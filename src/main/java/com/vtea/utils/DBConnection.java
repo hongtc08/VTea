@@ -24,7 +24,7 @@ public class DBConnection {
     // - Nhóm xài XAMPP: Thường để trống ""
     // - Nhóm xài Workbench: Điền mật khẩu lúc cài đặt (Ví dụ: "123456", "root")
     // - Nhóm xài Cloud: Điền mật khẩu chung của Cloud
-    private static final String PASSWORD = "root";
+    private static final String PASSWORD = "";
 
     /* ========================================================================================= */
 
