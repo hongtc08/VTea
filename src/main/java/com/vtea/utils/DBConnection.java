@@ -16,8 +16,7 @@ public class DBConnection {
     // 1. ĐỊA CHỈ DATABASE:
     // - Nếu vẫn dùng máy cá nhân: Giữ nguyên "localhost"
     // - Nếu đưa lên Cloud (Aiven, Clever-Cloud...): Thay "localhost" bằng đường dẫn host được cấp.
-    private static final String URL = "jdbc:mysql://localhost:3306/vtea_management?useUnicode=true&characterEncoding=UTF-8";
-
+    private static final String URL = "jdbc:mysql://localhost:3306/fnb_management?useUnicode=true&characterEncoding=UTF-8";
     // 2. TÀI KHOẢN: Mặc định của MySQL local luôn là "root"
     private static final String USER = "root";
 
@@ -25,7 +24,7 @@ public class DBConnection {
     // - Nhóm xài XAMPP: Thường để trống ""
     // - Nhóm xài Workbench: Điền mật khẩu lúc cài đặt (Ví dụ: "123456", "root")
     // - Nhóm xài Cloud: Điền mật khẩu chung của Cloud
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = ""; // CHỖ NÀY AI XÀI KIỂU GÌ THÌ TỰ SỬA TRONG MÁY, KHÔNG PUSH LÊN GITHUB TRÁNH CONFICT CẢ ĐÁM
 
     /* ========================================================================================= */
 
