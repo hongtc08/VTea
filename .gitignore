@@ -9,9 +9,13 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/workspace.xml
+.idea/copilot*.xml
 *.iws
 *.iml
 *.ipr
+
+src/main/java/com/vtea/utils/DBConnection.java
 
 ### Eclipse ###
 .apt_generated
