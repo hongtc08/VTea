@@ -6,25 +6,13 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    /* =========================================================================================
-     * ⚠️ KHU VỰC CẤU HÌNH DATABASE - CHỜ QUYẾT ĐỊNH TỪ TEAM DB
-     * =========================================================================================
-     * Hiện tại đang setup mặc định cho MySQL chạy trên máy cá nhân (Localhost).
-     * Sau khi Database được thiết kế xong, hãy cập nhật lại 3 biến dưới đây theo thống nhất chung.
-     */
-
     // 1. ĐỊA CHỈ DATABASE:
-    // - Nếu vẫn dùng máy cá nhân: Giữ nguyên "localhost"
-    // - Nếu đưa lên Cloud (Aiven, Clever-Cloud...): Thay "localhost" bằng đường dẫn host được cấp.
-    private static final String URL = "jdbc:mysql://localhost:3306/fnb_management?useUnicode=true&characterEncoding=UTF-8";
-    // 2. TÀI KHOẢN: Mặc định của MySQL local luôn là "root"
-    private static final String USER = "root";
+    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/defaultdb?sslMode=REQUIRED";
+    // 2. TÀI KHOẢN:
+    private static final String USER = "avnadmin";
 
-    // 3. MẬT KHẨU (Chú ý khi dùng Git để tránh xung đột file này):
-    // - Nhóm xài XAMPP: Thường để trống ""
-    // - Nhóm xài Workbench: Điền mật khẩu lúc cài đặt (Ví dụ: "123456", "root")
-    // - Nhóm xài Cloud: Điền mật khẩu chung của Cloud
-    private static final String PASSWORD = ""; // CHỖ NÀY AI XÀI KIỂU GÌ THÌ TỰ SỬA TRONG MÁY, KHÔNG PUSH LÊN GITHUB TRÁNH CONFICT CẢ ĐÁM
+    // 3. MẬT KHẨU
+    private static final String PASSWORD = "";
 
     /* ========================================================================================= */
 
@@ -48,4 +36,8 @@ public class DBConnection {
         }
         return conn;
     }
+    // Hàm main để test thử xem code có chạy đúng không
+//    public static void main(String[] args) {
+//        getConnection();
+//    }
 }
