@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.DashboardController"
+      spacing="24" styleClass="screen-root">
+
+    <!-- ===== Header ===== -->
+    <VBox spacing="4">
+        <Label text="Dashboard" styleClass="screen-title"/>
+        <Label text="Tổng quan hoạt động kinh doanh" styleClass="screen-subtitle"/>
+    </VBox>
+
+    <!-- ===== Stats Grid (4 cards) ===== -->
+    <GridPane hgap="16" vgap="16">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+        </columnConstraints>
+
+        <!-- Doanh thu -->
+        <VBox GridPane.columnIndex="0" styleClass="stat-card" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <StackPane styleClass="stat-icon-box stat-icon-green">
+                    <Label text="💰" style="-fx-font-size: 20px;"/>
+                </StackPane>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="+12.5%" styleClass="stat-change-pos"/>
+            </HBox>
+            <Label text="Doanh thu hôm nay" styleClass="stat-label"/>
+            <Label fx:id="revenueTodayLabel" text="—" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Đơn hàng -->
+        <VBox GridPane.columnIndex="1" styleClass="stat-card" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <StackPane styleClass="stat-icon-box stat-icon-blue">
+                    <Label text="🛍️" style="-fx-font-size: 20px;"/>
+                </StackPane>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="+8.2%" styleClass="stat-change-pos"/>
+            </HBox>
+            <Label text="Đơn hàng" styleClass="stat-label"/>
+            <Label fx:id="ordersTodayLabel" text="—" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Khách hàng -->
+        <VBox GridPane.columnIndex="2" styleClass="stat-card" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <StackPane styleClass="stat-icon-box stat-icon-purple">
+                    <Label text="👥" style="-fx-font-size: 20px;"/>
+                </StackPane>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="+5.1%" styleClass="stat-change-pos"/>
+            </HBox>
+            <Label text="Khách hàng" styleClass="stat-label"/>
+            <Label fx:id="customersTodayLabel" text="—" styleClass="stat-value"/>
+        </VBox>
+
+        <!-- Tăng trưởng -->
+        <VBox GridPane.columnIndex="3" styleClass="stat-card" spacing="8">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT">
+                <StackPane styleClass="stat-icon-box stat-icon-orange">
+                    <Label text="📈" style="-fx-font-size: 20px;"/>
+                </StackPane>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="+3.2%" styleClass="stat-change-pos"/>
+            </HBox>
+            <Label text="Tăng trưởng" styleClass="stat-label"/>
+            <Label fx:id="growthLabel" text="—" styleClass="stat-value"/>
+        </VBox>
+    </GridPane>
+
+    <!-- ===== Bottom 2 Panels ===== -->
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+
+        <!-- Recent Orders -->
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Đơn hàng gần đây" styleClass="card-title"/>
+            <TableView fx:id="recentOrdersTable" VBox.vgrow="ALWAYS" styleClass="vtea-table">
+                <columns>
+                    <TableColumn fx:id="colOrderId"  text="Mã đơn"     prefWidth="80"/>
+                    <TableColumn fx:id="colCustomer" text="Khách hàng" prefWidth="150"/>
+                    <TableColumn fx:id="colTotal"    text="Tổng tiền"  prefWidth="110"/>
+                    <TableColumn fx:id="colStatus"   text="Trạng thái" prefWidth="100"/>
+                    <TableColumn fx:id="colTime"     text="Giờ"        prefWidth="70"/>
+                </columns>
+                <placeholder>
+                    <Label text="Chưa có đơn hàng nào hôm nay" styleClass="table-placeholder"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <!-- Top Products -->
+        <VBox styleClass="card" prefWidth="320" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <Label text="Sản phẩm bán chạy" styleClass="card-title"/>
+            <ListView fx:id="topProductsList" VBox.vgrow="ALWAYS" styleClass="vtea-list"/>
+        </VBox>
+
+    </HBox>
+</VBox>

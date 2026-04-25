@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.LoginController"
+      prefWidth="1280" prefHeight="800"
+      styleClass="login-root">
+
+    <!-- ===== LEFT PANEL: Branding ===== -->
+    <VBox styleClass="login-left-panel" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="0">
+        <padding><Insets top="80" right="80" bottom="80" left="80"/></padding>
+
+        <!-- Logo Icon -->
+        <StackPane styleClass="logo-icon-box" maxWidth="88" maxHeight="88">
+            <Label text="☕" style="-fx-font-size: 42px;"/>
+        </StackPane>
+
+        <VBox.margin><Insets bottom="32"/></VBox.margin>
+
+        <!-- Brand Name -->
+        <Label text="VTea" styleClass="brand-name"/>
+        <Label text="Cafe &amp; Trà Sữa" styleClass="brand-sub"/>
+
+        <!-- Divider line -->
+        <Rectangle width="80" height="4" styleClass="brand-divider">
+            <VBox.margin><Insets top="16" bottom="24"/></VBox.margin>
+        </Rectangle>
+
+        <!-- Tagline -->
+        <Label text="&quot;Nơi hương vị gặp gỡ cảm xúc&quot;"
+               styleClass="brand-tagline" wrapText="true" maxWidth="380"/>
+
+        <!-- Feature list -->
+        <VBox spacing="14">
+            <VBox.margin><Insets top="48"/></VBox.margin>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Circle radius="5" styleClass="dot-accent"/>
+                <Label text="Nguyên liệu tươi mới mỗi ngày" styleClass="feature-text"/>
+            </HBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Circle radius="5" styleClass="dot-accent"/>
+                <Label text="Không gian ấm cúng, hiện đại" styleClass="feature-text"/>
+            </HBox>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Circle radius="5" styleClass="dot-accent"/>
+                <Label text="Phục vụ tận tâm, chu đáo" styleClass="feature-text"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+    <!-- ===== RIGHT PANEL: Login Form ===== -->
+    <VBox alignment="CENTER" HBox.hgrow="ALWAYS" styleClass="login-right-panel">
+        <padding><Insets top="60" right="80" bottom="60" left="80"/></padding>
+
+        <!-- Form Card -->
+        <VBox fx:id="formCard" styleClass="form-card" maxWidth="420" spacing="0">
+            <padding><Insets top="48" right="48" bottom="48" left="48"/></padding>
+
+            <!-- Header -->
+            <Label text="Đăng nhập" styleClass="form-title"/>
+            <Label text="Chào mừng bạn quay trở lại!" styleClass="form-subtitle">
+                <VBox.margin><Insets top="6" bottom="36"/></VBox.margin>
+            </Label>
+
+            <!-- Username Field -->
+            <Label text="Tên đăng nhập" styleClass="field-label"/>
+            <TextField fx:id="usernameField"
+                       promptText="Nhập tên đăng nhập"
+                       styleClass="input-field">
+                <VBox.margin><Insets top="8" bottom="20"/></VBox.margin>
+            </TextField>
+
+            <!-- Password Field -->
+            <Label text="Mật khẩu" styleClass="field-label"/>
+            <PasswordField fx:id="passwordField"
+                           promptText="Nhập mật khẩu"
+                           styleClass="input-field">
+                <VBox.margin><Insets top="8" bottom="28"/></VBox.margin>
+            </PasswordField>
+
+            <!-- Error Label -->
+            <Label fx:id="errorLabel" styleClass="error-label" wrapText="true">
+                <VBox.margin><Insets bottom="16"/></VBox.margin>
+            </Label>
+
+            <!-- Login Button -->
+            <Button fx:id="loginButton"
+                    text="Đăng nhập"
+                    styleClass="btn-primary"
+                    maxWidth="Infinity"
+                    onAction="#handleLogin"/>
+
+             <!-- Demo hint -->
+             <Separator>
+                 <VBox.margin><Insets top="28" bottom="16"/></VBox.margin>
+             </Separator>
+             <Label text="🔧 TEST MODE: Nhập bất kỳ tên đăng nhập và mật khẩu để test UI (Database sẽ được setup sau)"
+                    styleClass="hint-text" wrapText="true" textAlignment="CENTER" maxWidth="Infinity"/>
+
+        </VBox>
+    </VBox>
+
+</HBox>
