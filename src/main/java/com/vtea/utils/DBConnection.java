@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnection {
 
     // 1. ĐỊA CHỈ DATABASE:
-    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/defaultdb?sslMode=REQUIRED";
+    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/fnb_management?sslMode=REQUIRED";
     // 2. TÀI KHOẢN:
     private static final String USER = "avnadmin";
 
@@ -24,6 +24,7 @@ public class DBConnection {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             // Thực hiện kết nối dựa trên 3 biến cấu hình ở trên
+            System.out.println("Đang kết nối tới: " + URL);
             conn = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
 
