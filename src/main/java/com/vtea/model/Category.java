@@ -4,15 +4,17 @@ public class Category {
     private int categoryId;
     private String name;
     private String description;
+    private boolean isAvailable;
 
     public Category() {
 
     }
 
-    public Category(int categoryId, String description, String name) {
+    public Category(int categoryId, String description, String name, boolean isAvailable) {
         this.categoryId = categoryId;
         this.description = description;
         this.name = name;
+        this.isAvailable = isAvailable;
     }
 
     public int getCategoryId() {
@@ -27,6 +29,8 @@ public class Category {
         return name;
     }
 
+    public boolean isAvailable() { return isAvailable; }
+
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
@@ -38,4 +42,6 @@ public class Category {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setAvailable(boolean available) { this.isAvailable = available;}
 }
