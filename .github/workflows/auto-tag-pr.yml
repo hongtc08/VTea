@@ -1,0 +1,26 @@
+name: Thông báo Pull Request
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  auto_comment:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Bot tạo comment nhắc nhở
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prAuthor = context.payload.pull_request.user.login;
+            const commentBody = `📌 **Yêu cầu Review Code**\n\nChào @hongtc08, **@${prAuthor}** vừa mở Pull Request này.\nNhờ bạn kiểm tra cấu trúc (MVC/DAO) trước khi duyệt nhé!`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
