@@ -1,0 +1,25 @@
+name: Kiểm tra Code (Maven)
+
+# Hành động này sẽ tự động chạy khi có người tạo Pull Request vào nhánh main
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Chạy trên máy chủ Linux ảo của GitHub
+
+    steps:
+    - name: Clone code về máy chủ
+      uses: actions/checkout@v3
+
+    - name: Cài đặt Java 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Chạy lệnh Test và Compile Code
+      # Lệnh này sẽ biên dịch code. Nếu ai đó viết sai cú pháp Java, bước này sẽ báo lỗi (Fail)
+      run: mvn -B compile --file pom.xml
