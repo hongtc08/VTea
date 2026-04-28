@@ -3,6 +3,7 @@ package com.vtea.model;
 import java.math.BigDecimal;
 
 public class OrderDetail {
+    private int detailId;
     private int productId;
     private String productName;
     private int quantity;
@@ -22,6 +23,9 @@ public class OrderDetail {
     }
 
     // Getters & Setters
+    public int getDetailId() { return detailId; }
+    public void setDetailId(int detailId) { this.detailId = detailId; }
+
     public int getProductId() { return productId; }
     public void setProductId(int productId) { this.productId = productId; }
 
