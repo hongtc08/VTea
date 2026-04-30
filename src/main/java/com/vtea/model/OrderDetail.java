@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 
 public class OrderDetail {
 <<<<<<< Updated upstream
+=======
+    private int detailId;
+    private int orderId;
+>>>>>>> Stashed changes
     private int productId;
     private int quantity;
     private BigDecimal unitPrice;
