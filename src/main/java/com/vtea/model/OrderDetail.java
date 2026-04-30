@@ -3,11 +3,8 @@ package com.vtea.model;
 import java.math.BigDecimal;
 
 public class OrderDetail {
-<<<<<<< Updated upstream
-=======
     private int detailId;
     private int orderId;
->>>>>>> Stashed changes
     private int productId;
     private int quantity;
     private BigDecimal unitPrice;
@@ -26,15 +23,12 @@ public class OrderDetail {
     }
 
     // Getters & Setters
-<<<<<<< Updated upstream
-=======
     public int getDetailId() { return detailId; }
     public void setDetailId(int detailId) { this.detailId = detailId; }
 
     public int getOrderId() { return orderId; }
     public void setOrderId(int orderId) { this.orderId = orderId; }
 
->>>>>>> Stashed changes
     public int getProductId() { return productId; }
     public void setProductId(int productId) { this.productId = productId; }
 
