@@ -17,7 +17,8 @@ public class ArchitectureTest {
         // LUẬT 1: Tầng Controller KHÔNG ĐƯỢC PHÉP chứa code SQL (java.sql)
         ArchRule rule = noClasses()
             .that().resideInAPackage("..controller..")
-            .should().dependOnClassesThat().resideInAPackage("java.sql..");
+            .should().dependOnClassesThat().resideInAPackage("java.sql..")
+            .allowEmptyShould(true); // Bỏ qua nếu chưa tạo file Controller nào
             
         rule.check(importedClasses);
     }
@@ -28,7 +29,8 @@ public class ArchitectureTest {
         ArchRule rule = noClasses()
             .that().resideInAPackage("..model..")
             .should().dependOnClassesThat().resideInAPackage("..controller..")
-            .orShould().dependOnClassesThat().resideInAPackage("..dao..");
+            .orShould().dependOnClassesThat().resideInAPackage("..dao..")
+            .allowEmptyShould(true); // Bỏ qua nếu chưa tạo file Model nào
             
         rule.check(importedClasses);
     }
@@ -38,7 +40,8 @@ public class ArchitectureTest {
         // LUẬT 3: Bất kỳ file nào nằm trong thư mục 'dao' đều PHẢI có chữ 'DAO' ở cuối tên
         ArchRule rule = classes()
             .that().resideInAPackage("..dao..")
-            .should().haveSimpleNameEndingWith("DAO");
+            .should().haveSimpleNameEndingWith("DAO")
+            .allowEmptyShould(true); // Bỏ qua nếu thư mục DAO đang trống rỗng
             
         rule.check(importedClasses);
     }
