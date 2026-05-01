@@ -12,6 +12,6 @@ public class POSController {
 
         System.out.println("Đã thêm " + productName + " vào giỏ!");
         System.out.println("Tổng tiền hiện tại: " + orderService.getCurrentOrder().getTotalAmount());
-        
+
     }
 }
