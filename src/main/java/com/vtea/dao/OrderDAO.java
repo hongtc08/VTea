@@ -1,5 +1,7 @@
 package com.vtea.dao;
 
+import com.vtea.dto.OrderDTO;
+import com.vtea.dto.OrderDetailDTO;
 import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.utils.DBConnection;
@@ -7,6 +9,7 @@ import com.vtea.utils.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 public class OrderDAO {
     /**
@@ -14,7 +17,7 @@ public class OrderDAO {
      * Trả về true nếu lưu thành công, false nếu thất bại
      */
     public boolean checkoutOrder(Order order, List<OrderDetail> details){
-        String insertOrderSQL = "INSERT INTO 'order' (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+        String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
 
         Connection conn = null;
@@ -101,9 +104,9 @@ public class OrderDAO {
     /**
      * Lấy danh sách các món trong một hóa đơn cụ thể (Order Details).
      */
-    public List<OrderDetail> getOrderDetailsByOrderId(int orderId) {
-        List<OrderDetail> details = new ArrayList<>();
-        String query = "SELECT od.*, p.name AS product_name " +
+    public List<OrderDetailDTO> getOrderDetailsByOrderId(int orderId) {
+        List<OrderDetailDTO> details = new ArrayList<>();
+        String query = "SELECT od.product_id, p.name AS product_name, od.quantity, od.unit_price " +
                 "FROM order_detail od " +
                 "JOIN product p ON od.product_id = p.product_id " +
                 "WHERE od.order_id = ?";
@@ -115,20 +118,19 @@ public class OrderDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    OrderDetail detail = new OrderDetail();
-                    detail.setDetailId(rs.getInt("detail_id"));
-                    detail.setOrderId(rs.getInt("order_id"));
-                    detail.setProductId(rs.getInt("product_id"));
-                    detail.setQuantity(rs.getInt("quantity"));
-                    detail.setUnitPrice(rs.getBigDecimal("unit_price"));
+                    OrderDetailDTO dto = new OrderDetailDTO();
 
-                    detail.setProductName(rs.getString("product_name"));
+                    dto.setProductId(rs.getInt("product_id"));
+                    dto.setProductName(rs.getString("product_name"));
+                    dto.setQuantity(rs.getInt("quantity"));
+                    dto.setUnitPrice(rs.getBigDecimal("unit_price"));
 
-                    details.add(detail);
+
+                    details.add(dto);
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy chi tiết hóa đơn: " + e.getMessage());
+            System.err.println("Lỗi khi lấy chi tiết hóa đơn (DTO): " + e.getMessage());
             e.printStackTrace();
         }
         return details;
@@ -136,19 +138,27 @@ public class OrderDAO {
 
     /**
      * Truy xuất lịch sử đơn hàng để tra cứu theo khoảng thời gian.
+     * * Trả về danh sách chứa tên nhân viên lập bill và tên khách hàng (nếu có)
      */
-    public List<Order> getOrderHistory(Date startDate, Date endDate){
-        List<Order> orderList = new ArrayList<>();
-        String query = "SELECT * FROM 'order' WHERE DATE(created_at) BETWEEN ? AND ? ORDER BY created_at DESC";
+    public List<OrderDTO> getOrderHistory(Date startDate, Date endDate){
+        List<OrderDTO> orderList = new ArrayList<>();
+        String query = "SELECT o.*, u.full_name AS staff_name, c.full_name AS customer_name " +
+                "FROM `order` o " +
+                "JOIN `user` u ON o.user_id = u.user_id " +
+                "LEFT JOIN customer c ON o.customer_id = c.customer_id " +
+                "WHERE DATE(o.created_at) BETWEEN ? AND ? " +
+                "ORDER BY o.created_at DESC";
 
         try(Connection conn = DBConnection.getConnection();
            PreparedStatement ps = conn.prepareStatement(query)) {
+
             ps.setDate(1, new java.sql.Date(startDate.getTime()));
             ps.setDate(2, new java.sql.Date(endDate.getTime()));
 
             try(ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Order order = new Order();
+                    OrderDTO order = new OrderDTO();
+
                     order.setOrderId(rs.getInt("order_id"));
                     order.setUserId(rs.getInt("user_id"));
 
@@ -162,6 +172,10 @@ public class OrderDAO {
                     order.setCreatedAt(rs.getTimestamp("created_at"));
                     order.setStatus(rs.getString("status"));
                     order.setPaymentMethod(rs.getString("payment_method"));
+
+                    order.setStaffName(rs.getString("staff_name"));
+                    // Tên khách hàng có thể bị null nếu là khách vãng lai
+                    order.setCustomerName(rs.getString("customer_name"));
 
                     orderList.add(order);
                 }
