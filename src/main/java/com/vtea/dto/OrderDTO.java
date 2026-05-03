@@ -1,48 +1,47 @@
-package com.vtea.model;
+package com.vtea.dto;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
-public class Order {
+public class OrderDTO {
     private int orderId;
     private int userId;
-    private int customerId;
-    private BigDecimal totalAmount = BigDecimal.ZERO;
-    private String status = "PENDING";
+    private Integer customerId; // Dùng Integer vì có thể null
+    private BigDecimal totalAmount;
     private Timestamp createdAt;
+    private String status;
     private String paymentMethod;
 
-    // Danh sách các món trong giỏ
-    private List<OrderDetail> details = new ArrayList<>();
+    private String staffName;
+    private String customerName;
 
-    public Order() {
-        //this.createdAt = LocalDateTime.now();
-    }
+    public OrderDTO() {}
 
-    // Getters & Setters
+    // --- GETTERS & SETTERS ---
     public int getOrderId() { return orderId; }
     public void setOrderId(int orderId) { this.orderId = orderId; }
 
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
 
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
+
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
 
-    public List<OrderDetail> getDetails() { return details; }
-    public void setDetails(List<OrderDetail> details) { this.details = details; }
-
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getStaffName() { return staffName; }
+    public void setStaffName(String staffName) { this.staffName = staffName; }
+
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 }

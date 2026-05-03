@@ -8,13 +8,13 @@ public class Product {
     private String name;
     private BigDecimal price;
     private String imageUrl;
-    private String isAvailable;
+    private Boolean isAvailable;
 
     public Product() {
 
     }
 
-    public Product(int categoryId, String imageUrl, String isAvailable, String name, BigDecimal price, int productId) {
+    public Product(int categoryId, String imageUrl, Boolean isAvailable, String name, BigDecimal price, int productId) {
         this.categoryId = categoryId;
         this.imageUrl = imageUrl;
         this.isAvailable = isAvailable;
@@ -31,7 +31,7 @@ public class Product {
         return imageUrl;
     }
 
-    public String getIsAvailable() {
+    public Boolean getAvailable() {
         return isAvailable;
     }
 
@@ -55,7 +55,7 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    public void setIsAvailable(String isAvailable) {
+    public void setAvailable(Boolean isAvailable) {
         this.isAvailable = isAvailable;
     }
 
