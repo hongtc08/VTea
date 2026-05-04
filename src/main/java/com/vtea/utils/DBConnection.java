@@ -15,26 +15,33 @@ public class DBConnection {
 
     /* ========================================================================================= */
 
-    // Biến lưu trữ kết nối duy nhất
-    private static Connection conn = null;
+    // private static Connection conn = null;
 
     // Hàm thực hiện kết nối
     public static Connection getConnection() {
         try {
+            // Tải driver MySQL (giữ nguyên cho an toàn)
             Class.forName("com.mysql.cj.jdbc.Driver");
+
             System.out.println("Đang kết nối tới: " + URL);
             Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
             System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
+
             return conn;
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("❌ [Lỗi] " + e.getMessage());
+
+        } catch (ClassNotFoundException e) {
+            System.out.println("❌ [Lỗi] Không tìm thấy thư viện MySQL Connector. Hãy kiểm tra lại file pom.xml");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("❌ [Lỗi] Sai thông tin kết nối (URL, User, Pass) hoặc MySQL chưa được bật!");
             e.printStackTrace();
         }
+
         return null;
     }
 
-    // Hàm dùng để đóng kết nối khi tắt app
-    public static void closeConnection() {
+    // Hàm dùng để đóng kết nối khi tắt app (giữ lại cho đúng structure, nhưng không còn cần thiết)
+    public static void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
@@ -47,6 +54,7 @@ public class DBConnection {
 
     // Hàm main để test thử xem code có chạy đúng không
     public static void main(String[] args) {
-        getConnection();
+        Connection conn = getConnection();
+        closeConnection(conn);
     }
 }
