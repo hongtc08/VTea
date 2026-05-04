@@ -8,7 +8,7 @@ public class Product {
     private String name;
     private BigDecimal price;
     private String imageUrl;
-    private Boolean isAvailable;
+    private boolean isAvailable;
 
     public Product() {
 

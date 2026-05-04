@@ -18,7 +18,7 @@ public class UserDAO {
     public User getUserByUsername(String username){
         User user = null;
 
-        String query = "SELECT * FROM 'user' WHERE username=?";
+        String query = "SELECT * FROM `user` WHERE username=?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query)) {
@@ -50,7 +50,7 @@ public class UserDAO {
      */
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        String query = "SELECT * FROM 'user'";
+        String query = "SELECT * FROM `user`";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query);
