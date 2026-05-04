@@ -11,7 +11,7 @@ public class DBConnection {
     // 2. TÀI KHOẢN:
     private static final String USER = "avnadmin";
     // 3. MẬT KHẨU
-    private static final String PASSWORD = "AVNS_cmtIkCkYcgnQn_c6xvV";
+    private static final String PASSWORD = "";
 
     /* ========================================================================================= */
 
