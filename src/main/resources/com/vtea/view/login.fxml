@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<HBox prefHeight="800" prefWidth="1280" styleClass="login-root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.LoginController">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+
+    <!-- ===== LEFT PANEL: Branding ===== -->
+    <StackPane styleClass="login-left-panel" HBox.hgrow="ALWAYS">
+
+        <!-- Background Overlay -->
+        <Region styleClass="background-overlay" />
+
+        <!-- Content -->
+        <VBox alignment="CENTER_LEFT" spacing="0">
+            <padding><Insets bottom="80" left="80" right="80" top="80" /></padding>
+
+            <!-- Logo Icon -->
+            <StackPane maxHeight="88" maxWidth="88" styleClass="logo-icon-box">
+                <VBox.margin><Insets bottom="32" /></VBox.margin>
+                <FontIcon iconLiteral="fth-coffee" styleClass="logo-icon" iconSize="42" iconColor="#4db6ac"/>
+            </StackPane>
+
+            <!-- Brand Name -->
+            <Label styleClass="brand-name" text="VTea" />
+            <Label styleClass="brand-sub" text="Cafe &amp; Trà Sữa" />
+
+            <!-- Divider line -->
+            <Rectangle height="4" styleClass="brand-divider" width="80">
+                <VBox.margin><Insets bottom="24" top="16" /></VBox.margin>
+            </Rectangle>
+
+            <!-- Tagline -->
+            <Label maxWidth="380" styleClass="brand-tagline" text="&quot;Nơi hương vị gặp gỡ cảm xúc&quot;" wrapText="true" />
+
+            <!-- Feature list -->
+            <VBox spacing="14">
+                <VBox.margin><Insets top="48" /></VBox.margin>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Circle radius="5" styleClass="dot-accent" />
+                    <Label styleClass="feature-text" text="Nguyên liệu tươi mới mỗi ngày" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Circle radius="5" styleClass="dot-accent" />
+                    <Label styleClass="feature-text" text="Không gian ấm cúng, hiện đại" />
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <Circle radius="5" styleClass="dot-accent" />
+                    <Label styleClass="feature-text" text="Phục vụ tận tâm, chu đáo" />
+                </HBox>
+            </VBox>
+        </VBox>
+
+    </StackPane>
+
+    <!-- ===== RIGHT PANEL: Login Form ===== -->
+    <VBox alignment="CENTER" styleClass="login-right-panel" HBox.hgrow="ALWAYS">
+        <padding><Insets bottom="60" left="80" right="80" top="60" /></padding>
+
+        <!-- Form Card -->
+        <VBox fx:id="formCard" maxWidth="420" spacing="0" styleClass="form-card">
+            <padding><Insets bottom="48" left="48" right="48" top="48" /></padding>
+
+            <!-- Header -->
+            <Label styleClass="form-title" text="Đăng nhập" />
+            <Label styleClass="form-subtitle" text="Chào mừng bạn quay trở lại!">
+                <VBox.margin><Insets bottom="36" top="6" /></VBox.margin>
+            </Label>
+
+            <!-- Username Field -->
+            <Label styleClass="field-label" text="Tên đăng nhập" />
+            <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" styleClass="input-field">
+                <VBox.margin><Insets bottom="20" top="8" /></VBox.margin>
+            </TextField>
+
+            <!-- Password Field -->
+            <Label styleClass="field-label" text="Mật khẩu" />
+            <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="input-field">
+                <VBox.margin><Insets bottom="16" top="8" /></VBox.margin>
+            </PasswordField>
+
+            <!-- Remember Me & Forgot Password -->
+            <HBox alignment="CENTER_LEFT">
+                <VBox.margin><Insets bottom="28" /></VBox.margin>
+                <CheckBox fx:id="rememberMeCheckbox" styleClass="field-label" text="Ghi nhớ đăng nhập" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Hyperlink styleClass="forgot-password-link" text="Quên mật khẩu?" />
+            </HBox>
+
+            <!-- Login Button -->
+            <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Đăng nhập" />
+
+        </VBox>
+    </VBox>
+
+</HBox>
