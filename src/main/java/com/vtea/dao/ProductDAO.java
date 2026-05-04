@@ -1,5 +1,6 @@
 package com.vtea.dao;
 
+import com.vtea.dto.ProductDTO;
 import com.vtea.model.Product;
 import com.vtea.utils.DBConnection;
 
@@ -15,21 +16,27 @@ public class ProductDAO {
      * Dành cho Màn hình POS:
      * Lấy tất cả các món đang còn bán (is_available = true)
      */
-    public List<Product> getAllActiveProduct(){
-        List<Product> productList = new ArrayList<>();
-        String query = "SELECT * FROM product WHERE is_available = true";
+    public List<ProductDTO> getAllActiveProduct(){
+        List<ProductDTO> productList = new ArrayList<>();
+
+        String query = "SELECT p.*, c.name AS category_name " +
+                "FROM product p " +
+                "JOIN category c ON p.category_id = c.category_id " +
+                "WHERE p.is_available = true";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery()) {
             while(rs.next()){
-                Product product = new Product();
+                ProductDTO product = new ProductDTO();
                 product.setProductId(rs.getInt("product_id"));
                 product.setCategoryId(rs.getInt("category_id"));
                 product.setName(rs.getString("name"));
                 product.setPrice(rs.getBigDecimal("price"));
                 product.setImageUrl(rs.getString("image_url"));
                 product.setAvailable(rs.getBoolean("is_available"));
+
+                product.setCategoryName(rs.getString("category_name"));
 
                 productList.add(product);
             }
@@ -44,23 +51,27 @@ public class ProductDAO {
      * Dành cho Màn hình Quản lý của Admin:
      * Lấy TOÀN BỘ món nước (kể cả những món đã bị xóa/tạm ngưng)
      */
-    public List<Product> getAllProductForAdmin() {
-        List<Product> productList = new ArrayList<>();
-        // Query lấy hết, không lọc trạng thái
-        String query = "SELECT * FROM product";
+    public List<ProductDTO> getAllProductForAdmin() {
+        List<ProductDTO> productList = new ArrayList<>();
+        // Query lấy hết, dùng JOIN lấy tên danh mục
+        String query = "SELECT p.*, c.name AS category_name " +
+                "FROM product p " +
+                "JOIN category c ON p.category_id = c.category_id";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Product product = new Product();
+                ProductDTO product = new ProductDTO();
                 product.setProductId(rs.getInt("product_id"));
                 product.setCategoryId(rs.getInt("category_id"));
                 product.setName(rs.getString("name"));
                 product.setPrice(rs.getBigDecimal("price"));
                 product.setImageUrl(rs.getString("image_url"));
                 product.setAvailable(rs.getBoolean("is_available"));
+
+                product.setCategoryName(rs.getString("category_name"));
 
                 productList.add(product);
             }
@@ -74,9 +85,12 @@ public class ProductDAO {
     /**
      *  Lấy món theo phân loại
      */
-    public List<Product> getProductByCategory(int categoryId){
-        List<Product> productList = new ArrayList<>();
-        String query = "SELECT * FROM product WHERE category_id = ? AND is_available = true";
+    public List<ProductDTO> getProductByCategory(int categoryId){
+        List<ProductDTO> productList = new ArrayList<>();
+        String query = "SELECT p.*, c.name AS category_name " +
+                "FROM product p " +
+                "JOIN category c ON p.category_id = c.category_id " +
+                "WHERE p.category_id = ? AND p.is_available = true";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query)){
@@ -84,13 +98,15 @@ public class ProductDAO {
 
             try(ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
-                    Product product = new Product();
+                    ProductDTO product = new ProductDTO();
                     product.setProductId(rs.getInt("product_id"));
                     product.setCategoryId(rs.getInt("category_id"));
                     product.setName(rs.getString("name"));
                     product.setPrice(rs.getBigDecimal("price"));
                     product.setImageUrl(rs.getString("image_url"));
                     product.setAvailable(rs.getBoolean("is_available"));
+
+                    product.setCategoryName(rs.getString("category_name"));
 
                     productList.add(product);
                 }
