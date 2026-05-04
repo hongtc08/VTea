@@ -19,10 +19,12 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.List;
 
 public class POSController {
 
+    Connection testConn = null; //test
     private OrderService orderService = new OrderService();
     private ProductDAO productDAO = new ProductDAO();
     private OrderDAO orderDAO = new OrderDAO();
