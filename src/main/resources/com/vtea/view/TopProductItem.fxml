@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER_LEFT" spacing="15" styleClass="item-container" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+
+    <!-- Cục bo góc chứa Rank -->
+    <StackPane styleClass="product-rank-box" prefWidth="35" prefHeight="35" minWidth="35" minHeight="35" maxWidth="35" maxHeight="35">
+        <Label fx:id="lblRank" styleClass="product-rank-text" text="1"/>
+    </StackPane>
+
+    <!-- Cột giữa: Tên sản phẩm và Số lượng -->
+    <VBox alignment="CENTER_LEFT" spacing="5">
+        <Label fx:id="lblProductName" styleClass="product-name" text="Tên sản phẩm"/>
+        <Label fx:id="lblSold" styleClass="product-sold" text="0 đã bán"/>
+    </VBox>
+
+    <!-- Spacer đẩy tổng tiền ra sát mép phải -->
+    <Region HBox.hgrow="ALWAYS" />
+
+    <!-- Cột phải: Tổng tiền thu được -->
+    <Label fx:id="lblRevenue" styleClass="product-revenue" text="0đ"/>
+
+</HBox>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<!-- Thẻ VBox chính rộng 160px, cao khoảng 240px -->
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="product-card" spacing="10" prefWidth="160" minWidth="160" maxWidth="160">
+
+    <!-- Khu vực chứa ảnh (Nền màu hồng nhạt) -->
+    <StackPane styleClass="product-image-container" prefHeight="130" prefWidth="130">
+        <!-- Đặt ImageView ở đây, kích thước 70x70 để ảnh nằm gọn giữa nền -->
+        <ImageView fx:id="imgProduct" fitWidth="70" fitHeight="70" preserveRatio="true"/>
+    </StackPane>
+
+    <!-- Khu vực chứa thông tin Text -->
+    <VBox spacing="4" VBox.vgrow="ALWAYS">
+        <!-- Tên món: Giới hạn chiều cao 45px để tên dài rớt xuống 2 dòng cho đều nhau -->
+        <Label fx:id="lblProductName" styleClass="product-card-title" text="Tên món" prefHeight="45" alignment="TOP_LEFT"/>
+
+        <Label fx:id="lblCategory" styleClass="product-card-category" text="Loại món"/>
+
+        <!-- Dùng Region rỗng đẩy giá tiền xuống sát đáy -->
+        <Region VBox.vgrow="ALWAYS" />
+
+        <Label fx:id="lblPrice" styleClass="product-card-price" text="0đ"/>
+    </VBox>
+</VBox>
