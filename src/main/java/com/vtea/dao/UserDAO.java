@@ -41,7 +41,6 @@ public class UserDAO {
             System.err.println("Lỗi khi tìm User theo username: " + e.getMessage());
             e.printStackTrace();
         }
-        // Trả về đối tượng user, hoặc trả về null nếu không tìm thấy username này
         return user;
     }
 
@@ -80,7 +79,7 @@ public class UserDAO {
      * Lưu ý: Mật khẩu truyền vào qua object User phải là mật khẩu đã được BE mã hóa.
      */
     public boolean insertUser(User user){
-        String sql = "INSERT INTO 'user' (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        String sql = "INSERT INTO `user` (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,10 +104,10 @@ public class UserDAO {
      * Cập nhật cột status thành 'Active' hoặc 'Locked'.
      */
     public boolean updateStatus(int userId, String newStatus){
-        String sql = "UPDATE 'user' SET status = ? WHERE user_id = ?";
+        String sql = "UPDATE `user` SET status = ? WHERE user_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, newStatus);
             ps.setInt(2, userId);
