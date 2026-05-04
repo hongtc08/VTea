@@ -1,24 +1,65 @@
-name: Kiểm tra Kiến trúc (ArchUnit)
+# .github/workflows/maven.yml
+name: 🏗️ Kiểm tra Kiến trúc MVC + DAO
 
 on:
   pull_request:
+    branches: [ "main", "develop" ]
+  push:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test-architecture:
+    name: Test Architecture & Compile
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone code về máy chủ
-      uses: actions/checkout@v3
+      - name: 📥 Clone code về máy chủ
+        uses: actions/checkout@v4
 
-    - name: Cài đặt Java 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
+      - name: ☕ Cài đặt Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
 
-    - name: Chạy bài Test Kiến Trúc
-      # Lệnh này tự động đọc file ArchitectureTest.java để chấm điểm cấu trúc MVC
-      run: mvn -B test --file pom.xml
+      - name: 📝 Hiển thị thông tin build
+        run: |
+          echo "🔍 Chạy kiểm tra MVC + DAO Architecture"
+          echo "Branch: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          mvn --version
+
+      - name: 🧪 Chạy Unit Tests & Architecture Tests
+        run: mvn -B test --file pom.xml
+
+      - name: 📊 Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+
+      - name: ✅ Kiểm tra Code Compilation
+        run: mvn -B compile --file pom.xml
+
+      - name: 📦 Đóng gói JAR (nếu pass toàn bộ test)
+        if: success()
+        run: mvn -B package -DskipTests --file pom.xml
+
+      - name: 🎯 Build Result Summary
+        if: always()
+        run: |
+          echo "================================"
+          echo "✅ Build Summary"
+          echo "================================"
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "🎉 Toàn bộ tests đã PASS!"
+            echo "✓ Architecture tests: PASS"
+            echo "✓ Unit tests: PASS"
+            echo "✓ Compilation: PASS"
+          else
+            echo "❌ Có lỗi xảy ra"
+            echo "❌ Vui lòng kiểm tra logs bên dưới"
+          fi
+          echo "================================"
