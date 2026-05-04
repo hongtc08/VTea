@@ -11,7 +11,7 @@ public class DBConnection {
     // 2. TÀI KHOẢN:
     private static final String USER = "avnadmin";
     // 3. MẬT KHẨU
-    private static final String PASSWORD = "AVNS_cmtIkCkYcgnQn_c6xvV";
+    private static final String PASSWORD = "";
 
     /* ========================================================================================= */
 
@@ -21,16 +21,25 @@ public class DBConnection {
     // Hàm thực hiện kết nối
     public static Connection getConnection() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            System.out.println("Đang kết nối tới: " + URL);
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
-            return conn;
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("❌ [Lỗi] " + e.getMessage());
+            // Kiểm tra nếu chưa có kết nối hoặc kết nối đã bị đóng thì mới tạo mới
+            if (conn == null || conn.isClosed()) {
+                // Tải driver MySQL
+                Class.forName("com.mysql.cj.jdbc.Driver");
+
+                System.out.println("Đang kết nối tới: " + URL);
+                conn = DriverManager.getConnection(URL, USER, PASSWORD);
+                System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
+            }
+        } catch (ClassNotFoundException e) {
+            System.out.println("❌ [Lỗi] Không tìm thấy thư viện MySQL Connector. Hãy kiểm tra lại file pom.xml");
+            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("❌ [Lỗi] Sai thông tin kết nối (URL, User, Pass) hoặc MySQL chưa được bật!");
             e.printStackTrace();
         }
-        return null;
+
+        // Trả về kết nối đã có sẵn
+        return conn;
     }
 
     // Hàm dùng để đóng kết nối khi tắt app
