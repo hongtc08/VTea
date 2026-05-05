@@ -18,7 +18,7 @@ public class UserDAO {
     public User getUserByUsername(String username){
         User user = null;
 
-        String query = "SELECT * FROM 'user' WHERE username=?";
+        String query = "SELECT * FROM `user` WHERE username=?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query)) {
@@ -50,7 +50,7 @@ public class UserDAO {
      */
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        String query = "SELECT * FROM 'user'";
+        String query = "SELECT * FROM `user`";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query);
@@ -80,7 +80,7 @@ public class UserDAO {
      * Lưu ý: Mật khẩu truyền vào qua object User phải là mật khẩu đã được BE mã hóa.
      */
     public boolean insertUser(User user){
-        String sql = "INSERT INTO 'user' (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        String sql = "INSERT INTO `user` (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,7 +105,7 @@ public class UserDAO {
      * Cập nhật cột status thành 'Active' hoặc 'Locked'.
      */
     public boolean updateStatus(int userId, String newStatus){
-        String sql = "UPDATE 'user' SET status = ? WHERE user_id = ?";
+        String sql = "UPDATE `user` SET status = ? WHERE user_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)) {
