@@ -41,7 +41,6 @@ public class UserDAO {
             System.err.println("Lỗi khi tìm User theo username: " + e.getMessage());
             e.printStackTrace();
         }
-        // Trả về đối tượng user, hoặc trả về null nếu không tìm thấy username này
         return user;
     }
 
@@ -108,7 +107,7 @@ public class UserDAO {
         String sql = "UPDATE `user` SET status = ? WHERE user_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, newStatus);
             ps.setInt(2, userId);

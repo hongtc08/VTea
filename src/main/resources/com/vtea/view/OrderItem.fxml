@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER_LEFT" styleClass="item-container" stylesheets="@../css/styles.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+
+    <!-- Cột trái -->
+    <VBox spacing="5">
+        <HBox spacing="5">
+            <Label fx:id="lblOrderId" styleClass="order-id" text="#000"/>
+            <Label fx:id="lblCustomer" styleClass="order-customer" text="- Tên khách"/>
+        </HBox>
+        <Label fx:id="lblItems" styleClass="order-items-text" text="Tên món ăn"/>
+    </VBox>
+
+    <!-- Spacer đẩy cột phải ra sát mép -->
+    <Region HBox.hgrow="ALWAYS" />
+
+    <!-- Cột phải -->
+    <VBox alignment="CENTER_RIGHT" spacing="5">
+        <Label fx:id="lblTotal" styleClass="order-total" text="0đ"/>
+        <Label fx:id="lblTime" styleClass="order-time" text="00:00"/>
+    </VBox>
+
+</HBox>

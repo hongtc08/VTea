@@ -150,7 +150,7 @@ public class OrderDAO {
                 "ORDER BY o.created_at DESC";
 
         try(Connection conn = DBConnection.getConnection();
-           PreparedStatement ps = conn.prepareStatement(query)) {
+            PreparedStatement ps = conn.prepareStatement(query)) {
 
             ps.setDate(1, new java.sql.Date(startDate.getTime()));
             ps.setDate(2, new java.sql.Date(endDate.getTime()));
