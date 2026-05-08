@@ -18,7 +18,7 @@ public class CategoryDAO {
      */
     public List<Category>  getActiveCategories(){
         List<Category> categoryList = new ArrayList<>();
-        String query = "SELECT * FROM category WHERE is_available = true";
+        String query = "SELECT * FROM category WHERE is_available = 1";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(query);
@@ -86,7 +86,7 @@ public class CategoryDAO {
     }
 
     // Cập nhật phân loại
-    public Boolean updateCategory(Category category){
+    public boolean updateCategory(Category category){
         String sql = "UPDATE category SET name = ?, description = ?, is_available = ? WHERE category_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
@@ -105,8 +105,8 @@ public class CategoryDAO {
     }
 
     // Xóa phân loại
-    public boolean delateCategory(int categoryId){
-        String sql = "UPDATE category SET is_available = false WHERE category_id = ?";
+    public boolean softDeleteCategory(int categoryId){
+        String sql = "UPDATE category SET is_available = 0 WHERE category_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
@@ -119,5 +119,4 @@ public class CategoryDAO {
         }
         return false;
     }
-
 }
