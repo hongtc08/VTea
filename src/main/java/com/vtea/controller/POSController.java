@@ -14,31 +14,51 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
 public class POSController {
 
-    private OrderService orderService = new OrderService();
-    private ProductService productService = new ProductService();
+    private static final int CATEGORY_CAFE = 1;
+    private static final int CATEGORY_TRA_SUA = 2;
+    private static final int CATEGORY_TRA = 3;
+    private static final int CATEGORY_DAC_BIET = 4;
+
+    private final ProductService productService = new ProductService();
+    private final OrderService orderService = new OrderService();
+
+    // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager
     private int currentUserId = 1;
 
     @FXML private FlowPane productGrid;
-    @FXML private Button btnAll, btnTraSua, btnCafe, btnTra, btnDacBiet;
+
+    @FXML private Button btnAll;
+    @FXML private Button btnTraSua;
+    @FXML private Button btnCafe;
+    @FXML private Button btnTra;
+    @FXML private Button btnDacBiet;
+
     @FXML private TableView<OrderDetailDTO> cartTableView;
     @FXML private Label lblTotalAmount;
     @FXML private ComboBox<String> cmbPaymentMethod;
 
     @FXML
     public void initialize() {
-        try {
-            loadProductsFromDatabase();
-            cmbPaymentMethod.setItems(FXCollections.observableArrayList("Tiền mặt", "Thẻ ghi nợ", "QR Pay"));
-            cmbPaymentMethod.setValue("Tiền mặt");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setupPaymentMethods();
+        loadProductsFromDatabase();
+        updateCartDisplay();
+        updateTotalAmount();
+    }
+
+    private void setupPaymentMethods() {
+        cmbPaymentMethod.setItems(FXCollections.observableArrayList(
+                "Tiền mặt",
+                "Thẻ ghi nợ",
+                "QR Pay"
+        ));
+        cmbPaymentMethod.setValue("Tiền mặt");
     }
 
     private void loadProductsFromDatabase() {
@@ -46,6 +66,7 @@ public class POSController {
             List<ProductDTO> products = productService.getAllActiveProducts();
             displayProducts(products);
         } catch (Exception e) {
+            e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể tải danh sách sản phẩm!");
         }
     }
@@ -53,50 +74,73 @@ public class POSController {
     public void handleAddToCart(int productId, String productName, BigDecimal price) {
         try {
             orderService.addToCart(productId, productName, price, 1);
-            updateCartDisplay();
-            updateTotalAmount();
-            showSuccessAlert("Thêm vào giỏ", productName + " ✓\nGiá: " + formatPrice(price));
+            refreshCart();
+
+            showSuccessAlert(
+                    "Thêm vào giỏ",
+                    productName + " ✓\nGiá: " + formatPrice(price)
+            );
         } catch (Exception e) {
             e.printStackTrace();
+            showErrorAlert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng!");
         }
     }
 
     @FXML
     private void handleClearCart(ActionEvent event) {
-        if (orderService.getCartItems().isEmpty()) {
+        if (orderService.isCartEmpty()) {
             showInfoAlert("Thông báo", "Giỏ hàng đã trống!");
             return;
         }
-        if (showConfirmDialog("Xác nhận", "Bạn có chắc muốn xóa toàn bộ giỏ hàng?")) {
-            orderService = new OrderService();
-            updateCartDisplay();
-            updateTotalAmount();
-            showInfoAlert("Thành công", "Giỏ hàng đã được xóa!");
+
+        boolean confirmed = showConfirmDialog(
+                "Xác nhận",
+                "Bạn có chắc muốn xóa toàn bộ giỏ hàng?"
+        );
+
+        if (!confirmed) {
+            return;
         }
+
+        orderService.clearCart();
+        refreshCart();
+        showInfoAlert("Thành công", "Giỏ hàng đã được xóa!");
     }
 
     @FXML
     private void handleCheckout(ActionEvent event) {
         try {
-            if (orderService.getCartItems().isEmpty()) {
+            if (orderService.isCartEmpty()) {
                 showErrorAlert("Lỗi", "Giỏ hàng trống! Vui lòng thêm sản phẩm.");
+                return;
+            }
+
+            String paymentMethod = cmbPaymentMethod.getValue();
+            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                showErrorAlert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
                 return;
             }
 
             Order order = orderService.getCurrentOrder();
             order.setUserId(currentUserId);
             order.setStatus("PAID");
-            order.setPaymentMethod(cmbPaymentMethod.getValue());
+            order.setPaymentMethod(paymentMethod);
 
-            if (orderService.checkoutCurrentOrder()) {
-                showSuccessAlert("✓ Thanh toán thành công!", "Tổng tiền: " + formatPrice(order.getTotalAmount()));
-                orderService = new OrderService();
-                updateCartDisplay();
-                updateTotalAmount();
+            boolean success = orderService.checkoutCurrentOrder();
+
+            if (success) {
+                showSuccessAlert(
+                        "✓ Thanh toán thành công!",
+                        "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                );
+
+                orderService.clearCart();
+                refreshCart();
             } else {
                 showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
             }
         } catch (Exception e) {
+            e.printStackTrace();
             showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
         }
     }
@@ -110,44 +154,120 @@ public class POSController {
     @FXML
     private void filterTraSua(ActionEvent event) {
         setActiveButton(btnTraSua);
-        filterByCategory(2);
+        filterByCategory(CATEGORY_TRA_SUA);
     }
 
     @FXML
     private void filterCafe(ActionEvent event) {
         setActiveButton(btnCafe);
-        filterByCategory(1);
+        filterByCategory(CATEGORY_CAFE);
     }
 
     @FXML
     private void filterTra(ActionEvent event) {
         setActiveButton(btnTra);
-        filterByCategory(3);
+        filterByCategory(CATEGORY_TRA);
     }
 
     @FXML
     private void filterDacBiet(ActionEvent event) {
         setActiveButton(btnDacBiet);
-        filterByCategory(4);
+        filterByCategory(CATEGORY_DAC_BIET);
     }
 
     private void filterByCategory(int categoryId) {
         try {
-            List<ProductDTO> filtered = productService.getProductsByCategory(categoryId);
-            displayProducts(filtered);
+            List<ProductDTO> filteredProducts = productService.getProductsByCategory(categoryId);
+            displayProducts(filteredProducts);
         } catch (Exception e) {
             e.printStackTrace();
+            showErrorAlert("Lỗi", "Không thể lọc sản phẩm theo danh mục!");
         }
     }
 
     private void displayProducts(List<ProductDTO> products) {
         productGrid.getChildren().clear();
-        for (ProductDTO p : products) {
-            VBox card = loadProductCard(p.getProductId(), p.getName(), p.getCategoryName(), p.getPrice(), p.getImageUrl());
+
+        if (products == null || products.isEmpty()) {
+            return;
+        }
+
+        for (ProductDTO product : products) {
+            VBox card = loadProductCard(product);
+
             if (card != null) {
                 productGrid.getChildren().add(card);
             }
         }
+    }
+
+    private VBox loadProductCard(ProductDTO product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/vtea/view/ProductCard.fxml")
+            );
+
+            VBox cardNode = loader.load();
+
+            Label lblName = (Label) cardNode.lookup("#lblProductName");
+            Label lblCategory = (Label) cardNode.lookup("#lblCategory");
+            Label lblPrice = (Label) cardNode.lookup("#lblPrice");
+            ImageView imgProduct = (ImageView) cardNode.lookup("#imgProduct");
+            Button btnAdd = (Button) cardNode.lookup("#btnAddToCart");
+
+            if (lblName != null) {
+                lblName.setText(product.getName());
+            }
+
+            if (lblCategory != null) {
+                lblCategory.setText(product.getCategoryName());
+            }
+
+            if (lblPrice != null) {
+                lblPrice.setText(formatPrice(product.getPrice()));
+            }
+
+            if (btnAdd != null) {
+                btnAdd.setOnAction(event -> handleAddToCart(
+                        product.getProductId(),
+                        product.getName(),
+                        product.getPrice()
+                ));
+            }
+
+            loadProductImage(imgProduct, product.getImageUrl());
+
+            return cardNode;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void loadProductImage(ImageView imgProduct, String imagePath) {
+        if (imgProduct == null) {
+            return;
+        }
+
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+
+            if (!image.isError()) {
+                imgProduct.setImage(image);
+            }
+        } catch (Exception e) {
+            System.err.println("Không load được ảnh sản phẩm: " + imagePath);
+            e.printStackTrace();
+        }
+    }
+
+    private void refreshCart() {
+        updateCartDisplay();
+        updateTotalAmount();
     }
 
     private void updateCartDisplay() {
@@ -161,49 +281,30 @@ public class POSController {
     }
 
     private void setActiveButton(Button clickedButton) {
-        Button[] allButtons = {btnAll, btnTraSua, btnCafe, btnTra, btnDacBiet};
-        for (Button btn : allButtons) {
-            if (btn != null) {
-                btn.getStyleClass().remove("category-btn-active");
+        Button[] allButtons = {
+                btnAll,
+                btnTraSua,
+                btnCafe,
+                btnTra,
+                btnDacBiet
+        };
+
+        for (Button button : allButtons) {
+            if (button != null) {
+                button.getStyleClass().remove("category-btn-active");
             }
         }
-        clickedButton.getStyleClass().add("category-btn-active");
-    }
 
-    private VBox loadProductCard(int productId, String name, String category, BigDecimal price, String imagePath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/ProductCard.fxml"));
-            VBox cardNode = loader.load();
-
-            Label lblName = (Label) cardNode.lookup("#lblProductName");
-            Label lblCat = (Label) cardNode.lookup("#lblCategory");
-            Label lblPrice = (Label) cardNode.lookup("#lblPrice");
-            ImageView imgProduct = (ImageView) cardNode.lookup("#imgProduct");
-            Button btnAdd = (Button) cardNode.lookup("#btnAddToCart");
-
-            lblName.setText(name);
-            lblCat.setText(category);
-            lblPrice.setText(formatPrice(price));
-
-            if (btnAdd != null) {
-                btnAdd.setOnAction(e -> handleAddToCart(productId, name, price));
-            }
-
-            if (imagePath != null && !imagePath.isEmpty()) {
-                try {
-                    Image image = new Image(getClass().getResourceAsStream(imagePath));
-                    imgProduct.setImage(image);
-                } catch (Exception e) {
-                    // Do nothing
-                }
-            }
-            return cardNode;
-        } catch (IOException e) {
-            return null;
+        if (clickedButton != null && !clickedButton.getStyleClass().contains("category-btn-active")) {
+            clickedButton.getStyleClass().add("category-btn-active");
         }
     }
 
     private String formatPrice(BigDecimal price) {
+        if (price == null) {
+            return "0 đ";
+        }
+
         return String.format("%,.0f đ", price);
     }
 
@@ -232,6 +333,7 @@ public class POSController {
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+
         return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 }
