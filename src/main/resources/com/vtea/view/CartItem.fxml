@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="cart-item-container" spacing="10" alignment="CENTER_LEFT" prefHeight="65" maxHeight="65">
+
+    <StackPane styleClass="cart-item-img-box" minWidth="45" minHeight="45" prefWidth="45" prefHeight="45">
+        <ImageView fx:id="imgCartItem" fitWidth="30" fitHeight="30" preserveRatio="true"/>
+    </StackPane>
+
+    <VBox VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" spacing="2" alignment="CENTER_LEFT">
+        <Label fx:id="lblCartName" styleClass="cart-item-name" text="Tên món"/>
+        <Label fx:id="lblCartPrice" styleClass="cart-item-price" text="0đ"/>
+    </VBox>
+
+    <HBox alignment="CENTER" spacing="6" styleClass="qty-box">
+        <Button fx:id="btnMinus" text="-" styleClass="qty-btn"/>
+        <Label fx:id="lblQty" text="1" styleClass="qty-label"/>
+        <Button fx:id="btnPlus" text="+" styleClass="qty-btn"/>
+    </HBox>
+
+    <Button fx:id="btnRemove" styleClass="btn-remove-item">
+        <graphic>
+            <Label text="X" style="-fx-text-fill: #ff4d4f; -fx-font-weight: bold;"/>
+        </graphic>
+    </Button>
+</HBox>

@@ -1,6 +1,6 @@
 package com.vtea.model;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class User {
     private int userId;
@@ -9,13 +9,13 @@ public class User {
     private String fullName;
     private String role;
     private String status;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     public User() {
 
     }
 
-    public User(Timestamp createdAt, String fullName, String passWord, String role, String status, int userId, String userName) {
+    public User(LocalDateTime createdAt, String fullName, String passWord, String role, String status, int userId, String userName) {
         this.createdAt = createdAt;
         this.fullName = fullName;
         this.passWord = passWord;
@@ -25,7 +25,7 @@ public class User {
         this.userName = userName;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
@@ -53,7 +53,7 @@ public class User {
         return userName;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
