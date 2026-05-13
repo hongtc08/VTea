@@ -25,9 +25,6 @@
         <HBox alignment="CENTER_LEFT" spacing="12">
             <Label text="Bán hàng (POS)" styleClass="screen-title"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <StackPane styleClass="cart-badge">
-<!--                <Label fx:id="cartCountLabel" text="0" styleClass="cart-badge-text"/>-->
-            </StackPane>
         </HBox>
 
         <!-- Search -->

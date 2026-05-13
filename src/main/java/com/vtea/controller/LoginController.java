@@ -54,7 +54,6 @@ public class LoginController {
             // Hiện thông báo chào mừng
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
 
-            // TODO: Viết code đóng màn hình Login và mở màn hình POSController ở đây
             System.out.println("Chuẩn bị chuyển sang màn hình chính...");
             MainApp.setRoot("main-layout");
         } catch (Exception e) {
