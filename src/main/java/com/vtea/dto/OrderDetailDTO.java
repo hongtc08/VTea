@@ -3,13 +3,14 @@ package com.vtea.dto;
 import java.math.BigDecimal;
 
 public class OrderDetailDTO {
+
     private int productId;
-    
     private String productName;
     private int quantity;
     private BigDecimal unitPrice;
 
-    public OrderDetailDTO() {}
+    public OrderDetailDTO() {
+    }
 
     public OrderDetailDTO(int productId, String productName, int quantity, BigDecimal unitPrice) {
         this.productId = productId;
@@ -19,19 +20,50 @@ public class OrderDetailDTO {
     }
 
     public BigDecimal getSubTotal() {
+        if (unitPrice == null || quantity <= 0) {
+            return BigDecimal.ZERO;
+        }
+
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
-    // Getters & Setters
-    public int getProductId() { return productId; }
-    public void setProductId(int productId) { this.productId = productId; }
+    public int getProductId() {
+        return productId;
+    }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
 
-    public int getQuantity() { return quantity; }
-    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public String getProductName() {
+        return productName;
+    }
 
-    public BigDecimal getUnitPrice() { return unitPrice; }
-    public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Số lượng không được âm!");
+        }
+
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        if (unitPrice != null && unitPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Đơn giá không được âm!");
+        }
+
+        this.unitPrice = unitPrice;
+    }
 }
