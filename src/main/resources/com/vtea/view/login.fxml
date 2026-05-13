@@ -78,13 +78,13 @@
 
             <!-- Username Field -->
             <Label styleClass="field-label" text="Tên đăng nhập" />
-            <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập" styleClass="input-field">
+            <TextField fx:id="txtUsername" promptText="Nhập tên đăng nhập" styleClass="input-field">
                 <VBox.margin><Insets bottom="20" top="8" /></VBox.margin>
             </TextField>
 
             <!-- Password Field -->
             <Label styleClass="field-label" text="Mật khẩu" />
-            <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="input-field">
+            <PasswordField fx:id="txtPassword" promptText="Nhập mật khẩu" styleClass="input-field">
                 <VBox.margin><Insets bottom="16" top="8" /></VBox.margin>
             </PasswordField>
 
@@ -97,7 +97,7 @@
             </HBox>
 
             <!-- Login Button -->
-            <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Đăng nhập" />
+            <Button fx:id="btnLogin" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Đăng nhập" />
 
         </VBox>
     </VBox>
