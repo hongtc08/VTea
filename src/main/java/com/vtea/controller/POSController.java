@@ -40,10 +40,6 @@ public class POSController {
 
 
 
-
-    private List<ProductMock> allProducts = new ArrayList<>();
-
-
     @FXML private FlowPane productGrid;
 
     // 1. Khai báo các Button từ FXML
@@ -53,28 +49,20 @@ public class POSController {
     @FXML private Button btnTra;
     @FXML private Button btnDacBiet;
     @FXML
-    public void initialize() {
-        // Khởi tạo dữ liệu mẫu
-        allProducts.add(new ProductMock("Trà sữa trân châu", "Trà sữa", "50.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Trà sữa ô long", "Trà sữa", "55.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Cafe sữa đá", "Cafe", "35.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Bạc xỉu", "Cafe", "35.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Trà đào cam sả", "Trà", "45.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Trà vải", "Trà", "45.000đ", "/com/vtea/images/cup.png"));
-        allProducts.add(new ProductMock("Sữa chua trân châu", "Đặc biệt", "40.000đ", "/com/vtea/images/cup.png"));
 
-        // Mặc định hiển thị tất cả sản phẩm
-        displayProducts(allProducts);
+    // ==========================================
+    // HÀM INIT
+    // ==========================================
+    public void initialize() {
     }
 
     // ==========================================
-    // CÁC HÀM XỬ LÝ SỰ KIỆN CLICK BUTTON LỌC
+    // CÁC HÀM XỬ LÝ SỰ KIỆN CLICK BUTTON LỌC (Phần này giữ để dùng luôn)
     // ==========================================
 
     @FXML
     private void filterAll(ActionEvent event) {
-        setActiveButton(btnAll);
-        displayProducts(allProducts);
+
     }
 
     @FXML
@@ -107,24 +95,11 @@ public class POSController {
 
     // Hàm lọc danh sách theo danh mục
     private void filterByCategory(String category) {
-        List<ProductMock> filteredList = new ArrayList<>();
-        for (ProductMock p : allProducts) {
-            if (p.category.equals(category)) {
-                filteredList.add(p);
-            }
-        }
-        displayProducts(filteredList);
     }
 
     // Hàm hiển thị danh sách sản phẩm lên giao diện
-    private void displayProducts(List<ProductMock> productsToDisplay) {
-        productGrid.getChildren().clear(); // Xóa các sản phẩm cũ đi
-        for (ProductMock p : productsToDisplay) {
-            VBox card = loadProductCard(p.name, p.category, p.price, p.imagePath);
-            if (card != null) {
-                productGrid.getChildren().add(card);
-            }
-        }
+    private void displayProducts() {
+
     }
 
     // Hàm đổi màu nút đang được chọn
@@ -145,42 +120,16 @@ public class POSController {
     // ==========================================
     // HÀM LOAD FXML CARD SẢN PHẨM (Đã có từ trước)
     // ==========================================
-    private VBox loadProductCard(String name, String category, String price, String imagePath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/ProductCard.fxml"));
-            VBox cardNode = loader.load();
 
-            Label lblProductName = (Label) cardNode.lookup("#lblProductName");
-            Label lblCategory = (Label) cardNode.lookup("#lblCategory");
-            Label lblPrice = (Label) cardNode.lookup("#lblPrice");
-            ImageView imgProduct = (ImageView) cardNode.lookup("#imgProduct");
+    // ==========================================
+    // LOGIC THÊM VÀO GIỎ HÀNG
+    // ==========================================
 
-            lblProductName.setText(name);
-            lblCategory.setText(category);
-            lblPrice.setText(price);
+    // ==========================================
+    // TÍNH TOÁN VÀ CẬP NHẬT TỔNG TIỀN
+    // ==========================================
 
-            try {
-                Image image = new Image(getClass().getResourceAsStream(imagePath));
-                imgProduct.setImage(image);
-            } catch (Exception e) {
-                // Bỏ qua nếu không tìm thấy ảnh
-            }
-            return cardNode;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    // Class phụ để chứa dữ liệu mẫu (Mock data)
-    // Thực tế sau này bạn sẽ dùng Class Product từ DB
-    private class ProductMock {
-        String name, category, price, imagePath;
-        public ProductMock(String name, String category, String price, String imagePath) {
-            this.name = name;
-            this.category = category;
-            this.price = price;
-            this.imagePath = imagePath;
-        }
-    }
+    // ==========================================
+    // LOGIC LOAD PRODUCT CARD (Đã sửa để nhận Click)
+    // ==========================================
 }

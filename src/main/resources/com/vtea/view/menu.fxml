@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.MenuController"
+      spacing="20" styleClass="screen-root">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label text="Quản lý thực đơn" styleClass="screen-title"/>
+            <Label text="Cập nhật danh sách món ăn và giá bán của hệ thống Vtea" styleClass="screen-subtitle"/>
+        </VBox>
+
+        <Button onAction="#handleAddNewDish" styleClass="action-btn-primary">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <FontIcon iconLiteral="fth-plus" iconColor="white" iconSize="18"/>
+                    <Label text="Thêm món ăn" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                </HBox>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <VBox spacing="10">
+        <HBox spacing="16" alignment="CENTER_LEFT">
+            <HBox styleClass="form-input-field" alignment="CENTER_LEFT" spacing="10" prefWidth="400">
+                <FontIcon iconLiteral="fth-search" iconSize="18" iconColor="#999999"/>
+                <TextField fx:id="searchField" promptText="Tìm kiếm tên món ăn..."
+                           style="-fx-background-color: transparent;" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <Button styleClass="qty-action-btn" style="-fx-border-color: #EAEAEA; -fx-border-radius: 8; -fx-padding: 8 12;">
+                <graphic>
+                    <FontIcon iconLiteral="fth-refresh-cw" iconSize="16" iconColor="#523628"/>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <ScrollPane hbarPolicy="NEVER" vbarPolicy="NEVER" fitToHeight="true"
+                    minHeight="60" prefHeight="60"
+                    styleClass="category-scroll" style="-fx-background-color: transparent; -fx-background: transparent;">
+            <HBox fx:id="categoryBar" spacing="10" alignment="CENTER_LEFT">
+                <padding><Insets top="10" bottom="10"/></padding>
+
+                <Button fx:id="btnAll" text="Tất cả" styleClass="category-btn, category-btn-active" onAction="#filterAll"/>
+                <Button fx:id="btnTraSua" text="Trà sữa" styleClass="category-btn" onAction="#filterTraSua"/>
+                <Button fx:id="btnCafe" text="Cafe" styleClass="category-btn" onAction="#filterCafe"/>
+                <Button fx:id="btnTra" text="Trà" styleClass="category-btn" onAction="#filterTra"/>
+                <Button fx:id="btnDacBiet" text="Đặc biệt" styleClass="category-btn" onAction="#filterDacBiet"/>
+            </HBox>
+        </ScrollPane>
+    </VBox>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="products-scroll"
+                style="-fx-background-color: transparent; -fx-background: transparent;">
+        <FlowPane fx:id="menuGrid" hgap="20" vgap="20" prefWrapLength="800">
+            <padding>
+                <Insets top="10" right="10" bottom="20" left="10"/>
+            </padding>
+        </FlowPane>
+    </ScrollPane>
+
+</VBox>
