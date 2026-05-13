@@ -650,7 +650,8 @@
 .btn-clear-cart {
     -fx-background-color: transparent;
     -fx-text-fill: #dc2626;
-    -fx-font-size: 12px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-border-color: transparent;
 }
@@ -668,7 +669,17 @@
 .cart-empty {
     -fx-text-fill: #a8a29e;
     -fx-font-size: 14px;
-    -fx-padding: 40 0;
+    -fx-padding: 100 0 40 0;
+    -fx-min-height: 360;
+}
+
+.cart-empty-icon {
+    -fx-icon-color: #a8a29e;
+}
+
+.cart-empty-text {
+    -fx-text-fill: #a8a29e;
+    -fx-font-size: 18px;
 }
 
 .cart-row {
@@ -677,6 +688,70 @@
     -fx-border-color: #e7e5e4;
     -fx-border-radius: 10;
     -fx-border-width: 1;
+}
+
+/* ========================================= */
+/* CSS CHO CART ITEM (GIỎ HÀNG)              */
+/* ========================================= */
+.cart-item-container {
+    -fx-background-color: white;
+    -fx-padding: 8;
+    -fx-border-color: #EAEAEA;
+    -fx-border-width: 0 0 1 0; /* Chỉ kẻ viền dưới để ngăn cách các item */
+}
+
+.cart-item-img-box {
+    -fx-background-color: #FDF1ED;
+    -fx-background-radius: 8;
+}
+
+.cart-item-name {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333333;
+}
+
+.cart-item-price {
+    -fx-text-fill: #b04a00;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+.qty-box {
+    -fx-background-color: #F4F4F4;
+    -fx-background-radius: 15;
+    -fx-padding: 0 4 0 4;
+}
+
+.qty-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #523628;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4 8 4 8;
+}
+
+.qty-btn:hover {
+    -fx-background-color: #EAEAEA;
+    -fx-background-radius: 15;
+}
+
+.qty-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-min-width: 15px;
+    -fx-alignment: center;
+}
+
+.btn-remove-item {
+    -fx-background-color: #FFF1F0;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 6 10 6 10;
+}
+
+.btn-remove-item:hover {
+    -fx-background-color: #FFCCC7;
 }
 
 .qty-btn {
@@ -834,4 +909,74 @@
     -fx-text-fill: #b04a00;
     -fx-font-weight: bold;
     -fx-font-size: 16px;
+}
+
+/* ========================================= */
+/* CSS CHO MÀN HÌNH MENU & FORM POP-UP       */
+/* ========================================= */
+.action-btn-primary {
+    -fx-background-color: #523628;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.action-btn-primary:hover {
+    -fx-background-color: #634231;
+}
+
+.modal-container {
+    -fx-background-color: white;
+    -fx-background-radius: 16;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 30, 0, 0, 10);
+    -fx-border-color: #EAEAEA;
+    -fx-border-radius: 16;
+}
+
+.form-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #4A4A4A;
+    -fx-font-size: 14px;
+}
+
+.form-input-field {
+    -fx-background-color: #faf9f8;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1c1917;
+    -fx-pref-height: 44;
+}
+
+.form-input-field:focused {
+    -fx-border-color: #4db6ac;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(77, 182, 172, 0.25), 8, 0, 0, 0);
+}
+
+.image-upload-placeholder {
+    -fx-border-color: #DCDCDC;
+    -fx-border-style: dashed;
+    -fx-border-width: 2;
+    -fx-border-radius: 12;
+    -fx-background-color: #FAFAFA;
+    -fx-cursor: hand;
+}
+
+.image-upload-placeholder:hover {
+    -fx-background-color: #F0F0F0;
+    -fx-border-color: #523628;
+}
+
+/* Ẩn viền focus mặc định của ScrollPane */
+.products-scroll:focused {
+    -fx-background-color: transparent;
+}
+.products-scroll > .viewport {
+    -fx-background-color: transparent;
 }

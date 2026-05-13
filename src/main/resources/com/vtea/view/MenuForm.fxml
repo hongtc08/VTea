@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<?import javafx.scene.image.ImageView?>
+<VBox spacing="20" styleClass="modal-container" prefWidth="480"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <padding>
+        <Insets top="28" right="28" bottom="28" left="28"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblFormTitle" text="Thêm món mới"
+               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #523628;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnClose" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic>
+                <FontIcon iconLiteral="fth-x" iconSize="20" iconColor="#999999"/>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" hbarPolicy="NEVER">
+        <VBox spacing="18">
+            <VBox spacing="8">
+                <Label text="Tên món ăn" styleClass="form-label"/>
+                <TextField fx:id="txtName" promptText="Ví dụ: Trà sữa trân châu hoàng kim" styleClass="form-input-field"/>
+            </VBox>
+
+            <HBox spacing="16">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Loại món" styleClass="form-label"/>
+                    <ComboBox fx:id="cbCategory" maxWidth="Infinity" promptText="Chọn loại..." styleClass="form-input-field"/>
+                </VBox>
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="Giá bán (VNĐ)" styleClass="form-label"/>
+                    <TextField fx:id="txtPrice" promptText="50.000" styleClass="form-input-field"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="8">
+                <Label text="Hình ảnh món ăn" styleClass="form-label"/>
+                <VBox fx:id="imageUploadArea" alignment="CENTER" spacing="12" prefHeight="150" styleClass="image-upload-placeholder">
+                    <FontIcon iconLiteral="fth-image" iconSize="32" iconColor="#BBBBBB"/>
+                    <VBox alignment="CENTER" spacing="2">
+                        <Label text="Nhấn để tải ảnh lên" style="-fx-text-fill: #523628; -fx-font-weight: bold;"/>
+                        <Label text="Hỗ trợ: JPG, PNG (Tối đa 2MB)" style="-fx-text-fill: #999999; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <ImageView fx:id="imgPreview" fitWidth="100" fitHeight="100" preserveRatio="true" managed="false" visible="false"/>
+                </VBox>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button fx:id="btnCancel" text="Hủy bỏ"
+                style="-fx-background-color: #F5F5F5; -fx-text-fill: #666666; -fx-background-radius: 8; -fx-padding: 10 24; -fx-cursor: hand;"/>
+        <Button fx:id="btnSubmit" text="Xác nhận thêm" styleClass="action-btn-primary" prefWidth="140"/>
+    </HBox>
+
+</VBox>

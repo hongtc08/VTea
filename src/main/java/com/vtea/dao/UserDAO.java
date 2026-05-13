@@ -34,7 +34,7 @@ public class UserDAO {
                     user.setFullName(rs.getString("full_name"));
                     user.setRole(rs.getString("role"));
                     user.setStatus(rs.getString("status"));
-                    user.setCreatedAt(rs.getTimestamp("created_at"));
+                    user.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
                 }
             }
         } catch (SQLException e) {
@@ -63,7 +63,7 @@ public class UserDAO {
                 user.setFullName(rs.getString("full_name"));
                 user.setRole(rs.getString("role"));
                 user.setStatus(rs.getString("status"));
-                user.setCreatedAt(rs.getTimestamp("created_at"));
+                user.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
 
                 userList.add(user);
             }

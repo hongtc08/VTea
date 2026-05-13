@@ -33,12 +33,15 @@ jobs:
             echo "✅ SQL Syntax OK."
           fi
 
-      # 2. Maven sẽ tự động Compile, chạy Unit Test, chạy ArchUnit Test và Package
-      # Chỉ cần 1 lệnh duy nhất này là đủ, tiết kiệm 70% thời gian so với file cũ
-      - name: 🛠️ Compile, Test & Package
-        run: mvn -B clean package
+      # 2. JavaFX / TestFX (AppStartupTest) cần display — trên Ubuntu runner không có X11.
+      - name: 🖥️ Install Xvfb (JavaFX tests)
+        run: sudo apt-get update && sudo apt-get install -y xvfb
 
-      # 3. Lưu trữ file JAR (chỉ chạy khi nhánh main được push)
+      # 3. Maven: compile, test (kể cả TestFX), package — chạy trong virtual framebuffer
+      - name: 🛠️ Compile, Test & Package
+        run: xvfb-run -a mvn -B clean package
+
+      # 4. Lưu trữ file JAR (chỉ chạy khi nhánh main được push)
       - name: 📤 Upload JAR Artifact
         if: success() && github.event_name == 'push'
         uses: actions/upload-artifact@v4
@@ -47,7 +50,7 @@ jobs:
           path: target/*.jar
           retention-days: 15
 
-      # 4. Lưu trữ Report Test (chạy luôn cả khi test rớt để xem lỗi)
+      # 5. Lưu trữ Report Test (chạy luôn cả khi test rớt để xem lỗi)
       - name: 📤 Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4

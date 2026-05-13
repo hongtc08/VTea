@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 <?import java.net.URL?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 
 
@@ -25,7 +26,7 @@
             <Label text="Bán hàng (POS)" styleClass="screen-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <StackPane styleClass="cart-badge">
-                <Label fx:id="cartCountLabel" text="0" styleClass="cart-badge-text"/>
+<!--                <Label fx:id="cartCountLabel" text="0" styleClass="cart-badge-text"/>-->
             </StackPane>
         </HBox>
 
@@ -36,6 +37,7 @@
 
         <!-- Category Filter -->
         <ScrollPane hbarPolicy="NEVER" vbarPolicy="NEVER" fitToHeight="true"
+                    minHeight="60" prefHeight="60"
                     styleClass="category-scroll" style="-fx-background-color: transparent; -fx-background: transparent;">
             <HBox fx:id="categoryBar" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="10" bottom="10"/></padding>
@@ -82,13 +84,20 @@
                 <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
 
                 <!-- Empty state -->
-                <Label fx:id="cartEmptyLabel"
-                       text="🛒\n\nChưa có sản phẩm nào"
-                       styleClass="cart-empty"
-                       maxWidth="Infinity"
-                       alignment="CENTER"
-                       textAlignment="CENTER"
-                       wrapText="true"/>
+                <VBox fx:id="cartEmptyLabel"
+                      styleClass="cart-empty"
+                      maxWidth="Infinity"
+                      alignment="CENTER"
+                      spacing="18">
+                    <FontIcon iconLiteral="fth-shopping-cart"
+                              iconSize="64"
+                              styleClass="cart-empty-icon"/>
+                    <Label text="Chưa có sản phẩm nào"
+                           styleClass="cart-empty-text"
+                           alignment="CENTER"
+                           textAlignment="CENTER"
+                           wrapText="true"/>
+                </VBox>
             </VBox>
         </ScrollPane>
 
@@ -110,14 +119,20 @@
             <HBox>
                 <Label text="Tổng cộng:" styleClass="checkout-total-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="totalLabel" text="0₫" styleClass="checkout-total-value"/>
+                <Label fx:id="lblTotalAmount" text="0₫" styleClass="checkout-total-value"/>
             </HBox>
+
+            <VBox spacing="6">
+                <VBox.margin><Insets top="8" bottom="8"/></VBox.margin>
+                <Label text="Phương thức thanh toán:" styleClass="checkout-row-label" style="-fx-font-size: 13px;"/>
+                <ComboBox fx:id="cmbPaymentMethod" maxWidth="Infinity" styleClass="form-input-field" promptText="Chọn phương thức..."/>
+            </VBox>
 
             <Button text="💳  Thanh toán"
                     styleClass="btn-primary"
                     maxWidth="Infinity"
                     onAction="#handleCheckout">
-                <VBox.margin><Insets top="8"/></VBox.margin>
+                <VBox.margin><Insets top="4"/></VBox.margin>
             </Button>
         </VBox>
 
