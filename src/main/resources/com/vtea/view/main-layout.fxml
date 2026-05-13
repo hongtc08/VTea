@@ -98,6 +98,16 @@
                 </graphic>
             </Button>
 
+            <Button fx:id="btnMenu"
+                    text="Thực đơn"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#handleMenu">
+                <graphic>
+                    <FontIcon iconLiteral="fth-book-open" iconSize="18"/>
+                </graphic>
+            </Button>
+
         </VBox>
     </left>
 

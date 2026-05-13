@@ -119,14 +119,20 @@
             <HBox>
                 <Label text="Tổng cộng:" styleClass="checkout-total-label"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="totalLabel" text="0₫" styleClass="checkout-total-value"/>
+                <Label fx:id="lblTotalAmount" text="0₫" styleClass="checkout-total-value"/>
             </HBox>
+
+            <VBox spacing="6">
+                <VBox.margin><Insets top="8" bottom="8"/></VBox.margin>
+                <Label text="Phương thức thanh toán:" styleClass="checkout-row-label" style="-fx-font-size: 13px;"/>
+                <ComboBox fx:id="cmbPaymentMethod" maxWidth="Infinity" styleClass="form-input-field" promptText="Chọn phương thức..."/>
+            </VBox>
 
             <Button text="💳  Thanh toán"
                     styleClass="btn-primary"
                     maxWidth="Infinity"
                     onAction="#handleCheckout">
-                <VBox.margin><Insets top="8"/></VBox.margin>
+                <VBox.margin><Insets top="4"/></VBox.margin>
             </Button>
         </VBox>
 
