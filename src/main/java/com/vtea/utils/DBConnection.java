@@ -11,25 +11,24 @@ public class DBConnection {
     // 2. TÀI KHOẢN:
     private static final String USER = "avnadmin";
     // 3. MẬT KHẨU
-    private static final String PASSWORD = "";
+    private static final String PASSWORD = "AVNS_cmtIkCkYcgnQn_c6xvV";
 
     /* ========================================================================================= */
 
-    // Biến lưu trữ kết nối duy nhất
-    private static Connection conn = null;
+    // private static Connection conn = null;
 
     // Hàm thực hiện kết nối
     public static Connection getConnection() {
         try {
-            // Kiểm tra nếu chưa có kết nối hoặc kết nối đã bị đóng thì mới tạo mới
-            if (conn == null || conn.isClosed()) {
-                // Tải driver MySQL
-                Class.forName("com.mysql.cj.jdbc.Driver");
+            // Tải driver MySQL (giữ nguyên cho an toàn)
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-                System.out.println("Đang kết nối tới: " + URL);
-                conn = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
-            }
+            System.out.println("Đang kết nối tới: " + URL);
+            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
+            System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
+
+            return conn;
+
         } catch (ClassNotFoundException e) {
             System.out.println("❌ [Lỗi] Không tìm thấy thư viện MySQL Connector. Hãy kiểm tra lại file pom.xml");
             e.printStackTrace();
@@ -38,12 +37,11 @@ public class DBConnection {
             e.printStackTrace();
         }
 
-        // Trả về kết nối đã có sẵn
-        return conn;
+        return null;
     }
 
-    // Hàm dùng để đóng kết nối khi tắt app
-    public static void closeConnection() {
+    // Hàm dùng để đóng kết nối khi tắt app (giữ lại cho đúng structure, nhưng không còn cần thiết)
+    public static void closeConnection(Connection conn) {
         try {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
@@ -56,6 +54,7 @@ public class DBConnection {
 
     // Hàm main để test thử xem code có chạy đúng không
     public static void main(String[] args) {
-        getConnection();
+        Connection conn = getConnection();
+        closeConnection(conn);
     }
 }

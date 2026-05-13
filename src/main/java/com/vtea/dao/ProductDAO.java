@@ -22,22 +22,13 @@ public class ProductDAO {
         String query = "SELECT p.*, c.name AS category_name " +
                 "FROM product p " +
                 "JOIN category c ON p.category_id = c.category_id " +
-                "WHERE p.is_available = true";
+                "WHERE p.is_available = 1 AND c.is_available = 1";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query);
             ResultSet rs = ps.executeQuery()) {
             while(rs.next()){
-                ProductDTO product = new ProductDTO();
-                product.setProductId(rs.getInt("product_id"));
-                product.setCategoryId(rs.getInt("category_id"));
-                product.setName(rs.getString("name"));
-                product.setPrice(rs.getBigDecimal("price"));
-                product.setImageUrl(rs.getString("image_url"));
-                product.setAvailable(rs.getBoolean("is_available"));
-
-                product.setCategoryName(rs.getString("category_name"));
-
+                ProductDTO product = mapResultSetToDTO(rs);
                 productList.add(product);
             }
         } catch(SQLException e){
@@ -63,16 +54,7 @@ public class ProductDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                ProductDTO product = new ProductDTO();
-                product.setProductId(rs.getInt("product_id"));
-                product.setCategoryId(rs.getInt("category_id"));
-                product.setName(rs.getString("name"));
-                product.setPrice(rs.getBigDecimal("price"));
-                product.setImageUrl(rs.getString("image_url"));
-                product.setAvailable(rs.getBoolean("is_available"));
-
-                product.setCategoryName(rs.getString("category_name"));
-
+                ProductDTO product = mapResultSetToDTO(rs);
                 productList.add(product);
             }
         } catch (SQLException e) {
@@ -90,7 +72,7 @@ public class ProductDAO {
         String query = "SELECT p.*, c.name AS category_name " +
                 "FROM product p " +
                 "JOIN category c ON p.category_id = c.category_id " +
-                "WHERE p.category_id = ? AND p.is_available = true";
+                "WHERE p.category_id = ? AND p.is_available = 1 AND c.is_available = 1";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(query)){
@@ -98,16 +80,7 @@ public class ProductDAO {
 
             try(ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
-                    ProductDTO product = new ProductDTO();
-                    product.setProductId(rs.getInt("product_id"));
-                    product.setCategoryId(rs.getInt("category_id"));
-                    product.setName(rs.getString("name"));
-                    product.setPrice(rs.getBigDecimal("price"));
-                    product.setImageUrl(rs.getString("image_url"));
-                    product.setAvailable(rs.getBoolean("is_available"));
-
-                    product.setCategoryName(rs.getString("category_name"));
-
+                    ProductDTO product = mapResultSetToDTO(rs);
                     productList.add(product);
                 }
             }
@@ -176,7 +149,7 @@ public class ProductDAO {
      * Xóa món nước
      */
     public boolean deleteProduct(int productId) {
-        String sql = "UPDATE product SET is_available = false WHERE product_id = ?";
+        String sql = "UPDATE product SET is_available = 0 WHERE product_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -189,5 +162,18 @@ public class ProductDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // Hàm dùng chung để đúc ResultSet ra ProductDTO
+    private ProductDTO mapResultSetToDTO(ResultSet rs) throws SQLException {
+        ProductDTO product = new ProductDTO();
+        product.setProductId(rs.getInt("product_id"));
+        product.setCategoryId(rs.getInt("category_id"));
+        product.setName(rs.getString("name"));
+        product.setPrice(rs.getBigDecimal("price"));
+        product.setImageUrl(rs.getString("image_url"));
+        product.setAvailable(rs.getBoolean("is_available"));
+        product.setCategoryName(rs.getString("category_name"));
+        return product;
     }
 }
