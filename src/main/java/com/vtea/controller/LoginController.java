@@ -2,6 +2,7 @@ package com.vtea.controller;
 
 import com.vtea.dto.LoginRequestDTO;
 import com.vtea.dto.UserSessionDTO;
+import com.vtea.main.MainApp;
 import com.vtea.service.AuthService;
 import com.vtea.utils.SessionManager;
 
@@ -53,9 +54,8 @@ public class LoginController {
             // Hiện thông báo chào mừng
             showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
 
-            // TODO: Viết code đóng màn hình Login và mở màn hình POSController ở đây
             System.out.println("Chuẩn bị chuyển sang màn hình chính...");
-
+            MainApp.setRoot("main-layout");
         } catch (Exception e) {
             // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
             showAlert(Alert.AlertType.ERROR, "Lỗi Đăng Nhập", e.getMessage());

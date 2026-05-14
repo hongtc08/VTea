@@ -1,7 +1,7 @@
 package com.vtea.model;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +11,7 @@ public class Order {
     private int customerId;
     private BigDecimal totalAmount = BigDecimal.ZERO;
     private String status = "PENDING";
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
     private String paymentMethod;
 
     // Danh sách các món trong giỏ
@@ -34,8 +34,8 @@ public class Order {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public List<OrderDetail> getDetails() { return details; }
     public void setDetails(List<OrderDetail> details) { this.details = details; }

@@ -91,7 +91,7 @@
             <!-- Remember Me & Forgot Password -->
             <HBox alignment="CENTER_LEFT">
                 <VBox.margin><Insets bottom="28" /></VBox.margin>
-                <CheckBox fx:id="rememberMeCheckbox" styleClass="field-label" text="Ghi nhớ đăng nhập" />
+                <CheckBox fx:id="showPasswordCheckbox" styleClass="field-label" text="Hiển thị mật khẩu" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Hyperlink styleClass="forgot-password-link" text="Quên mật khẩu?" />
             </HBox>

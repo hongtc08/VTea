@@ -40,7 +40,8 @@ public class POSController {
     @FXML private Button btnTra;
     @FXML private Button btnDacBiet;
 
-    @FXML private TableView<OrderDetailDTO> cartTableView;
+    @FXML private VBox cartItemsBox;
+    @FXML private VBox cartEmptyLabel;
     @FXML private Label lblTotalAmount;
     @FXML private ComboBox<String> cmbPaymentMethod;
 
@@ -340,7 +341,57 @@ public class POSController {
 
     private void updateCartDisplay() {
         List<OrderDetailDTO> cartItems = orderService.getCartItems();
-        cartTableView.setItems(FXCollections.observableArrayList(cartItems));
+
+        // 1. Xóa sạch giỏ hàng cũ trên UI trước khi vẽ lại
+        if (cartItemsBox != null) {
+            cartItemsBox.getChildren().clear();
+        }
+
+        // 2. Nếu giỏ hàng trống, hiển thị lại VBox "Chưa có sản phẩm nào"
+        if (cartItems == null || cartItems.isEmpty()) {
+            if (cartItemsBox != null && cartEmptyLabel != null && !cartItemsBox.getChildren().contains(cartEmptyLabel)) {
+                cartItemsBox.getChildren().add(cartEmptyLabel);
+            }
+            return;
+        }
+
+        // 3. Nếu có hàng, duyệt qua danh sách và tạo từng thẻ Cart Item
+        for (OrderDetailDTO item : cartItems) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/CartItem.fxml"));
+                javafx.scene.layout.HBox cartNode = loader.load();
+
+                // Ánh xạ các thành phần bên trong thẻ CartItem
+                Label lblCartName = (Label) cartNode.lookup("#lblCartName");
+                Label lblCartPrice = (Label) cartNode.lookup("#lblCartPrice");
+                Label lblQty = (Label) cartNode.lookup("#lblQty");
+                Button btnRemove = (Button) cartNode.lookup("#btnRemove");
+
+                // Gắn dữ liệu từ DTO vào UI
+                // Lưu ý: Đảm bảo class OrderDetailDTO của bạn có các hàm getProductName(), getQuantity()...
+                if (lblCartName != null) lblCartName.setText(item.getProductName());
+                if (lblQty != null) lblQty.setText(String.valueOf(item.getQuantity()));
+
+                // Giả sử giá tiền bạn muốn hiển thị là tổng giá của item đó (giá x số lượng)
+                if (lblCartPrice != null) lblCartPrice.setText(formatPrice(item.getSubTotal()));
+
+                // Gắn sự kiện xóa món khỏi giỏ hàng
+                if (btnRemove != null) {
+                    btnRemove.setOnAction(e -> {
+                        // Gọi hàm xóa của Backend (bạn cần điều chỉnh hàm xóa theo logic của Service)
+                        // Ví dụ: orderService.removeCartItem(item.getProductId());
+                        // Sau đó gọi lại hàm refreshCart();
+                    });
+                }
+
+                // Thêm thẻ vừa tạo vào VBox giỏ hàng
+                cartItemsBox.getChildren().add(cartNode);
+
+            } catch (java.io.IOException e) {
+                System.err.println("Lỗi load UI CartItem.fxml");
+                e.printStackTrace();
+            }
+        }
     }
 
     private void updateTotalAmount() {
