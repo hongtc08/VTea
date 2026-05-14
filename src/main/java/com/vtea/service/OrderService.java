@@ -103,11 +103,14 @@ public class OrderService {
     }
 
     private void calculateTotal() {
-        BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotal = BigDecimal.ZERO;
 
         for (OrderDetailDTO item : cartItems) {
-            total = total.add(item.getSubTotal());
+            subtotal = subtotal.add(item.getSubTotal());
         }
+
+        BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
+        BigDecimal total = subtotal.add(vat);
 
         currentOrder.setTotalAmount(total);
     }
@@ -151,6 +154,7 @@ public class OrderService {
         }
         else if (item != null && item.getQuantity() == 1) {
             cartItems.remove(item);
+            calculateTotal();
         }
     }
 
@@ -162,6 +166,7 @@ public class OrderService {
         OrderDetailDTO item = findCartItemByProductId(productId);
         if (item != null) {
             cartItems.remove(item);
+            calculateTotal();
         }
     }
 }
