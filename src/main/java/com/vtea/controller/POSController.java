@@ -47,6 +47,8 @@ public class POSController {
 
     @FXML private VBox cartItemsBox;
     @FXML private VBox cartEmptyLabel;
+    @FXML private Label subtotalLabel;
+    @FXML private Label taxLabel;
     @FXML private Label lblTotalAmount;
     @FXML private ComboBox<String> cmbPaymentMethod;
 
@@ -230,7 +232,6 @@ public class POSController {
             Label lblCategory = (Label) cardNode.lookup("#lblCategory");
             Label lblPrice = (Label) cardNode.lookup("#lblPrice");
             ImageView imgProduct = (ImageView) cardNode.lookup("#imgProduct");
-            Button btnAdd = (Button) cardNode.lookup("#btnAddToCart");
 
             if (lblName != null) {
                 lblName.setText(product.getName());
@@ -244,13 +245,13 @@ public class POSController {
                 lblPrice.setText(formatPrice(product.getPrice()));
             }
 
-            if (btnAdd != null) {
-                btnAdd.setOnAction(event -> handleAddToCart(
-                        product.getProductId(),
-                        product.getName(),
-                        product.getPrice()
-                ));
-            }
+            cardNode.setOnMouseClicked(event -> handleAddToCart(
+                    product.getProductId(),
+                    product.getName(),
+                    product.getPrice()
+            ));
+
+            cardNode.setCursor(javafx.scene.Cursor.HAND);
 
             loadProductImage(imgProduct, product.getImageUrl());
 
@@ -392,7 +393,20 @@ public class POSController {
     }
 
     private void updateTotalAmount() {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (OrderDetailDTO item : orderService.getCartItems()) {
+            subtotal = subtotal.add(item.getSubTotal());
+        }
+        
+        BigDecimal tax = subtotal.multiply(new BigDecimal("0.10"));
         BigDecimal total = orderService.getCurrentOrder().getTotalAmount();
+
+        if (subtotalLabel != null) {
+            subtotalLabel.setText(formatPrice(subtotal));
+        }
+        if (taxLabel != null) {
+            taxLabel.setText(formatPrice(tax));
+        }
         lblTotalAmount.setText(formatPrice(total));
     }
 
