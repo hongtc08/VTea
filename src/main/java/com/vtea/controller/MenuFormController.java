@@ -55,21 +55,8 @@ public class MenuFormController {
             List<CategoryDTO> categories = categoryService.getAllActiveCategories();
             cbCategory.getItems().addAll(categories);
 
-            cbCategory.setConverter(new StringConverter<CategoryDTO>() {
-                @Override
-                public String toString(CategoryDTO object) {
-                    if (object == null) return null;
-                    return object.getName();
-                }
+            cbCategory.setConverter(new com.vtea.utils.CategoryConverter(cbCategory));
 
-                @Override
-                public CategoryDTO fromString(String string) {
-                    return cbCategory.getItems().stream()
-                            .filter(c -> c.getName().equals(string))
-                            .findFirst()
-                            .orElse(null);
-                }
-            });
         } catch (Exception e) {
             e.printStackTrace();
         }
