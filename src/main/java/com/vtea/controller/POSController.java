@@ -1,7 +1,7 @@
 package com.vtea.controller;
 
-import com.vtea.dto.ProductDTO;
 import com.vtea.dto.OrderDetailDTO;
+import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
 import com.vtea.service.OrderService;
 import com.vtea.service.ProductService;
@@ -44,6 +44,8 @@ public class POSController {
     @FXML private Label lblTotalAmount;
     @FXML private ComboBox<String> cmbPaymentMethod;
 
+    // ==================== INIT ====================
+
     @FXML
     public void initialize() {
         setupPaymentMethods();
@@ -61,15 +63,7 @@ public class POSController {
         cmbPaymentMethod.setValue("Tiền mặt");
     }
 
-    private void loadProductsFromDatabase() {
-        try {
-            List<ProductDTO> products = productService.getAllActiveProducts();
-            displayProducts(products);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showErrorAlert("Lỗi", "Không thể tải danh sách sản phẩm!");
-        }
-    }
+    // ==================== PRODUCT EVENTS ====================
 
     public void handleAddToCart(int productId, String productName, BigDecimal price) {
         try {
@@ -83,65 +77,6 @@ public class POSController {
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng!");
-        }
-    }
-
-    @FXML
-    private void handleClearCart(ActionEvent event) {
-        if (orderService.isCartEmpty()) {
-            showInfoAlert("Thông báo", "Giỏ hàng đã trống!");
-            return;
-        }
-
-        boolean confirmed = showConfirmDialog(
-                "Xác nhận",
-                "Bạn có chắc muốn xóa toàn bộ giỏ hàng?"
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        orderService.clearCart();
-        refreshCart();
-        showInfoAlert("Thành công", "Giỏ hàng đã được xóa!");
-    }
-
-    @FXML
-    private void handleCheckout(ActionEvent event) {
-        try {
-            if (orderService.isCartEmpty()) {
-                showErrorAlert("Lỗi", "Giỏ hàng trống! Vui lòng thêm sản phẩm.");
-                return;
-            }
-
-            String paymentMethod = cmbPaymentMethod.getValue();
-            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
-                showErrorAlert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
-                return;
-            }
-
-            Order order = orderService.getCurrentOrder();
-            order.setUserId(currentUserId);
-            order.setStatus("PAID");
-            order.setPaymentMethod(paymentMethod);
-
-            boolean success = orderService.checkoutCurrentOrder();
-
-            if (success) {
-                showSuccessAlert(
-                        "✓ Thanh toán thành công!",
-                        "Tổng tiền: " + formatPrice(order.getTotalAmount())
-                );
-
-                orderService.clearCart();
-                refreshCart();
-            } else {
-                showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
         }
     }
 
@@ -173,6 +108,137 @@ public class POSController {
     private void filterDacBiet(ActionEvent event) {
         setActiveButton(btnDacBiet);
         filterByCategory(CATEGORY_DAC_BIET);
+    }
+
+    // ==================== CART EVENTS ====================
+
+    @FXML
+    private void handleClearCart(ActionEvent event) {
+        if (orderService.isCartEmpty()) {
+            showInfoAlert("Thông báo", "Giỏ hàng đã trống!");
+            return;
+        }
+
+        boolean confirmed = showConfirmDialog(
+                "Xác nhận",
+                "Bạn có chắc muốn xóa toàn bộ giỏ hàng?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        orderService.clearCart();
+        refreshCart();
+        showInfoAlert("Thành công", "Giỏ hàng đã được xóa!");
+    }
+
+    // Xử lý khi người dùng bấm nút tăng số lượng món trong giỏ hàng.
+    // Lấy món đang được chọn trong bảng giỏ hàng, gọi service tăng số lượng,
+    // sau đó refresh lại giỏ hàng và tổng tiền.
+    @FXML
+    private void handleIncreaseSelectedCartItem(ActionEvent event) {
+        OrderDetailDTO selectedItem = getSelectedCartItem();
+
+        if (selectedItem == null) {
+            showInfoAlert("Thông báo", "Vui lòng chọn món cần tăng số lượng!");
+            return;
+        }
+
+        orderService.increaseQuantity(selectedItem.getProductId());
+        refreshCart();
+    }
+
+    // Xử lý khi người dùng bấm nút giảm số lượng món trong giỏ hàng.
+    // Lấy món đang được chọn trong bảng giỏ hàng, gọi service giảm số lượng.
+    // Nếu số lượng còn 1 thì service sẽ tự xóa món khỏi giỏ.
+    // Sau đó refresh lại giỏ hàng và tổng tiền.
+    @FXML
+    private void handleDecreaseSelectedCartItem(ActionEvent event) {
+        OrderDetailDTO selectedItem = getSelectedCartItem();
+
+        if (selectedItem == null) {
+            showInfoAlert("Thông báo", "Vui lòng chọn món cần giảm số lượng!");
+            return;
+        }
+
+        orderService.decreaseQuantity(selectedItem.getProductId());
+        refreshCart();
+    }
+
+    // Xử lý khi người dùng bấm nút xóa món khỏi giỏ hàng.
+    // Lấy món đang được chọn trong bảng giỏ hàng, gọi service xóa món,
+    // sau đó refresh lại giỏ hàng và tổng tiền.
+    @FXML
+    private void handleRemoveSelectedCartItem(ActionEvent event) {
+        OrderDetailDTO selectedItem = getSelectedCartItem();
+
+        if (selectedItem == null) {
+            showInfoAlert("Thông báo", "Vui lòng chọn món cần xóa!");
+            return;
+        }
+
+        orderService.removeFromCart(selectedItem.getProductId());
+        refreshCart();
+    }
+
+    // Lấy món đang được chọn trong bảng giỏ hàng.
+    // Method này dùng chung cho các event tăng, giảm và xóa món.
+    private OrderDetailDTO getSelectedCartItem() {
+        return cartTableView.getSelectionModel().getSelectedItem();
+    }
+
+    // ==================== CHECKOUT EVENTS ====================
+
+    @FXML
+    private void handleCheckout(ActionEvent event) {
+        try {
+            if (orderService.isCartEmpty()) {
+                showErrorAlert("Lỗi", "Giỏ hàng trống! Vui lòng thêm sản phẩm.");
+                return;
+            }
+
+            String paymentMethod = cmbPaymentMethod.getValue();
+
+            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                showErrorAlert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
+                return;
+            }
+
+            Order order = orderService.getCurrentOrder();
+            order.setUserId(currentUserId);
+            order.setStatus("PAID");
+            order.setPaymentMethod(paymentMethod);
+
+            boolean success = orderService.checkoutCurrentOrder();
+
+            if (success) {
+                showSuccessAlert(
+                        "✓ Thanh toán thành công!",
+                        "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                );
+
+                orderService.clearCart();
+                refreshCart();
+            } else {
+                showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
+        }
+    }
+
+    // ==================== PRODUCT DISPLAY ====================
+
+    private void loadProductsFromDatabase() {
+        try {
+            List<ProductDTO> products = productService.getAllActiveProducts();
+            displayProducts(products);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Lỗi", "Không thể tải danh sách sản phẩm!");
+        }
     }
 
     private void filterByCategory(int categoryId) {
@@ -265,6 +331,8 @@ public class POSController {
         }
     }
 
+    // ==================== CART DISPLAY ====================
+
     private void refreshCart() {
         updateCartDisplay();
         updateTotalAmount();
@@ -279,6 +347,8 @@ public class POSController {
         BigDecimal total = orderService.getCurrentOrder().getTotalAmount();
         lblTotalAmount.setText(formatPrice(total));
     }
+
+    // ==================== UI HELPERS ====================
 
     private void setActiveButton(Button clickedButton) {
         Button[] allButtons = {
@@ -307,6 +377,8 @@ public class POSController {
 
         return String.format("%,.0f đ", price);
     }
+
+    // ==================== ALERT HELPERS ====================
 
     private void showSuccessAlert(String title, String message) {
         showAlert(Alert.AlertType.INFORMATION, title, message);
