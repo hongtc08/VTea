@@ -13,6 +13,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 
 public class LoginController {
 
@@ -24,7 +25,36 @@ public class LoginController {
     private PasswordField txtPassword; // Ô nhập mật khẩu (ẩn ký tự)
 
     @FXML
+    private TextField txtPasswordVisible; // Ô hiển thị mật khẩu
+
+    @FXML
+    private CheckBox showPasswordCheckbox; // Checkbox hiển thị mật khẩu
+
+    @FXML
     private Button btnLogin; // Nút đăng nhập
+
+    @FXML
+    public void initialize() {
+        // Đồng bộ dữ liệu giữa 2 ô nhập liệu
+        txtPasswordVisible.textProperty().bindBidirectional(txtPassword.textProperty());
+
+        // Bắt sự kiện check/uncheck
+        showPasswordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                // Hiện ô password text rõ, ẩn ô ẩn
+                txtPasswordVisible.setVisible(true);
+                txtPasswordVisible.setManaged(true);
+                txtPassword.setVisible(false);
+                txtPassword.setManaged(false);
+            } else {
+                // Ẩn ô password text rõ, hiện ô ẩn
+                txtPasswordVisible.setVisible(false);
+                txtPasswordVisible.setManaged(false);
+                txtPassword.setVisible(true);
+                txtPassword.setManaged(true);
+            }
+        });
+    }
 
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();

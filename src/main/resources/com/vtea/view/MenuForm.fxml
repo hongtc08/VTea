@@ -8,7 +8,8 @@
 
 <?import javafx.scene.image.ImageView?>
 <VBox spacing="20" styleClass="modal-container" prefWidth="480"
-      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.MenuFormController">
 
     <stylesheets>
         <URL value="@../css/styles.css" />

@@ -273,9 +273,14 @@ public class POSController {
         }
 
         try {
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            Image image;
+            if (imagePath.startsWith("http") || imagePath.startsWith("file:")) {
+                image = new Image(imagePath);
+            } else {
+                image = new Image(getClass().getResourceAsStream(imagePath));
+            }
 
-            if (!image.isError()) {
+            if (image != null && !image.isError()) {
                 imgProduct.setImage(image);
             }
         } catch (Exception e) {

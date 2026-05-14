@@ -8,7 +8,7 @@
       styleClass="product-card" spacing="10" prefWidth="160" minWidth="160" maxWidth="160">
 
     <StackPane styleClass="product-image-container" prefHeight="130" prefWidth="130">
-        <ImageView fx:id="imgProduct" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+        <ImageView fx:id="imgProduct" fitWidth="129" fitHeight="125" preserveRatio="true"/>
     </StackPane>
 
     <VBox spacing="4" VBox.vgrow="ALWAYS">
@@ -19,5 +19,18 @@
         <Region VBox.vgrow="ALWAYS" />
 
         <Label fx:id="lblPrice" styleClass="product-card-price" text="0đ"/>
+
+        <HBox spacing="8" alignment="CENTER_RIGHT" style="-fx-padding: 4 0 0 0;">
+            <Button fx:id="btnEdit" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                <graphic>
+                    <org.kordamp.ikonli.javafx.FontIcon iconLiteral="fth-edit-2" iconSize="16" iconColor="#1890ff"/>
+                </graphic>
+            </Button>
+            <Button fx:id="btnDelete" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                <graphic>
+                    <org.kordamp.ikonli.javafx.FontIcon iconLiteral="fth-trash-2" iconSize="16" iconColor="#ff4d4f"/>
+                </graphic>
+            </Button>
+        </HBox>
     </VBox>
 </VBox>
