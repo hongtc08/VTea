@@ -5,6 +5,7 @@ import com.vtea.dto.UserSessionDTO;
 import com.vtea.main.MainApp;
 import com.vtea.service.AuthService;
 import com.vtea.utils.SessionManager;
+import com.vtea.utils.DialogHelper;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -37,7 +38,7 @@ public class LoginController {
 
         // Kiểm tra xem người dùng có để trống không
         if (username.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
+            DialogHelper.showInfo("Cảnh báo", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
             return; // Dừng lại, không chạy xuống dưới nữa
         }
 
@@ -52,14 +53,13 @@ public class LoginController {
             SessionManager.login(sessionInfo);
 
             // Hiện thông báo chào mừng
-            showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
+            DialogHelper.showInfo("Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
 
             System.out.println("Chuẩn bị chuyển sang màn hình chính...");
             MainApp.setRoot("main-layout");
         } catch (Exception e) {
             // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
-            showAlert(Alert.AlertType.ERROR, "Lỗi Đăng Nhập", e.getMessage());
-        }
+            DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());        }
     }
 
     // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code

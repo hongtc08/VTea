@@ -1,5 +1,6 @@
 package com.vtea.controller;
 
+import com.vtea.utils.DialogHelper;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
@@ -442,32 +443,21 @@ public class POSController {
 
     // ==================== ALERT HELPERS ====================
 
+    // ==================== ALERT HELPERS (ĐÃ NÂNG CẤP LÊN CUSTOM DIALOG) ====================
+
     private void showSuccessAlert(String title, String message) {
-        showAlert(Alert.AlertType.INFORMATION, title, message);
+        DialogHelper.showInfo(title, message);
     }
 
     private void showErrorAlert(String title, String message) {
-        showAlert(Alert.AlertType.ERROR, title, message);
+        DialogHelper.showInfo(title, message);
     }
 
     private void showInfoAlert(String title, String message) {
-        showAlert(Alert.AlertType.INFORMATION, title, message);
-    }
-
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogHelper.showInfo(title, message);
     }
 
     private boolean showConfirmDialog(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-
-        return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+        return DialogHelper.showConfirm(title, message);
     }
 }
