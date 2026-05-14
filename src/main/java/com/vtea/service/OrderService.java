@@ -129,4 +129,39 @@ public class OrderService {
             throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0!");
         }
     }
+
+    /*
+        Tăng số lượng của món trong giỏ hàng theo productId.
+        Nếu tìm thấy món thì cộng quantity lên 1 và cập nhật lại tổng tiền.
+    */
+    public void increaseQuantity(int productId) {
+        OrderDetailDTO item = findCartItemByProductId(productId);
+        if (item != null) {
+            item.setQuantity(item.getQuantity() + 1);
+            calculateTotal();
+        }
+    }
+
+    // Giảm số lượng của món trong giỏ hàng theo productId.
+    public void decreaseQuantity(int productId) {
+        OrderDetailDTO item = findCartItemByProductId(productId);
+        if (item != null && item.getQuantity() > 1) {
+            item.setQuantity(item.getQuantity() - 1);
+            calculateTotal();
+        }
+        else if (item != null && item.getQuantity() == 1) {
+            cartItems.remove(item);
+        }
+    }
+
+    /*
+        Khi người dùng bấm nút xóa món trong giỏ hàng.
+        Hoặc khi bấm - mà quantity của món đang là 1.
+    */
+    public void removeFromCart(int productId){
+        OrderDetailDTO item = findCartItemByProductId(productId);
+        if (item != null) {
+            cartItems.remove(item);
+        }
+    }
 }
