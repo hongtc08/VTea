@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="product-card" spacing="10" prefWidth="160" minWidth="160" maxWidth="160">
+
+    <StackPane styleClass="product-image-container" prefHeight="130" prefWidth="130">
+        <ImageView fx:id="imgProduct" fitWidth="80" fitHeight="80" preserveRatio="true"/>
+    </StackPane>
+
+    <VBox spacing="4" VBox.vgrow="ALWAYS">
+        <Label fx:id="lblProductName" styleClass="product-card-title" text="Tên món" prefHeight="45" alignment="TOP_LEFT" wrapText="true"/>
+
+        <Label fx:id="lblCategory" styleClass="product-card-category" text="Loại món"/>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <Label fx:id="lblPrice" styleClass="product-card-price" text="0đ"/>
+    </VBox>
+</VBox>
