@@ -10,8 +10,7 @@
 
     <!-- Khu vực chứa ảnh (Nền màu hồng nhạt) -->
     <StackPane styleClass="product-image-container" prefHeight="130" prefWidth="130">
-        <!-- Đặt ImageView ở đây, kích thước 70x70 để ảnh nằm gọn giữa nền -->
-        <ImageView fx:id="imgProduct" fitWidth="70" fitHeight="70" preserveRatio="true"/>
+        <ImageView fx:id="imgProduct" fitWidth="129" fitHeight="125" preserveRatio="true"/>
     </StackPane>
 
     <!-- Khu vực chứa thông tin Text -->
