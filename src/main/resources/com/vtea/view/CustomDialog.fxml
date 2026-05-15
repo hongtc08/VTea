@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<StackPane styleClass="dialog-overlay" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.vtea.controller.CustomDialogController">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <VBox styleClass="dialog-box" spacing="16" prefWidth="350" maxWidth="350">
+
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <StackPane style="-fx-background-color: #FDF1ED; -fx-background-radius: 50; -fx-padding: 8;">
+                <FontIcon fx:id="iconDialog" iconLiteral="fth-bell" iconSize="24" iconColor="#523628"/>
+            </StackPane>
+            <Label fx:id="lblTitle" text="Thông báo" styleClass="dialog-title"/>
+        </HBox>
+
+        <Label fx:id="lblMessage" text="Nội dung thông báo ở đây..." styleClass="dialog-message"/>
+
+        <HBox fx:id="buttonBox" alignment="CENTER_RIGHT" spacing="12">
+            <VBox.margin><Insets top="8"/></VBox.margin>
+            <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" onAction="#handleCancel"/>
+            <Button fx:id="btnConfirm" text="Xác nhận" styleClass="btn-dialog-confirm" onAction="#handleConfirm"/>
+        </HBox>
+    </VBox>
+</StackPane>
