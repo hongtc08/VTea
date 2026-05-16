@@ -41,11 +41,11 @@
 
             <Region HBox.hgrow="ALWAYS" />
 
-            <Button styleClass="qty-action-btn" style="-fx-border-color: #EAEAEA; -fx-border-radius: 8; -fx-padding: 8 12;">
-                <graphic>
-                    <FontIcon iconLiteral="fth-refresh-cw" iconSize="16" iconColor="#523628"/>
-                </graphic>
-            </Button>
+<!--            <Button styleClass="qty-action-btn" style="-fx-border-color: #EAEAEA; -fx-border-radius: 8; -fx-padding: 8 12;">-->
+<!--                <graphic>-->
+<!--                    <FontIcon iconLiteral="fth-refresh-cw" iconSize="16" iconColor="#523628"/>-->
+<!--                </graphic>-->
+<!--            </Button>-->
         </HBox>
 
         <ScrollPane hbarPolicy="NEVER" vbarPolicy="NEVER" fitToHeight="true"

@@ -7,6 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
+import com.vtea.utils.DialogHelper;
 
 import java.net.URL;
 
@@ -51,7 +52,7 @@ public class MainLayoutController {
 
             if (fileUrl == null) {
                 // Nếu đường dẫn bị sai, hiển thị thông báo ngay
-                showAlert("Lỗi Đường Dẫn", "Không tìm thấy file: " + fxml + ".fxml\nHãy kiểm tra lại thư mục /com/vtea/view/");
+                DialogHelper.showInfo("Lỗi Đường Dẫn", "Không tìm thấy file: " + fxml + ".fxml\nHãy kiểm tra lại thư mục /com/vtea/view/");
                 return;
             }
 
@@ -66,16 +67,6 @@ public class MainLayoutController {
         } catch (Exception e) {
             // Nếu file tìm thấy nhưng load bị lỗi (do sai Controller, thiếu ID...)
             e.printStackTrace();
-            showAlert("Lỗi Code Bên Trong File " + fxml, "Nguyên nhân: " + e.getMessage() + "\n(Vui lòng xem thêm chi tiết màu đỏ dưới console của IDE)");
-        }
-    }
-
-    // Hàm hiển thị Popup báo lỗi
-    private void showAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+            DialogHelper.showInfo("Lỗi Code Bên Trong File " + fxml, "Nguyên nhân: " + e.getMessage() + "\n(Vui lòng xem thêm chi tiết màu đỏ dưới console của IDE)");        }
     }
 }

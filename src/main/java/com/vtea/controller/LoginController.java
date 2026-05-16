@@ -5,6 +5,7 @@ import com.vtea.dto.UserSessionDTO;
 import com.vtea.main.MainApp;
 import com.vtea.service.AuthService;
 import com.vtea.utils.SessionManager;
+import com.vtea.utils.DialogHelper;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 
 public class LoginController {
 
@@ -23,7 +25,36 @@ public class LoginController {
     private PasswordField txtPassword; // Ô nhập mật khẩu (ẩn ký tự)
 
     @FXML
+    private TextField txtPasswordVisible; // Ô hiển thị mật khẩu
+
+    @FXML
+    private CheckBox showPasswordCheckbox; // Checkbox hiển thị mật khẩu
+
+    @FXML
     private Button btnLogin; // Nút đăng nhập
+
+    @FXML
+    public void initialize() {
+        // Đồng bộ dữ liệu giữa 2 ô nhập liệu
+        txtPasswordVisible.textProperty().bindBidirectional(txtPassword.textProperty());
+
+        // Bắt sự kiện check/uncheck
+        showPasswordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                // Hiện ô password text rõ, ẩn ô ẩn
+                txtPasswordVisible.setVisible(true);
+                txtPasswordVisible.setManaged(true);
+                txtPassword.setVisible(false);
+                txtPassword.setManaged(false);
+            } else {
+                // Ẩn ô password text rõ, hiện ô ẩn
+                txtPasswordVisible.setVisible(false);
+                txtPasswordVisible.setManaged(false);
+                txtPassword.setVisible(true);
+                txtPassword.setManaged(true);
+            }
+        });
+    }
 
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();
@@ -37,7 +68,7 @@ public class LoginController {
 
         // Kiểm tra xem người dùng có để trống không
         if (username.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
+            DialogHelper.showInfo("Cảnh báo", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
             return; // Dừng lại, không chạy xuống dưới nữa
         }
 
@@ -52,14 +83,13 @@ public class LoginController {
             SessionManager.login(sessionInfo);
 
             // Hiện thông báo chào mừng
-            showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
+            DialogHelper.showInfo("Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
 
             System.out.println("Chuẩn bị chuyển sang màn hình chính...");
             MainApp.setRoot("main-layout");
         } catch (Exception e) {
             // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
-            showAlert(Alert.AlertType.ERROR, "Lỗi Đăng Nhập", e.getMessage());
-        }
+            DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());        }
     }
 
     // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code
