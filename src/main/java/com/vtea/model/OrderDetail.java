@@ -1,6 +1,8 @@
 package com.vtea.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderDetail {
     private int detailId;
@@ -8,6 +10,7 @@ public class OrderDetail {
     private int productId;
     private int quantity;
     private BigDecimal unitPrice;
+    private List<Integer> toppingIds = new ArrayList<>();
 
     public OrderDetail() {}
 
@@ -37,4 +40,12 @@ public class OrderDetail {
 
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public List<Integer> getToppingIds() {
+        return toppingIds;
+    }
+
+    public void setToppingIds(List<Integer> toppingIds) {
+        this.toppingIds = toppingIds;
+    }
 }
