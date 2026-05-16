@@ -6,9 +6,9 @@ import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.utils.DBConnection;
 
+import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.Date;
 
 public class OrderDAO {
@@ -19,7 +19,7 @@ public class OrderDAO {
     public boolean checkoutOrder(Order order, List<OrderDetail> details){
         String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
-        String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?))";
+        String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
         Connection conn = null;
 
@@ -75,14 +75,20 @@ public class OrderDAO {
                     }
 
                     // 3. NẾU LY NƯỚC CÓ TOPPING -> INSERT VÀO BẢNG ORDER_DETAIL_TOPPING
-                    if (detail.getToppingIds() != null && !detail.getToppingIds().isEmpty()) {
-                        for (Integer toppingId : detail.getToppingIds()) {
+                    if (detail.getToppingQuantities() != null && !detail.getToppingQuantities().isEmpty()) {
+                        // Duyệt qua từng cặp (Topping ID - Số lượng) trong Map
+                        for (Map.Entry<Integer, Integer> entry : detail.getToppingQuantities().entrySet()) {
+                            int toppingId = entry.getKey();
+                            int toppingQty = entry.getValue();
+
                             psTopping.setInt(1, generatedDetailId);
                             psTopping.setInt(2, toppingId);
                             psTopping.setInt(3, toppingId); // Truyền lần 2 cho câu subquery lấy giá
+                            psTopping.setInt(4, toppingQty);
+
                             psTopping.addBatch();
                         }
-                        psTopping.executeBatch(); // Thực thi list topping của ly này
+                        psTopping.executeBatch();
                     }
                 }
             }
@@ -121,13 +127,22 @@ public class OrderDAO {
     //////////////// CÁC HÀM DÙNG CHO THỐNG KÊ ////////////////////
     /**
      * Lấy danh sách các món trong một hóa đơn cụ thể (Order Details).
+     * Đã bao gồm việc lấy tên Topping và cộng dồn giá Topping
      */
     public List<OrderDetailDTO> getOrderDetailsByOrderId(int orderId) {
         List<OrderDetailDTO> details = new ArrayList<>();
-        String query = "SELECT od.product_id, p.name AS product_name, od.quantity, od.unit_price " +
+
+        //// phần topping trả về chuỗi tên, số lượng, tổng tiền topping đó
+        //// vd: ["Trân châu đen (x3) +15000"]
+        String query = "SELECT od.detail_id, od.product_id, p.name AS product_name, od.quantity, od.unit_price, " +
+                "GROUP_CONCAT(CONCAT(t.name, ' (x', odt.quantity, ') +', (odt.unit_price * odt.quantity)) SEPARATOR ', ') AS topping_names, " +
+                "SUM(odt.unit_price * odt.quantity) AS total_topping_price " +
                 "FROM order_detail od " +
                 "JOIN product p ON od.product_id = p.product_id " +
-                "WHERE od.order_id = ?";
+                "LEFT JOIN order_detail_topping odt ON od.detail_id = odt.detail_id " +
+                "LEFT JOIN topping t ON odt.topping_id = t.topping_id " +
+                "WHERE od.order_id = ? " +
+                "GROUP BY od.detail_id, od.product_id, p.name, od.quantity, od.unit_price";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(query)) {
@@ -143,6 +158,18 @@ public class OrderDAO {
                     dto.setQuantity(rs.getInt("quantity"));
                     dto.setUnitPrice(rs.getBigDecimal("unit_price"));
 
+                    String toppingsString = rs.getString("topping_names");
+                    // TÁCH CHUỖI THÀNH LIST
+                    if (toppingsString != null && !toppingsString.trim().isEmpty()) {
+                        // Dùng hàm split() để cắt chuỗi tại dấu phẩy và khoảng trắng, sau đó chuyển thành List
+                        dto.setToppingList(new ArrayList<>(Arrays.asList(toppingsString.split(",\\s*"))));
+                    } else {
+                        // Nếu ly nước không có topping, trả về List rỗng để không bị lỗi Null
+                        dto.setToppingList(new ArrayList<>());
+                    }
+
+                    BigDecimal tPrice = rs.getBigDecimal("total_topping_price");
+                    dto.setToppingPrice(tPrice != null ? tPrice : BigDecimal.ZERO);
 
                     details.add(dto);
                 }
