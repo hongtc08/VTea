@@ -32,7 +32,7 @@ public class Topping {
         this.price = price;
     }
 
-    public boolean isAvailable() {
+    public boolean getAvailable() {
         return isAvailable;
     }
 
