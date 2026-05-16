@@ -9,18 +9,21 @@ public class Product {
     private BigDecimal price;
     private String imageUrl;
     private boolean isAvailable;
+    private boolean inStock;
 
     public Product() {
 
     }
 
-    public Product(int categoryId, String imageUrl, Boolean isAvailable, String name, BigDecimal price, int productId) {
+
+    public Product(int categoryId, String imageUrl, boolean isAvailable, String name, BigDecimal price, int productId, boolean inStock) {
         this.categoryId = categoryId;
         this.imageUrl = imageUrl;
         this.isAvailable = isAvailable;
         this.name = name;
         this.price = price;
         this.productId = productId;
+        this.inStock = inStock;
     }
 
     public int getCategoryId() {
@@ -47,6 +50,11 @@ public class Product {
         return productId;
     }
 
+    public boolean isInStock() {
+        return inStock;
+    }
+
+
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
@@ -69,5 +77,13 @@ public class Product {
 
     public void setProductId(int productId) {
         this.productId = productId;
+    }
+
+    public void setAvailable(boolean available) {
+        isAvailable = available;
+    }
+
+    public void setInStock(boolean inStock) {
+        this.inStock = inStock;
     }
 }
