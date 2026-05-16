@@ -19,6 +19,7 @@ public class OrderDAO {
     public boolean checkoutOrder(Order order, List<OrderDetail> details){
         String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+        String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?))";
 
         Connection conn = null;
 
@@ -34,7 +35,7 @@ public class OrderDAO {
                 psOrder.setInt(1, order.getUserId());
 
                 // Xử lý nếu khách hàng có ID hợp lệ (lớn hơn 0)
-                if (order.getCustomerId() > 0) {
+                if (order.getCustomerId() != null && order.getCustomerId() > 0) {
                     psOrder.setInt(2, order.getCustomerId());
                 } else {
                     psOrder.setNull(2, java.sql.Types.INTEGER);
@@ -56,17 +57,34 @@ public class OrderDAO {
                 }
             }
 
-            // 2. INSERT VÀO BẢNG ORDER_DETAIL
-            try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL)) {
+            // 2. INSERT VÀO BẢNG ORDER_DETAIL VÀ ORDER_DETAIL_TOPPING
+            try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)) {
+
                 for (OrderDetail detail : details) {
                     psDetail.setInt(1, generatedOrderId); // Dùng ID vừa lấy được ở trên
                     psDetail.setInt(2, detail.getProductId());
                     psDetail.setInt(3, detail.getQuantity());
                     psDetail.setBigDecimal(4, detail.getUnitPrice());
+                    psDetail.executeUpdate();
 
-                    psDetail.addBatch(); // Đưa vào hàng chờ để chạy 1 lần
+                    int generatedDetailId = -1;
+                    try (ResultSet rsDetail = psDetail.getGeneratedKeys()) {
+                        if (rsDetail.next())
+                            generatedDetailId = rsDetail.getInt(1);
+                    }
+
+                    // 3. NẾU LY NƯỚC CÓ TOPPING -> INSERT VÀO BẢNG ORDER_DETAIL_TOPPING
+                    if (detail.getToppingIds() != null && !detail.getToppingIds().isEmpty()) {
+                        for (Integer toppingId : detail.getToppingIds()) {
+                            psTopping.setInt(1, generatedDetailId);
+                            psTopping.setInt(2, toppingId);
+                            psTopping.setInt(3, toppingId); // Truyền lần 2 cho câu subquery lấy giá
+                            psTopping.addBatch();
+                        }
+                        psTopping.executeBatch(); // Thực thi list topping của ly này
+                    }
                 }
-                psDetail.executeBatch(); // Thực thi lưu toàn bộ chi tiết
             }
 
             // NẾU TẤT CẢ ĐỀU ỔN -> XÁC NHẬN LƯU
