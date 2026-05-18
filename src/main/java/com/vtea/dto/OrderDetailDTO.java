@@ -2,7 +2,8 @@ package com.vtea.dto;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+import java.util.HashMap;
+import java.util.Map;
 public class OrderDetailDTO {
 
     private int productId;
@@ -11,7 +12,7 @@ public class OrderDetailDTO {
     private BigDecimal unitPrice;
     private List<String> toppingList;
     private BigDecimal toppingPrice; // Tổng tiền các topping của ly nước này
-
+    private Map<Integer, Integer> toppingQuantities = new HashMap<>();
     public OrderDetailDTO() {
     }
 
@@ -77,4 +78,15 @@ public class OrderDetailDTO {
 
     public BigDecimal getToppingPrice() { return toppingPrice; }
     public void setToppingPrice(BigDecimal toppingPrice) { this.toppingPrice = toppingPrice; }
+    public Map<Integer, Integer> getToppingQuantities() {
+        return toppingQuantities;
+    }
+
+    public void setToppingQuantities(Map<Integer, Integer> toppingQuantities) {
+        if (toppingQuantities == null) {
+            this.toppingQuantities = new HashMap<>();
+        } else {
+            this.toppingQuantities = new HashMap<>(toppingQuantities);
+        }
+    }
 }
