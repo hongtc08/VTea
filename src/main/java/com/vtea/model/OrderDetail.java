@@ -1,6 +1,10 @@
 package com.vtea.model;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class OrderDetail {
     private int detailId;
@@ -8,6 +12,7 @@ public class OrderDetail {
     private int productId;
     private int quantity;
     private BigDecimal unitPrice;
+    private Map<Integer, Integer> toppingQuantities = new HashMap<>();
 
     public OrderDetail() {}
 
@@ -37,4 +42,9 @@ public class OrderDetail {
 
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public Map<Integer, Integer> getToppingQuantities() { return toppingQuantities; }
+    public void setToppingQuantities(Map<Integer, Integer> toppingQuantities) {
+        this.toppingQuantities = toppingQuantities;
+    }
 }

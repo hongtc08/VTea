@@ -1,6 +1,7 @@
 package com.vtea.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class OrderDetailDTO {
 
@@ -8,6 +9,8 @@ public class OrderDetailDTO {
     private String productName;
     private int quantity;
     private BigDecimal unitPrice;
+    private List<String> toppingList;
+    private BigDecimal toppingPrice; // Tổng tiền các topping của ly nước này
 
     public OrderDetailDTO() {
     }
@@ -24,7 +27,9 @@ public class OrderDetailDTO {
             return BigDecimal.ZERO;
         }
 
-        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+        BigDecimal currentToppingPrice = (toppingPrice != null) ? toppingPrice : BigDecimal.ZERO;
+        BigDecimal totalUnitPrice = unitPrice.add(currentToppingPrice);
+        return totalUnitPrice.multiply(BigDecimal.valueOf(quantity));
     }
 
     public int getProductId() {
@@ -66,4 +71,10 @@ public class OrderDetailDTO {
 
         this.unitPrice = unitPrice;
     }
+
+    public List<String> getToppingList() { return toppingList; }
+    public void setToppingList(List<String> toppingList) { this.toppingList = toppingList; }
+
+    public BigDecimal getToppingPrice() { return toppingPrice; }
+    public void setToppingPrice(BigDecimal toppingPrice) { this.toppingPrice = toppingPrice; }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 public class Order {
     private int orderId;
     private int userId;
-    private int customerId;
+    private Integer customerId;
     private BigDecimal totalAmount = BigDecimal.ZERO;
     private String status = "PENDING";
     private LocalDateTime createdAt;
@@ -40,8 +40,8 @@ public class Order {
     public List<OrderDetail> getDetails() { return details; }
     public void setDetails(List<OrderDetail> details) { this.details = details; }
 
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public Integer getCustomerId() { return customerId; }
+    public void setCustomerId(Integer customerId) { this.customerId = customerId; }
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
