@@ -1,18 +1,17 @@
-package com.vtea.model;
+package com.vtea.dto;
 
 import java.math.BigDecimal;
 
-public class Topping {
+public class ToppingDTO {
     private int toppingId;
     private String name;
     private BigDecimal price;
     private boolean isAvailable;
 
-    public Topping() {
+    public ToppingDTO() {
 
     }
-
-    public Topping(boolean isAvailable, String name, BigDecimal price, int toppingId) {
+    public ToppingDTO(boolean isAvailable, String name, BigDecimal price, int toppingId) {
         this.isAvailable = isAvailable;
         this.name = name;
         this.price = price;
