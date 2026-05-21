@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import java.net.URL?>
+<VBox spacing="20" styleClass="dialog-box" prefWidth="420" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Thông tin khách hàng" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnClose" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="24" iconColor="#999999"/></graphic>
+        </Button>
+    </HBox>
+    <Separator/>
+
+    <VBox spacing="6">
+        <Label text="Số điện thoại" styleClass="form-label"/>
+        <HBox spacing="10">
+            <TextField fx:id="txtPhone" promptText="Nhập số điện thoại..." styleClass="form-input-field" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnCheck" text="Kiểm tra" styleClass="btn-check" prefHeight="44"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="newCustomerBox" spacing="12" visible="false" managed="false">
+        <VBox spacing="6">
+            <Label text="Tên khách hàng" styleClass="form-label"/>
+            <TextField fx:id="txtName" promptText="Nhập tên khách hàng..." styleClass="form-input-field"/>
+        </VBox>
+        <Label fx:id="lblNewPointPreview" text="Khách hàng mới sẽ nhận 55 điểm" style="-fx-text-fill: #666666;"/>
+    </VBox>
+
+    <VBox fx:id="existingCustomerBox" spacing="12" styleClass="customer-info-card" visible="true" managed="true">
+
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <StackPane styleClass="avatar-circle">
+                <Label fx:id="lblAvatarInitials" text="b" styleClass="avatar-text"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT" spacing="2">
+                <Label fx:id="lblExistingName" text="ba" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                <Label fx:id="lblExistingPhone" text="333" style="-fx-text-fill: #666666;"/>
+            </VBox>
+        </HBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="6">
+            <FontIcon iconLiteral="fth-star" iconSize="16" iconColor="#F59E0B"/>
+            <Label fx:id="lblCurrentPoints" text="55 điểm" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="lblEquivalentValue" text="(55.000đ)" style="-fx-text-fill: #888888;"/>
+        </HBox>
+
+        <fx:define>
+            <ToggleGroup fx:id="pointActionGroup"/>
+        </fx:define>
+
+        <VBox spacing="8">
+            <HBox styleClass="point-option-card" alignment="CENTER_LEFT" spacing="10">
+                <RadioButton fx:id="radioEarn" selected="true" toggleGroup="$pointActionGroup"/>
+                <VBox>
+                    <Label text="Tích điểm" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblEarnPreview" text="Nhận thêm 55 điểm" style="-fx-text-fill: #666666; -fx-font-size: 12px;"/>
+                </VBox>
+            </HBox>
+
+            <HBox styleClass="point-option-card" alignment="CENTER_LEFT" spacing="10">
+                <RadioButton fx:id="radioUse" toggleGroup="$pointActionGroup"/>
+                <VBox>
+                    <Label text="Dùng điểm" style="-fx-font-weight: bold;"/>
+                    <Label fx:id="lblUsePreview" text="Giảm 0 điểm (-0đ)" style="-fx-text-fill: #666666; -fx-font-size: 12px;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <VBox spacing="10" styleClass="summary-box">
+        <HBox>
+            <Label text="Tạm tính:" style="-fx-text-fill: #666666;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblSubTotal" text="55.000đ" style="-fx-text-fill: #666666;"/>
+        </HBox>
+        <HBox>
+            <Label text="VAT (10%):" style="-fx-text-fill: #666666;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblVat" text="5.500đ" style="-fx-text-fill: #666666;"/>
+        </HBox>
+        <Separator style="-fx-padding: 4 0;"/>
+        <HBox alignment="CENTER_LEFT">
+            <Label text="Tổng cộng:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblTotal" text="60.500đ" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #78350F;"/>
+        </HBox>
+    </VBox>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" prefWidth="120" prefHeight="44"/>
+        <Button fx:id="btnSubmit" text="Xác nhận" styleClass="btn-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefHeight="44"/>
+    </HBox>
+</VBox>

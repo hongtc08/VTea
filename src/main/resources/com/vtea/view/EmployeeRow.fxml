@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="list-item-row" alignment="CENTER_LEFT" spacing="16">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="280">
+        <StackPane styleClass="avatar-circle">
+            <Label fx:id="lblAvatarText" text="N" styleClass="avatar-text"/>
+        </StackPane>
+        <VBox alignment="CENTER_LEFT" spacing="2">
+            <Label fx:id="lblName" text="Nguyễn Văn An" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+            <Label fx:id="lblEmail" text="an@vtea.vn" style="-fx-text-fill: #888888; -fx-font-size: 12px;"/>
+        </VBox>
+    </HBox>
+
+    <HBox prefWidth="100" alignment="CENTER_LEFT">
+        <StackPane fx:id="badgeRole" styleClass="badge-neutral">
+            <Label fx:id="lblRole" text="Quản lý"/>
+        </StackPane>
+    </HBox>
+
+    <HBox alignment="CENTER_LEFT" spacing="6" prefWidth="160">
+        <FontIcon iconLiteral="fth-phone" iconSize="14" iconColor="#666666"/>
+        <Label fx:id="lblPhone" text="0901234567" style="-fx-text-fill: #444444;"/>
+    </HBox>
+
+    <Label fx:id="lblSalary" text="15.000.000đ" style="-fx-font-weight: bold; -fx-text-fill: #523628;" prefWidth="120"/>
+
+    <Label fx:id="lblStartDate" text="2024-01-15" style="-fx-text-fill: #666666;" prefWidth="100" wrapText="true"/>
+
+    <HBox prefWidth="120" alignment="CENTER_LEFT">
+        <StackPane fx:id="badgeStatus" styleClass="badge-success">
+            <Label fx:id="lblStatus" text="Đang làm việc"/>
+        </StackPane>
+    </HBox>
+
+    <HBox prefWidth="80" alignment="CENTER" spacing="0">
+        <Button fx:id="btnEdit" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+            <graphic>
+                <FontIcon iconLiteral="fth-edit-2" iconSize="18" iconColor="#1890ff"/>
+            </graphic>
+        </Button>
+        <Button fx:id="btnDelete" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+            <graphic>
+                <FontIcon iconLiteral="fth-trash-2" iconSize="18" iconColor="#D93025"/>
+            </graphic>
+        </Button>
+    </HBox>
+</HBox>

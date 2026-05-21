@@ -39,6 +39,12 @@ public class MainLayoutController {
     }
 
     @FXML
+    public void handleInventory(ActionEvent actionEvent) {loadView("inventory");}
+
+    @FXML
+    public void handleEmployee(ActionEvent actionEvent) {loadView("employee");}
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         // Trở về màn hình đăng nhập
         MainApp.setRoot("login");
@@ -69,4 +75,5 @@ public class MainLayoutController {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi Code Bên Trong File " + fxml, "Nguyên nhân: " + e.getMessage() + "\n(Vui lòng xem thêm chi tiết màu đỏ dưới console của IDE)");        }
     }
+
 }

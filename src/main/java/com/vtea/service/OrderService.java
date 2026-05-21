@@ -248,6 +248,71 @@ public class OrderService {
         return null;
     }
 
+    // Public helper: lấy tất cả topping đang bán (dùng cho UI)
+    public java.util.List<Topping> getAllActiveToppings() {
+        return toppingDAO.getAllActiveToppings();
+    }
+
+    // Public helper: tìm topping đang bán theo id
+    public Topping findActiveToppingById(int toppingId) {
+        List<Topping> list = toppingDAO.getAllActiveToppings();
+        for (Topping t : list) {
+            if (t.getToppingId() == toppingId) return t;
+        }
+        return null;
+    }
+
+    // Thêm 1 topping (toppingId) cho món đã có trong giỏ (baseProductId)
+    public void addToppingToItem(int baseProductId, int toppingId) {
+        OrderDetailDTO item = findCartItemByProductId(baseProductId);
+        if (item == null) {
+            throw new IllegalArgumentException("Không tìm thấy món trong giỏ: " + baseProductId);
+        }
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+        int prev = map.getOrDefault(toppingId, 0);
+        map.put(toppingId, prev + 1);
+        item.setToppingQuantities(map);
+
+        BigDecimal toppingPrice = calculateToppingPrice(map);
+        item.setToppingPrice(toppingPrice);
+        calculateTotal();
+    }
+
+    // Thay đổi số lượng topping (delta có thể là +1 hoặc -1), nếu kết quả <=0 thì xóa topping
+    public void changeToppingQuantity(int baseProductId, int toppingId, int delta) {
+        OrderDetailDTO item = findCartItemByProductId(baseProductId);
+        if (item == null) return;
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+        int prev = map.getOrDefault(toppingId, 0);
+        int now = prev + delta;
+        if (now <= 0) {
+            map.remove(toppingId);
+        } else {
+            map.put(toppingId, now);
+        }
+
+        item.setToppingQuantities(map);
+        BigDecimal toppingPrice = calculateToppingPrice(map);
+        item.setToppingPrice(toppingPrice);
+        calculateTotal();
+    }
+
+    public void removeToppingFromItem(int baseProductId, int toppingId) {
+        OrderDetailDTO item = findCartItemByProductId(baseProductId);
+        if (item == null) return;
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+        if (map.containsKey(toppingId)) {
+            map.remove(toppingId);
+            item.setToppingQuantities(map);
+            BigDecimal toppingPrice = calculateToppingPrice(map);
+            item.setToppingPrice(toppingPrice);
+            calculateTotal();
+        }
+    }
+
     // ==================== CALCULATE / VALIDATE METHODS ====================
 
     private void calculateTotal() {

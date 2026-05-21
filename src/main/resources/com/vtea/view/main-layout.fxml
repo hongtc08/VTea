@@ -108,6 +108,26 @@
                 </graphic>
             </Button>
 
+            <Button fx:id="btnInventory"
+                    text="Kho"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#handleInventory">
+                <graphic>
+                    <FontIcon iconLiteral="fth-package" styleClass="sidebar-icon" iconSize="18"/>
+                </graphic>
+            </Button>
+
+            <Button fx:id="btnEmployee"
+                    text="Nhân viên"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#handleEmployee">
+                <graphic>
+                    <FontIcon iconLiteral="fth-users" styleClass="sidebar-icon" iconSize="18"/>
+                </graphic>
+            </Button>
+
         </VBox>
     </left>
 
