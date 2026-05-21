@@ -39,6 +39,33 @@ public class ToppingDAO {
         return toppingList;
     }
 
+    /**Lấy Topping theo ID (Dùng cho việc tính tiền)
+     *
+     */
+    public Topping getToppingById(int toppingId) {
+        String query = "SELECT * FROM topping WHERE topping_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, toppingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Topping topping = new Topping();
+                    topping.setToppingId(rs.getInt("topping_id"));
+                    topping.setName(rs.getString("name"));
+                    topping.setPrice(rs.getBigDecimal("price"));
+                    topping.setAvailable(rs.getBoolean("is_available"));
+                    return topping;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy Topping theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Dành cho màn hình Quản lý (Admin):
      * Lấy TOÀN BỘ danh sách topping (kể cả những món đã tạm ngưng)
