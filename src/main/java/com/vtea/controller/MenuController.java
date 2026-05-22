@@ -17,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -32,17 +33,8 @@ public class MenuController {
 
     // ===== ĐỊNH NGHĨA ID DANH MỤC CỐ ĐỊNH (Khớp với Database và POSController) =====
     private static final int CATEGORY_ALL = -1;
-    private static final int CATEGORY_CAFE = 1;
-    private static final int CATEGORY_TRA_SUA = 2;
-    private static final int CATEGORY_TRA = 3;
-    private static final int CATEGORY_DAC_BIET = 4;
-
     @FXML private TextField searchField;
-    @FXML private Button btnAll;
-    @FXML private Button btnTraSua;
-    @FXML private Button btnCafe;
-    @FXML private Button btnTra;
-    @FXML private Button btnDacBiet;
+    @FXML private HBox categoryBar;
     @FXML private FlowPane menuGrid;
 
     private ProductService productService = new ProductService();
@@ -64,6 +56,8 @@ public class MenuController {
         try {
             allCategories = categoryService.getAllActiveCategories();
             allProducts = productService.getAllActiveProducts();
+            currentCategoryIdFilter = CATEGORY_ALL;
+            setupCategoryButtons();
 
             for (ProductDTO product : allProducts) {
                 CategoryDTO cat = allCategories.stream()
@@ -81,6 +75,39 @@ public class MenuController {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi tải dữ liệu", "Không thể tải danh sách sản phẩm: " + e.getMessage());
         }
+    }
+
+    private void setupCategoryButtons() {
+        if (categoryBar == null) {
+            return;
+        }
+
+        categoryBar.getChildren().clear();
+
+        Button allButton = createCategoryButton("T\u1ea5t c\u1ea3");
+        allButton.getStyleClass().add("category-btn-active");
+        allButton.setOnAction(event -> {
+            currentCategoryIdFilter = CATEGORY_ALL;
+            updateActiveCategoryButton(allButton);
+            filterProducts();
+        });
+        categoryBar.getChildren().add(allButton);
+
+        for (CategoryDTO category : allCategories) {
+            Button categoryButton = createCategoryButton(category.getName());
+            categoryButton.setOnAction(event -> {
+                currentCategoryIdFilter = category.getCategoryId();
+                updateActiveCategoryButton(categoryButton);
+                filterProducts();
+            });
+            categoryBar.getChildren().add(categoryButton);
+        }
+    }
+
+    private Button createCategoryButton(String text) {
+        Button button = new Button(text);
+        button.getStyleClass().add("category-btn");
+        return button;
     }
 
     private void setupSearch() {
@@ -211,43 +238,16 @@ public class MenuController {
     }
 
     private void updateActiveCategoryButton(Button activeButton) {
-        btnAll.getStyleClass().remove("category-btn-active");
-        btnTraSua.getStyleClass().remove("category-btn-active");
-        btnCafe.getStyleClass().remove("category-btn-active");
-        btnTra.getStyleClass().remove("category-btn-active");
-        btnDacBiet.getStyleClass().remove("category-btn-active");
+        if (categoryBar != null) {
+            for (javafx.scene.Node node : categoryBar.getChildren()) {
+                if (node instanceof Button button) {
+                    button.getStyleClass().remove("category-btn-active");
+                }
+            }
+        }
 
         activeButton.getStyleClass().add("category-btn-active");
     }
 
     // ===== SỰ KIỆN CLICK CÁC NÚT BỘ LỌC =====
-    public void filterAll(ActionEvent actionEvent) {
-        currentCategoryIdFilter = CATEGORY_ALL;
-        updateActiveCategoryButton(btnAll);
-        filterProducts();
-    }
-
-    public void filterTraSua(ActionEvent actionEvent) {
-        currentCategoryIdFilter = CATEGORY_TRA_SUA;
-        updateActiveCategoryButton(btnTraSua);
-        filterProducts();
-    }
-
-    public void filterCafe(ActionEvent actionEvent) {
-        currentCategoryIdFilter = CATEGORY_CAFE;
-        updateActiveCategoryButton(btnCafe);
-        filterProducts();
-    }
-
-    public void filterTra(ActionEvent actionEvent) {
-        currentCategoryIdFilter = CATEGORY_TRA;
-        updateActiveCategoryButton(btnTra);
-        filterProducts();
-    }
-
-    public void filterDacBiet(ActionEvent actionEvent) {
-        currentCategoryIdFilter = CATEGORY_DAC_BIET;
-        updateActiveCategoryButton(btnDacBiet);
-        filterProducts();
-    }
 }

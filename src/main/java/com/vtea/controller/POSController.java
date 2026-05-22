@@ -1,20 +1,21 @@
 package com.vtea.controller;
 
 import com.vtea.utils.DialogHelper;
+import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
+import com.vtea.service.CategoryService;
 import com.vtea.service.OrderService;
 import com.vtea.service.ProductService;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -27,12 +28,8 @@ import java.util.List;
 
 public class POSController {
 
-    private static final int CATEGORY_CAFE = 1;
-    private static final int CATEGORY_TRA_SUA = 2;
-    private static final int CATEGORY_TRA = 3;
-    private static final int CATEGORY_DAC_BIET = 4;
-
     private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
     private final OrderService orderService = new OrderService();
 
     // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager
@@ -40,14 +37,11 @@ public class POSController {
 
     @FXML private FlowPane productGrid;
 
-    @FXML private Button btnAll;
-    @FXML private Button btnTraSua;
-    @FXML private Button btnCafe;
-    @FXML private Button btnTra;
-    @FXML private Button btnDacBiet;
+    @FXML private HBox categoryBar;
 
     @FXML private VBox cartItemsBox;
     @FXML private VBox cartEmptyLabel;
+    @FXML private Label lblScreenTitle;
     @FXML private Label subtotalLabel;
     @FXML private Label taxLabel;
     @FXML private Label lblTotalAmount;
@@ -58,6 +52,7 @@ public class POSController {
     @FXML
     public void initialize() {
         setupPaymentMethods();
+        setupCategoryButtons();
         loadProductsFromDatabase();
         updateCartDisplay();
         updateTotalAmount();
@@ -74,6 +69,47 @@ public class POSController {
 
     // ==================== PRODUCT EVENTS ====================
 
+    private void setupCategoryButtons() {
+        if (categoryBar == null) {
+            return;
+        }
+
+        categoryBar.getChildren().clear();
+
+        Button allButton = createCategoryButton("T\u1ea5t c\u1ea3");
+        allButton.getStyleClass().add("category-btn-active");
+        allButton.setOnAction(event -> {
+            setActiveButton(allButton);
+            loadProductsFromDatabase();
+        });
+        categoryBar.getChildren().add(allButton);
+
+        try {
+            List<CategoryDTO> categories = categoryService.getAllActiveCategories();
+            for (CategoryDTO category : categories) {
+                Button categoryButton = createCategoryButton(category.getName());
+                categoryButton.setOnAction(event -> {
+                    setActiveButton(categoryButton);
+                    filterByCategory(category.getCategoryId());
+                });
+                categoryBar.getChildren().add(categoryButton);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("L\u1ed7i", "Kh\u00f4ng th\u1ec3 t\u1ea3i danh m\u1ee5c s\u1ea3n ph\u1ea9m!");
+        }
+    }
+
+    // Topping mode state
+    private boolean toppingMode = false;
+    private int toppingTargetProductId = -1; // productId của OrderDetail đang được thêm topping
+
+    private Button createCategoryButton(String text) {
+        Button button = new Button(text);
+        button.getStyleClass().add("category-btn");
+        return button;
+    }
+
     public void handleAddToCart(int productId, String productName, BigDecimal price) {
         try {
             orderService.addToCart(productId, productName, price, 1);
@@ -87,36 +123,6 @@ public class POSController {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng!");
         }
-    }
-
-    @FXML
-    private void filterAll(ActionEvent event) {
-        setActiveButton(btnAll);
-        loadProductsFromDatabase();
-    }
-
-    @FXML
-    private void filterTraSua(ActionEvent event) {
-        setActiveButton(btnTraSua);
-        filterByCategory(CATEGORY_TRA_SUA);
-    }
-
-    @FXML
-    private void filterCafe(ActionEvent event) {
-        setActiveButton(btnCafe);
-        filterByCategory(CATEGORY_CAFE);
-    }
-
-    @FXML
-    private void filterTra(ActionEvent event) {
-        setActiveButton(btnTra);
-        filterByCategory(CATEGORY_TRA);
-    }
-
-    @FXML
-    private void filterDacBiet(ActionEvent event) {
-        setActiveButton(btnDacBiet);
-        filterByCategory(CATEGORY_DAC_BIET);
     }
 
     // ==================== CART EVENTS ====================
@@ -246,11 +252,25 @@ public class POSController {
                 lblPrice.setText(formatPrice(product.getPrice()));
             }
 
-            cardNode.setOnMouseClicked(event -> handleAddToCart(
-                    product.getProductId(),
-                    product.getName(),
-                    product.getPrice()
-            ));
+            cardNode.setOnMouseClicked(event -> {
+                if (toppingMode) {
+                    // Khi đang ở chế độ thêm topping: nhấn lên 1 sản phẩm sẽ thêm nó làm topping cho item được chọn
+                    try {
+                        orderService.addToppingToItem(toppingTargetProductId, product.getProductId());
+                        refreshCart();
+                        showSuccessAlert("Thêm topping", product.getName() + " ✓");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showErrorAlert("Lỗi", "Không thể thêm topping: " + e.getMessage());
+                    }
+                } else {
+                    handleAddToCart(
+                            product.getProductId(),
+                            product.getName(),
+                            product.getPrice()
+                    );
+                }
+            });
 
             cardNode.setCursor(javafx.scene.Cursor.HAND);
 
@@ -340,6 +360,7 @@ public class POSController {
         Label lblCartName = (Label) cartNode.lookup("#lblCartName");
         Label lblCartPrice = (Label) cartNode.lookup("#lblCartPrice");
         Label lblQty = (Label) cartNode.lookup("#lblQty");
+        Label lblSubTotal = (Label) cartNode.lookup("#lblSubTotal");
 
         if (lblCartName != null) {
             lblCartName.setText(item.getProductName());
@@ -350,7 +371,55 @@ public class POSController {
         }
 
         if (lblCartPrice != null) {
-            lblCartPrice.setText(formatPrice(item.getSubTotal()));
+            // đơn giá
+            lblCartPrice.setText(formatPrice(item.getUnitPrice()));
+        }
+
+        if (lblSubTotal != null) {
+            lblSubTotal.setText(formatPrice(item.getSubTotal()));
+        }
+
+        // Hiển thị danh sách topping nếu có
+        VBox toppingsContainer = (VBox) cartNode.lookup("#toppingsContainer");
+        if (toppingsContainer != null) {
+            toppingsContainer.getChildren().clear();
+            if (item.getToppingQuantities() != null && !item.getToppingQuantities().isEmpty()) {
+                toppingsContainer.setVisible(true);
+                toppingsContainer.setManaged(true);
+
+                // Lấy thông tin topping từ service để hiển thị tên và giá
+                for (var entry : item.getToppingQuantities().entrySet()) {
+                    int toppingId = entry.getKey();
+                    int qty = entry.getValue();
+
+                    var topping = orderService.findActiveToppingById(toppingId);
+                    String toppingLabel = (topping != null) ? topping.getName() + " (x" + qty + ")" : "Topping#" + toppingId + " (x" + qty + ")";
+
+                    HBox row = new HBox();
+                    row.setSpacing(8);
+                    Label lbl = new Label(toppingLabel);
+                    lbl.getStyleClass().add("cart-item-topping");
+
+                    // Buttons: - / + / remove
+                    Button btnMinusT = new Button("-");
+                    Button btnPlusT = new Button("+");
+                    Button btnRemoveT = new Button("x");
+
+                    btnMinusT.getStyleClass().add("qty-btn");
+                    btnPlusT.getStyleClass().add("qty-btn");
+                    btnRemoveT.getStyleClass().add("btn-remove-topping");
+
+                    row.getChildren().addAll(lbl, btnMinusT, btnPlusT, btnRemoveT);
+
+                    // attach handlers (will be bound in bindCartItemEvents)
+                    row.setUserData(toppingId);
+
+                    toppingsContainer.getChildren().add(row);
+                }
+            } else {
+                toppingsContainer.setVisible(false);
+                toppingsContainer.setManaged(false);
+            }
         }
     }
 
@@ -386,6 +455,104 @@ public class POSController {
                 refreshCart();
             });
         }
+
+        // Nút bật/tắt chế độ thêm topping cho món này
+        Button btnTopping = (Button) cartNode.lookup("#btnTopping");
+        if (btnTopping != null) {
+
+            // 1. Cập nhật trạng thái hiển thị của nút ngay khi load item
+            if (toppingMode && toppingTargetProductId == item.getProductId()) {
+                btnTopping.setText("Đang thêm topping");
+                if (!btnTopping.getStyleClass().contains("btn-topping-active")) {
+                    btnTopping.getStyleClass().add("btn-topping-active");
+                }
+            } else {
+                btnTopping.setText("Thêm topping");
+                btnTopping.getStyleClass().remove("btn-topping-active");
+            }
+
+            // 2. Xử lý logic khi click
+            btnTopping.setOnAction(event -> {
+                if (!toppingMode || toppingTargetProductId != item.getProductId()) {
+                    // Bật chế độ thêm topping
+                    toppingMode = true;
+                    toppingTargetProductId = item.getProductId();
+                    if (lblScreenTitle != null) lblScreenTitle.setText("Thêm topping");
+                    showOnlyToppings();
+                } else {
+                    // Tắt chế độ
+                    toppingMode = false;
+                    toppingTargetProductId = -1;
+                    if (lblScreenTitle != null) lblScreenTitle.setText("Bán hàng (POS)");
+                    loadProductsFromDatabase();
+                }
+
+                // Cập nhật lại toàn bộ giao diện giỏ hàng để đổi trạng thái UI của nút
+                refreshCart();
+            });
+        }
+
+        // Các nút + - / x trong danh sách topping (tạo động)
+        VBox toppingsContainer = (VBox) cartNode.lookup("#toppingsContainer");
+        if (toppingsContainer != null) {
+            for (javafx.scene.Node node : toppingsContainer.getChildren()) {
+                if (node instanceof HBox hrow) {
+                    Object ud = hrow.getUserData();
+                    if (ud instanceof Integer toppingId) {
+                        Button btnMinusT = (Button) hrow.getChildren().get(1);
+                        Button btnPlusT = (Button) hrow.getChildren().get(2);
+                        Button btnRemoveT = (Button) hrow.getChildren().get(3);
+
+                        btnMinusT.setOnAction(evt -> {
+                            orderService.changeToppingQuantity(item.getProductId(), toppingId, -1);
+                            refreshCart();
+                        });
+
+                        btnPlusT.setOnAction(evt -> {
+                            orderService.changeToppingQuantity(item.getProductId(), toppingId, 1);
+                            refreshCart();
+                        });
+
+                        btnRemoveT.setOnAction(evt -> {
+                            orderService.removeToppingFromItem(item.getProductId(), toppingId);
+                            refreshCart();
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    private void showOnlyToppings() {
+        try {
+            // Lấy các topping hiện có (OrderService -> ToppingDAO)
+            var all = productService.getAllActiveProducts();
+            List<ProductDTO> toppings = new java.util.ArrayList<>();
+            for (ProductDTO p : all) {
+                if (p.getCategoryName() != null && p.getCategoryName().toLowerCase().contains("topping")) {
+                    toppings.add(p);
+                }
+            }
+
+            // Nếu không tìm thấy theo danh mục, fallback: lấy từ OrderService.getAllActiveToppings
+            if (toppings.isEmpty()) {
+                var tList = orderService.getAllActiveToppings();
+                // Convert Topping -> ProductDTO-like minimal objects for display
+                for (var t : tList) {
+                    ProductDTO pd = new ProductDTO();
+                    pd.setProductId(t.getToppingId());
+                    pd.setName(t.getName());
+                    pd.setPrice(t.getPrice());
+                    pd.setCategoryName("Topping");
+                    toppings.add(pd);
+                }
+            }
+
+            displayProducts(toppings);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Lỗi", "Không thể tải danh sách topping!");
+        }
     }
 
     private void showEmptyCartMessage() {
@@ -419,17 +586,11 @@ public class POSController {
     // ==================== UI HELPERS ====================
 
     private void setActiveButton(Button clickedButton) {
-        Button[] allButtons = {
-                btnAll,
-                btnTraSua,
-                btnCafe,
-                btnTra,
-                btnDacBiet
-        };
-
-        for (Button button : allButtons) {
-            if (button != null) {
-                button.getStyleClass().remove("category-btn-active");
+        if (categoryBar != null) {
+            for (javafx.scene.Node node : categoryBar.getChildren()) {
+                if (node instanceof Button button) {
+                    button.getStyleClass().remove("category-btn-active");
+                }
             }
         }
 
@@ -437,6 +598,7 @@ public class POSController {
             clickedButton.getStyleClass().add("category-btn-active");
         }
     }
+    
 
     private String formatPrice(BigDecimal price) {
         if (price == null) {

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox spacing="20" styleClass="dialog-box" prefWidth="480" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.EmployeeFormController">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblFormTitle" text="Thêm nhân viên mới" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnClose" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="24" iconColor="#999999"/></graphic>
+        </Button>
+    </HBox>
+    <Separator/>
+
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" prefHeight="450">
+        <VBox spacing="16">
+            <VBox spacing="6">
+                <Label text="Họ và tên" styleClass="form-label"/>
+                <TextField fx:id="txtName" promptText="Nhập họ và tên..." styleClass="form-input-field"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Vị trí" styleClass="form-label"/>
+                <ComboBox fx:id="cbRole" promptText="Chọn vị trí" maxWidth="Infinity" styleClass="form-input-field"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Số điện thoại" styleClass="form-label"/>
+                <TextField fx:id="txtPhone" promptText="Ví dụ: 0901234567" styleClass="form-input-field"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Email" styleClass="form-label"/>
+                <TextField fx:id="txtEmail" promptText="email@vtea.vn" styleClass="form-input-field"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label text="Lương (đ)" styleClass="form-label"/>
+                <TextField fx:id="txtSalary" promptText="Ví dụ: 8000000" styleClass="form-input-field"/>
+            </VBox>
+
+            <HBox spacing="16">
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Ngày vào làm" styleClass="form-label"/>
+                    <DatePicker fx:id="dpStartDate" maxWidth="Infinity" styleClass="form-input-field"/>
+                </VBox>
+                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="Trạng thái" styleClass="form-label"/>
+                    <ComboBox fx:id="cbStatus" maxWidth="Infinity" styleClass="form-input-field"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </ScrollPane>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <VBox.margin><Insets top="10"/></VBox.margin>
+        <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" prefWidth="120" prefHeight="40"/>
+        <Button fx:id="btnSubmit" text="Thêm nhân viên" styleClass="btn-primary" prefWidth="160" prefHeight="40"/>
+    </HBox>
+</VBox>

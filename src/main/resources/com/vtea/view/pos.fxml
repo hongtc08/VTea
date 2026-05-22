@@ -23,7 +23,7 @@
 
         <!-- Header -->
         <HBox alignment="CENTER_LEFT" spacing="12">
-            <Label text="Bán hàng (POS)" styleClass="screen-title"/>
+            <Label fx:id="lblScreenTitle" text="Bán hàng (POS)" styleClass="screen-title"/>
             <Region HBox.hgrow="ALWAYS"/>
         </HBox>
 
@@ -33,18 +33,12 @@
                    styleClass="input-field"/>
 
         <!-- Category Filter -->
-        <ScrollPane hbarPolicy="NEVER" vbarPolicy="NEVER" fitToHeight="true"
+        <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" fitToHeight="true"
                     minHeight="60" prefHeight="60"
                     styleClass="category-scroll" style="-fx-background-color: transparent; -fx-background: transparent;">
             <HBox fx:id="categoryBar" spacing="10" alignment="CENTER_LEFT">
                 <padding><Insets top="10" bottom="10"/></padding>
 
-                <!-- Thêm fx:id và onAction cho từng nút -->
-                <Button fx:id="btnAll" text="Tất cả" styleClass="category-btn, category-btn-active" onAction="#filterAll"/>
-                <Button fx:id="btnTraSua" text="Trà sữa" styleClass="category-btn" onAction="#filterTraSua"/>
-                <Button fx:id="btnCafe" text="Cafe" styleClass="category-btn" onAction="#filterCafe"/>
-                <Button fx:id="btnTra" text="Trà" styleClass="category-btn" onAction="#filterTra"/>
-                <Button fx:id="btnDacBiet" text="Đặc biệt" styleClass="category-btn" onAction="#filterDacBiet"/>
             </HBox>
         </ScrollPane>
 

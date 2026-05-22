@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox spacing="20" styleClass="dialog-box" prefWidth="450" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.InventoryFormController">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="lblFormTitle" text="Thêm nguyên liệu mới" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnClose" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="24" iconColor="#999999"/></graphic>
+        </Button>
+    </HBox>
+    <Separator/>
+
+    <VBox spacing="16">
+        <VBox spacing="6">
+            <Label text="Tên nguyên liệu" styleClass="form-label"/>
+            <TextField fx:id="txtName" promptText="Nhập tên nguyên liệu..." styleClass="form-input-field"/>
+        </VBox>
+
+        <HBox spacing="16">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Số lượng" styleClass="form-label"/>
+                <TextField fx:id="txtQuantity" promptText="0" styleClass="form-input-field"/>
+            </VBox>
+            <VBox spacing="6" prefWidth="120">
+                <Label text="Đơn vị" styleClass="form-label"/>
+                <ComboBox fx:id="cbUnit" maxWidth="Infinity" styleClass="form-input-field"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="6">
+            <Label text="Tồn kho tối thiểu" styleClass="form-label"/>
+            <TextField fx:id="txtMinStock" promptText="0" styleClass="form-input-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Danh mục" styleClass="form-label"/>
+            <ComboBox fx:id="cbCategory" promptText="Chọn danh mục" maxWidth="Infinity" styleClass="form-input-field"/>
+        </VBox>
+    </VBox>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <VBox.margin><Insets top="10"/></VBox.margin>
+        <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" prefWidth="120" prefHeight="40"/>
+        <Button fx:id="btnSubmit" text="Thêm mục" styleClass="btn-primary" prefWidth="160" prefHeight="40"/>
+    </HBox>
+</VBox>

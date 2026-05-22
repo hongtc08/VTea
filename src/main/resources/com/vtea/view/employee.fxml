@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+
+<VBox spacing="20" styleClass="screen-root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.EmployeeController">
+    <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Quản lý nhân viên" styleClass="screen-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="+ Thêm nhân viên" styleClass="btn-primary" onAction="#handleAddEmployee"/>
+    </HBox>
+
+    <TextField fx:id="searchField" promptText="🔍 Tìm kiếm nhân viên (tên, email, SĐT)..." styleClass="input-field"/>
+
+    <HBox spacing="10">
+        <Button text="Tất cả" styleClass="category-btn, category-btn-active"/>
+        <Button text="Quản lý" styleClass="category-btn"/>
+        <Button text="Thu ngân" styleClass="category-btn"/>
+        <Button text="Pha chế" styleClass="category-btn"/>
+        <Button text="Phục vụ" styleClass="category-btn"/>
+    </HBox>
+
+    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
+
+        <HBox styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16">
+            <Label text="Nhân viên" styleClass="list-header-label" prefWidth="280"/>
+            <Label text="Vị trí" styleClass="list-header-label" prefWidth="100"/>
+            <Label text="Liên hệ" styleClass="list-header-label" prefWidth="160"/>
+            <Label text="Lương" styleClass="list-header-label" prefWidth="120"/>
+            <Label text="Ngày vào làm" styleClass="list-header-label" prefWidth="100"/>
+            <Label text="Trạng thái" styleClass="list-header-label" prefWidth="120"/>
+            <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="80"/>
+        </HBox>
+
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox fx:id="employeeListContainer">
+                </VBox>
+        </ScrollPane>
+    </VBox>
+</VBox>

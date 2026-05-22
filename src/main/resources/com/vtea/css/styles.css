@@ -786,17 +786,54 @@
     -fx-alignment: center;
 }
 
+/* Trạng thái khi nút thêm topping đang được chọn */
+.btn-topping-active {
+    -fx-background-color: #FFC107;
+    -fx-border-color: #E0A800;
+    -fx-text-fill: #523628;
+    -fx-font-weight: bold;
+}
+.btn-topping-active:hover {
+    -fx-background-color: #E0A800;
+}
+
+/* Nâng cấp giao diện nút Xóa trong giỏ hàng */
 .btn-remove-item {
-    -fx-background-color: #FFF1F0;
+    -fx-background-color: #fef2f2;
     -fx-background-radius: 8;
     -fx-cursor: hand;
     -fx-padding: 6 10 6 10;
 }
-
 .btn-remove-item:hover {
-    -fx-background-color: #FFCCC7;
+    -fx-background-color: #fee2e2;
 }
 
+/* Nút thứ cấp nhỏ (dùng cho Topping button) */
+.btn-secondary {
+    -fx-background-color: white;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #523628;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.btn-secondary:hover {
+    -fx-background-color: #f8f6f5;
+}
+
+/* Kéo .btn-topping-active xuống dưới đây để nó ưu tiên đè lên .btn-secondary */
+.btn-secondary.btn-topping-active {
+    -fx-background-color: #FFC107;
+    -fx-border-color: #E0A800;
+    -fx-text-fill: #523628;
+    -fx-font-weight: bold;
+}
+.btn-secondary.btn-topping-active:hover {
+    -fx-background-color: #E0A800;
+}
 .qty-btn {
     -fx-background-color: white;
     -fx-border-color: #d6d3d1;
@@ -1022,4 +1059,132 @@
 }
 .products-scroll > .viewport {
     -fx-background-color: transparent;
+}
+/* Badge: Đủ hàng / Đang làm việc */
+.badge-success {
+    -fx-background-color: #E6F4EA; /* Xanh lá nhạt */
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+}
+.badge-success .label {
+    -fx-text-fill: #1E8E3E;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Badge: Sắp hết / Lỗi */
+.badge-warning {
+    -fx-background-color: #FCE8E6; /* Đỏ nhạt */
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+}
+.badge-warning .label {
+    -fx-text-fill: #D93025;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Badge: Nghỉ việc / Vị trí nhân viên */
+.badge-neutral {
+    -fx-background-color: #F1F3F4; /* Xám nhạt */
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+}
+.badge-neutral .label {
+    -fx-text-fill: #5F6368;
+    -fx-font-size: 13px;
+}
+
+/* Avatar tròn cho Nhân viên / Icon Kho */
+.avatar-circle {
+    -fx-background-color: #12B6A2; /* Màu xanh lơ giống Figma */
+    -fx-background-radius: 50;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+}
+.avatar-text {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+}
+
+/* Icon khối lập phương cho Kho */
+.inventory-icon-box {
+    -fx-background-color: #FDF1ED;
+    -fx-background-radius: 8;
+    -fx-min-width: 44px;
+    -fx-min-height: 44px;
+}
+
+/* Dòng tiêu đề các cột của danh sách */
+.list-header-row {
+    -fx-border-color: transparent transparent #E0E0E0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 16;
+}
+.list-header-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #444444;
+}
+
+/* Từng dòng dữ liệu trong danh sách */
+.list-item-row {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #F0F0F0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 16;
+}
+.list-item-row:hover {
+    -fx-background-color: #FAFAFA;
+}
+/* Nút "Kiểm tra" bên cạnh ô số điện thoại */
+.btn-check {
+    -fx-background-color: #F5F5F5;
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 0 16; /* Chiều cao sẽ được ép bằng với TextField */
+    -fx-cursor: hand;
+}
+.btn-check:hover {
+    -fx-background-color: #EAEAEA;
+}
+
+/* Thẻ thông tin khách hàng cũ (Viền Teal, nền Teal nhạt) */
+.customer-info-card {
+    -fx-background-color: #F0FAF9;
+    -fx-border-color: #12B6A2;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+    -fx-border-width: 1.5;
+}
+
+/* Hộp tùy chọn Radio Button (Tích điểm / Dùng điểm) */
+.point-option-card {
+    -fx-background-color: white;
+    -fx-border-color: #EAEAEA;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+}
+.point-option-card:hover {
+    -fx-border-color: #12B6A2;
+}
+
+/* Nền xám cho khu vực tính tiền Tạm tính / VAT */
+.summary-box {
+    -fx-background-color: #FAF9F8;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+}
+
+.text-teal {
+    -fx-text-fill: #12B6A2;
+}
+.text-orange {
+    -fx-text-fill: #F59E0B;
 }
