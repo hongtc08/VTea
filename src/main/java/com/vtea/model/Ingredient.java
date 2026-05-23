@@ -6,14 +6,14 @@ public class Ingredient {
     private int ingredientId;
     private String name;
     private String unit;
-    private  double stockQty;
+    private  BigDecimal stockQty;
     private boolean isAvailable;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(int ingredientId, String name, double stockQty, String unit, boolean isAvailable) {
+    public Ingredient(int ingredientId, String name, BigDecimal stockQty, String unit, boolean isAvailable) {
         this.ingredientId = ingredientId;
         this.name = name;
         this.stockQty = stockQty;
@@ -29,7 +29,7 @@ public class Ingredient {
         return name;
     }
 
-    public double getStockQty() {
+    public BigDecimal getStockQty() {
         return stockQty;
     }
 
@@ -45,7 +45,7 @@ public class Ingredient {
         this.name = name;
     }
 
-    public void setStockQty(double stockQty) {
+    public void setStockQty(BigDecimal stockQty) {
         this.stockQty = stockQty;
     }
 

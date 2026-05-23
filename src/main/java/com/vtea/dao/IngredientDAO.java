@@ -3,6 +3,7 @@ package com.vtea.dao;
 import com.vtea.model.Ingredient;
 import com.vtea.utils.DBConnection;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,7 +29,7 @@ public class IngredientDAO {
                 item.setIngredientId(rs.getInt("ingredient_id"));
                 item.setName(rs.getString("name"));
                 item.setUnit(rs.getString("unit"));
-                item.setStockQty(rs.getDouble("stock_qty"));
+                item.setStockQty(rs.getBigDecimal("stock_qty"));
                 item.setAvailable(rs.getBoolean("is_available"));
                 list.add(item);
             }
@@ -103,13 +104,13 @@ public class IngredientDAO {
      * Cách dùng: Staff đếm trong kho còn bao nhiêu thì nhập số đó vào,
      * Database sẽ ghi đè trực tiếp lên số cũ.
      */
-    public boolean updateActualQuantity(int ingredientId, double quantity){
+    public boolean updateActualQuantity(int ingredientId, BigDecimal quantity){
         String sql = "UPDATE ingredient SET stock_qty = ? WHERE ingredient_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
 
-            ps.setDouble(1, quantity);
+            ps.setBigDecimal(1, quantity);
             ps.setInt(2, ingredientId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e){
