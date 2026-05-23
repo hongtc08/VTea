@@ -1,5 +1,5 @@
 package com.vtea.controller;
-
+import com.vtea.service.POSCacheService;
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.service.CategoryService;
@@ -22,7 +22,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
+import com.vtea.service.POSCacheService;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -39,6 +39,7 @@ public class MenuController {
 
     private ProductService productService = new ProductService();
     private CategoryService categoryService = new CategoryService();
+    private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     private List<ProductDTO> allProducts = new ArrayList<>();
     private List<CategoryDTO> allCategories = new ArrayList<>();
@@ -54,8 +55,11 @@ public class MenuController {
 
     public void loadData() {
         try {
-            allCategories = categoryService.getAllActiveCategories();
-            allProducts = productService.getAllActiveProducts();
+            posCacheService.loadIfNeeded();
+
+            allCategories = posCacheService.getCategories();
+            allProducts = posCacheService.getProducts();
+
             currentCategoryIdFilter = CATEGORY_ALL;
             setupCategoryButtons();
 
@@ -64,12 +68,14 @@ public class MenuController {
                         .filter(c -> c.getCategoryId() == product.getCategoryId())
                         .findFirst()
                         .orElse(null);
+
                 if (cat != null) {
                     product.setCategoryName(cat.getName());
                 } else {
                     product.setCategoryName("Khác");
                 }
             }
+
             filterProducts();
         } catch (Exception e) {
             e.printStackTrace();
@@ -207,6 +213,8 @@ public class MenuController {
         if (isConfirmed) {
             try {
                 productService.softDeleteProduct(product.getProductId());
+                POSCacheService.getInstance().refresh();
+
                 DialogHelper.showInfo("Thành công", "Đã xóa món thành công.");
                 loadData();
             } catch (Exception e) {

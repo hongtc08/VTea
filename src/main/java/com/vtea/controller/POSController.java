@@ -22,8 +22,9 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
+import javafx.application.Platform;
+import java.util.concurrent.CompletableFuture;
 
 public class POSController {
 
@@ -196,27 +197,20 @@ public class POSController {
     Load cache Database
      */
     private void loadPOSCacheAsync() {
-        javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
-            @Override
-            protected Void call() {
-                posCacheService.loadIfNeeded();
-                return null;
-            }
-        };
+        CompletableFuture
+                .runAsync(() -> posCacheService.loadIfNeeded())
+                .thenRun(() -> Platform.runLater(() -> {
+                    setupCategoryButtons();
+                    displayProducts(posCacheService.getProducts());
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        ex.printStackTrace();
+                        showErrorAlert("Lỗi", "Không thể tải dữ liệu POS!");
+                    });
 
-        task.setOnSucceeded(event -> {
-            setupCategoryButtons();
-            displayProducts(posCacheService.getProducts());
-        });
-
-        task.setOnFailed(event -> {
-            task.getException().printStackTrace();
-            showErrorAlert("Lỗi", "Không thể tải dữ liệu POS!");
-        });
-
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+                    return null;
+                });
     }
 
     /*
@@ -321,13 +315,21 @@ public class POSController {
 
         try {
             Image image;
+
             if (imagePath.startsWith("http") || imagePath.startsWith("file:")) {
-                image = new Image(imagePath);
+                image = new Image(imagePath, true);
             } else {
-                image = new Image(getClass().getResourceAsStream(imagePath));
+                var imageStream = getClass().getResourceAsStream(imagePath);
+
+                if (imageStream == null) {
+                    System.err.println("Không tìm thấy ảnh trong resources: " + imagePath);
+                    return;
+                }
+
+                image = new Image(imageStream);
             }
 
-            if (image != null && !image.isError()) {
+            if (!image.isError()) {
                 imgProduct.setImage(image);
             }
         } catch (Exception e) {

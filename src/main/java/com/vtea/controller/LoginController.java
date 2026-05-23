@@ -15,7 +15,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import com.vtea.service.POSCacheService;
-import javafx.concurrent.Task;
+import javafx.application.Platform;
+import java.util.concurrent.CompletableFuture;
 
 public class LoginController {
 
@@ -97,35 +98,28 @@ public class LoginController {
         btnLogin.setDisable(true);
         btnLogin.setText("Đang tải dữ liệu...");
 
-        Task<Void> task = new Task<>() {
-            @Override
-            protected Void call() {
-                posCacheService.loadIfNeeded();
-                return null;
-            }
-        };
+        CompletableFuture
+                .runAsync(() -> posCacheService.loadIfNeeded())
+                .thenRun(() -> Platform.runLater(() -> {
+                    DialogHelper.showInfo(
+                            "Thành công",
+                            "Đăng nhập thành công!\nXin chào: " + fullName
+                    );
 
-        task.setOnSucceeded(event -> {
-            DialogHelper.showInfo(
-                    "Thành công",
-                    "Đăng nhập thành công!\nXin chào: " + fullName
-            );
+                    System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                    MainApp.setRoot("main-layout");
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        btnLogin.setDisable(false);
+                        btnLogin.setText("Đăng Nhập");
 
-            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
-            MainApp.setRoot("main-layout");
-        });
+                        ex.printStackTrace();
+                        DialogHelper.showInfo("Lỗi", "Không thể tải dữ liệu hệ thống!");
+                    });
 
-        task.setOnFailed(event -> {
-            btnLogin.setDisable(false);
-            btnLogin.setText("Đăng Nhập");
-
-            task.getException().printStackTrace();
-            DialogHelper.showInfo("Lỗi", "Không thể tải dữ liệu hệ thống!");
-        });
-
-        Thread thread = new Thread(task);
-        thread.setDaemon(true);
-        thread.start();
+                    return null;
+                });
     }
 
     // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code
