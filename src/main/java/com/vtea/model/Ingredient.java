@@ -6,17 +6,19 @@ public class Ingredient {
     private int ingredientId;
     private String name;
     private String unit;
-    private  BigDecimal stockQty;
+    private  double stockQty;
+    private boolean isAvailable;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(int ingredientId, String name, BigDecimal stockQty, String unit) {
+    public Ingredient(int ingredientId, String name, double stockQty, String unit, boolean isAvailable) {
         this.ingredientId = ingredientId;
         this.name = name;
         this.stockQty = stockQty;
         this.unit = unit;
+        this.isAvailable = isAvailable;
     }
 
     public int getIngredientId() {
@@ -27,7 +29,7 @@ public class Ingredient {
         return name;
     }
 
-    public BigDecimal getStockQty() {
+    public double getStockQty() {
         return stockQty;
     }
 
@@ -43,11 +45,14 @@ public class Ingredient {
         this.name = name;
     }
 
-    public void setStockQty(BigDecimal stockQty) {
+    public void setStockQty(double stockQty) {
         this.stockQty = stockQty;
     }
 
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
+    public boolean isAvailable() { return isAvailable; }
+    public void setAvailable(boolean available) { this.isAvailable = available; }
 }
