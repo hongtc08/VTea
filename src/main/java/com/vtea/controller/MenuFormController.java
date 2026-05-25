@@ -17,10 +17,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import com.vtea.service.POSCacheService;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 public class MenuFormController {
 
@@ -134,16 +144,66 @@ public class MenuFormController {
 
         if (file != null) {
             try {
-                String fileUrl = file.toURI().toString();
-                selectedImagePath = fileUrl;
+                selectedImagePath = saveProductImageToResources(file);
 
-                Image img = new Image(fileUrl);
+                Image img = new Image(file.toURI().toString());
                 showPreviewImage(img);
             } catch (Exception e) {
                 e.printStackTrace();
                 DialogHelper.showInfo("Lỗi", "Không thể tải hình ảnh: " + e.getMessage());
             }
         }
+    }
+    private String saveProductImageToResources(File selectedFile) throws IOException {
+        String extension = getFileExtension(selectedFile.getName());
+
+        String safeName = txtName.getText() == null
+                ? "product"
+                : txtName.getText().trim()
+                  .toLowerCase()
+                  .replaceAll("\\s+", "-")
+                  .replaceAll("[^a-z0-9-]", "");
+
+        if (safeName.isEmpty()) {
+            safeName = "product";
+        }
+
+        String fileName = safeName + "-" + System.currentTimeMillis() + extension;
+
+        // 1. Copy vào src/main/resources để ảnh được commit lên GitHub
+        Path sourceResourceDir = Paths.get("src/main/resources/images/products");
+        Files.createDirectories(sourceResourceDir);
+
+        Path sourceResourcePath = sourceResourceDir.resolve(fileName);
+        Files.copy(
+                selectedFile.toPath(),
+                sourceResourcePath,
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        // 2. Copy thêm vào target/classes để app đang chạy load được ngay
+        Path runtimeResourceDir = Paths.get("target/classes/images/products");
+        Files.createDirectories(runtimeResourceDir);
+
+        Path runtimeResourcePath = runtimeResourceDir.resolve(fileName);
+        Files.copy(
+                selectedFile.toPath(),
+                runtimeResourcePath,
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        // DB vẫn lưu đường dẫn resources
+        return "/images/products/" + fileName;
+    }
+
+    private String getFileExtension(String fileName) {
+        int dotIndex = fileName.lastIndexOf(".");
+
+        if (dotIndex == -1) {
+            return ".png";
+        }
+
+        return fileName.substring(dotIndex).toLowerCase();
     }
 
     private void showPreviewImage(Image img) {
@@ -196,7 +256,7 @@ public class MenuFormController {
                 productService.createProduct(currentProduct);
                 DialogHelper.showInfo("Thành công", "Đã thêm món ăn mới.");
             }
-
+            POSCacheService.getInstance().refresh();
             if (parentController != null) {
                 parentController.loadData();
             }

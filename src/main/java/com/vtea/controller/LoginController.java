@@ -14,6 +14,9 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import com.vtea.service.POSCacheService;
+import javafx.application.Platform;
+import java.util.concurrent.CompletableFuture;
 
 public class LoginController {
 
@@ -59,6 +62,9 @@ public class LoginController {
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();
 
+    //Khoi tao cache tu luc log in
+    private final POSCacheService posCacheService = POSCacheService.getInstance();
+
     // 3. Hàm này sẽ được gọi khi người dùng bấm nút "Đăng Nhập"
     @FXML
     public void handleLogin(ActionEvent event) {
@@ -82,14 +88,38 @@ public class LoginController {
             // Lưu thông tin người dùng vào SessionManager
             SessionManager.login(sessionInfo);
 
-            // Hiện thông báo chào mừng
-            DialogHelper.showInfo("Thành công", "Đăng nhập thành công!\nXin chào: " + sessionInfo.getFullName());
-
-            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
-            MainApp.setRoot("main-layout");
+            preloadSystemDataThenOpenMain(sessionInfo.getFullName());
         } catch (Exception e) {
             // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
             DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());        }
+    }
+
+    private void preloadSystemDataThenOpenMain(String fullName) {
+        btnLogin.setDisable(true);
+        btnLogin.setText("Đang tải dữ liệu...");
+
+        CompletableFuture
+                .runAsync(() -> posCacheService.loadIfNeeded())
+                .thenRun(() -> Platform.runLater(() -> {
+                    DialogHelper.showInfo(
+                            "Thành công",
+                            "Đăng nhập thành công!\nXin chào: " + fullName
+                    );
+
+                    System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                    MainApp.setRoot("main-layout");
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        btnLogin.setDisable(false);
+                        btnLogin.setText("Đăng Nhập");
+
+                        ex.printStackTrace();
+                        DialogHelper.showInfo("Lỗi", "Không thể tải dữ liệu hệ thống!");
+                    });
+
+                    return null;
+                });
     }
 
     // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code

@@ -49,23 +49,17 @@ public class OrderService {
         Map<Integer, Integer> safeToppingQuantities = normalizeToppingQuantities(toppingQuantities);
         BigDecimal toppingPrice = calculateToppingPrice(safeToppingQuantities);
 
-        OrderDetailDTO existingItem = findCartItemByProductIdAndToppings(productId, safeToppingQuantities);
+        OrderDetailDTO newItem = new OrderDetailDTO(
+                productId,
+                productName.trim(),
+                quantity,
+                price
+        );
 
-        if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + quantity);
-        } else {
-            OrderDetailDTO newItem = new OrderDetailDTO(
-                    productId,
-                    productName.trim(),
-                    quantity,
-                    price
-            );
+        newItem.setToppingQuantities(safeToppingQuantities);
+        newItem.setToppingPrice(toppingPrice);
 
-            newItem.setToppingQuantities(safeToppingQuantities);
-            newItem.setToppingPrice(toppingPrice);
-
-            cartItems.add(newItem);
-        }
+        cartItems.add(newItem);
 
         calculateTotal();
     }
@@ -88,28 +82,24 @@ public class OrderService {
         return currentOrder;
     }
 
-    /*
-        Tăng số lượng của món trong giỏ hàng theo productId.
-        Nếu tìm thấy món thì cộng quantity lên 1 và cập nhật lại tổng tiền.
-    */
-    public void increaseQuantity(int productId) {
-        OrderDetailDTO item = findCartItemByProductId(productId);
-
-        if (item != null) {
+    /*----------------------------------------------------------------------
+    Nếu có 2 ly nước (cùng id) mà mỗi ly có topping khác nhau sẽ dễ gây lỗi topping
+    Cần đưa dữ liệu vào là item thay vì chỉ dùng id
+     ----------------------------------------------------------------------*/
+    public void increaseQuantity(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
             item.setQuantity(item.getQuantity() + 1);
             calculateTotal();
         }
     }
 
-    // Giảm số lượng của món trong giỏ hàng theo productId.
-    public void decreaseQuantity(int productId) {
-        OrderDetailDTO item = findCartItemByProductId(productId);
-
-        if (item != null && item.getQuantity() > 1) {
-            item.setQuantity(item.getQuantity() - 1);
-            calculateTotal();
-        } else if (item != null && item.getQuantity() == 1) {
-            cartItems.remove(item);
+    public void decreaseQuantity(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
+            if (item.getQuantity() > 1) {
+                item.setQuantity(item.getQuantity() - 1);
+            } else {
+                cartItems.remove(item);
+            }
             calculateTotal();
         }
     }
@@ -118,13 +108,32 @@ public class OrderService {
         Khi người dùng bấm nút xóa món trong giỏ hàng.
         Hoặc khi bấm - mà quantity của món đang là 1.
     */
-    public void removeFromCart(int productId) {
-        OrderDetailDTO item = findCartItemByProductId(productId);
-
-        if (item != null) {
+    public void removeFromCart(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
             cartItems.remove(item);
             calculateTotal();
         }
+    }
+
+    public void addToppingToItem(OrderDetailDTO item, int toppingId) {
+        if (item == null || !cartItems.contains(item)) {
+            throw new IllegalArgumentException("Không tìm thấy món trong giỏ!");
+        }
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+
+        if (map == null) {
+            map = new HashMap<>();
+        } else {
+            map = new HashMap<>(map);
+        }
+
+        int prev = map.getOrDefault(toppingId, 0);
+        map.put(toppingId, prev + 1);
+
+        item.setToppingQuantities(map);
+        item.setToppingPrice(calculateToppingPrice(map));
+        calculateTotal();
     }
 
     // ==================== CHECKOUT METHODS ====================
