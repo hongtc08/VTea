@@ -5,8 +5,14 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <?import java.net.URL?>
-<VBox spacing="20" styleClass="dialog-box" prefWidth="420" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            prefViewportWidth="500" prefViewportHeight="720"
+            minViewportWidth="500" minViewportHeight="600"
+            maxHeight="820" style="-fx-background-color: transparent; -fx-background: transparent;"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.vtea.controller.CustomerDialogController">
+    <VBox spacing="20" styleClass="dialog-box" prefWidth="500" minWidth="500">
+    <padding><Insets top="24" right="28" bottom="28" left="28"/></padding>
 
     <stylesheets>
         <URL value="@../css/styles.css" />
@@ -34,25 +40,25 @@
             <Label text="Tên khách hàng" styleClass="form-label"/>
             <TextField fx:id="txtName" promptText="Nhập tên khách hàng..." styleClass="form-input-field"/>
         </VBox>
-        <Label fx:id="lblNewPointPreview" text="Khách hàng mới sẽ nhận 55 điểm" style="-fx-text-fill: #666666;"/>
+        <Label fx:id="lblNewPointPreview" text="Khách hàng mới sẽ nhận 0 điểm" style="-fx-text-fill: #666666;"/>
     </VBox>
 
-    <VBox fx:id="existingCustomerBox" spacing="12" styleClass="customer-info-card" visible="true" managed="true">
+    <VBox fx:id="existingCustomerBox" spacing="12" styleClass="customer-info-card" visible="false" managed="false">
 
         <HBox alignment="CENTER_LEFT" spacing="12">
             <StackPane styleClass="avatar-circle">
-                <Label fx:id="lblAvatarInitials" text="b" styleClass="avatar-text"/>
+                <Label fx:id="lblAvatarInitials" text="?" styleClass="avatar-text"/>
             </StackPane>
             <VBox alignment="CENTER_LEFT" spacing="2">
-                <Label fx:id="lblExistingName" text="ba" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
-                <Label fx:id="lblExistingPhone" text="333" style="-fx-text-fill: #666666;"/>
+                <Label fx:id="lblExistingName" text="" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                <Label fx:id="lblExistingPhone" text="" style="-fx-text-fill: #666666;"/>
             </VBox>
         </HBox>
 
         <HBox alignment="CENTER_LEFT" spacing="6">
             <FontIcon iconLiteral="fth-star" iconSize="16" iconColor="#F59E0B"/>
-            <Label fx:id="lblCurrentPoints" text="55 điểm" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
-            <Label fx:id="lblEquivalentValue" text="(55.000đ)" style="-fx-text-fill: #888888;"/>
+            <Label fx:id="lblCurrentPoints" text="0 điểm" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+            <Label fx:id="lblEquivalentValue" text="(0đ)" style="-fx-text-fill: #888888;"/>
         </HBox>
 
         <fx:define>
@@ -82,23 +88,25 @@
         <HBox>
             <Label text="Tạm tính:" style="-fx-text-fill: #666666;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="lblSubTotal" text="55.000đ" style="-fx-text-fill: #666666;"/>
+            <Label fx:id="lblSubTotal" text="0đ" style="-fx-text-fill: #666666;"/>
         </HBox>
         <HBox>
             <Label text="VAT (10%):" style="-fx-text-fill: #666666;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="lblVat" text="5.500đ" style="-fx-text-fill: #666666;"/>
+            <Label fx:id="lblVat" text="0đ" style="-fx-text-fill: #666666;"/>
         </HBox>
         <Separator style="-fx-padding: 4 0;"/>
         <HBox alignment="CENTER_LEFT">
             <Label text="Tổng cộng:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="lblTotal" text="60.500đ" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #78350F;"/>
+            <Label fx:id="lblTotal" text="0đ" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #78350F;"/>
         </HBox>
     </VBox>
 
-    <HBox spacing="16" alignment="CENTER_RIGHT">
-        <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" prefWidth="120" prefHeight="44"/>
-        <Button fx:id="btnSubmit" text="Xác nhận" styleClass="btn-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefHeight="44"/>
+    <HBox spacing="16" alignment="CENTER_RIGHT" minHeight="52">
+        <Button fx:id="btnWalkIn" text="Khách vãng lai" styleClass="btn-dialog-cancel" minHeight="44" prefHeight="44"/>
+        <Button fx:id="btnCancel" text="Hủy" styleClass="btn-dialog-cancel" prefWidth="100" minHeight="44" prefHeight="44"/>
+        <Button fx:id="btnSubmit" text="Xác nhận" styleClass="btn-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity" minHeight="44" prefHeight="44"/>
     </HBox>
-</VBox>
+    </VBox>
+</ScrollPane>

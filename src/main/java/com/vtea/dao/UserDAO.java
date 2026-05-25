@@ -44,6 +44,40 @@ public class UserDAO {
         return user;
     }
 
+    public User getUserById(int userId) {
+        String query = "SELECT * FROM `user` WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            if (conn == null) {
+                return null;
+            }
+
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getInt("user_id"));
+                    user.setUserName(rs.getString("username"));
+                    user.setPassWord(rs.getString("password"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setRole(rs.getString("role"));
+                    user.setStatus(rs.getString("status"));
+                    user.setCreatedAt(rs.getTimestamp("created_at") != null
+                            ? rs.getTimestamp("created_at").toLocalDateTime()
+                            : null);
+                    return user;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm User theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Lấy danh sách tất cả nhân viên (Dành cho Admin)
      */
@@ -88,7 +122,7 @@ public class UserDAO {
             ps.setString(2, user.getPassWord());
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
-            ps.setString(5, "Active");
+            ps.setString(5, user.getStatus() != null ? user.getStatus() : "Active");
 
             return ps.executeUpdate() > 0;
 
@@ -109,6 +143,10 @@ public class UserDAO {
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            if (conn == null) {
+                return false;
+            }
+
             ps.setString(1, newStatus);
             ps.setInt(2, userId);
 
@@ -125,14 +163,19 @@ public class UserDAO {
      * Đổi mật khẩu hoặc đổi status tách thành hàm riêng để dễ quản lý.
      */
     public boolean updateUser(User user) {
-        String sql = "UPDATE `user` SET full_name = ?, role = ? WHERE user_id = ?";
+        String sql = "UPDATE `user` SET full_name = ?, role = ?, status = ? WHERE user_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
+            if (conn == null) {
+                return false;
+            }
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getRole());
-            ps.setInt(3, user.getUserId());
+            ps.setString(3, user.getStatus() != null ? user.getStatus() : "Active");
+            ps.setInt(4, user.getUserId());
 
             return ps.executeUpdate() > 0;
 

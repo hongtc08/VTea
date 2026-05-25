@@ -3,10 +3,7 @@ package com.vtea.dao;
 import com.vtea.model.Customer;
 import com.vtea.utils.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class CustomerDAO {
     /**
@@ -44,22 +41,28 @@ public class CustomerDAO {
      * Thêm khách hàng mới.
      * Mặc định khi mới tạo, điểm thưởng (reward_points) = 0.
      */
-    public boolean insertCustomer(Customer customer) {
+    public int insertCustomer(Customer customer) {
         String sql = "INSERT INTO customer (full_name, phone_number, reward_points) VALUES (?, ?, 0)";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setString(1, customer.getFullName());
             ps.setString(2, customer.getPhoneNumber());
 
-            return ps.executeUpdate() > 0;
+            if (ps.executeUpdate() > 0) {
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
 
         } catch (SQLException e) {
             System.err.println("Lỗi khi thêm khách hàng mới: " + e.getMessage());
             e.printStackTrace();
         }
-        return false;
+        return -1;
     }
 
     /**

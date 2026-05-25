@@ -26,7 +26,7 @@ public class AuthService {
         }
 
         // 3. Kiểm tra tài khoản có bị Admin khóa không
-        if ("Locked".equalsIgnoreCase(user.getStatus())) {
+        if (EmployeeService.isLocked(user.getStatus())) {
             throw new Exception("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin!");
         }
 

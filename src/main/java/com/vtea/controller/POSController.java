@@ -1,11 +1,16 @@
 package com.vtea.controller;
 import com.vtea.service.POSCacheService;
+import com.vtea.utils.CustomerDialogHelper;
 import com.vtea.utils.DialogHelper;
 import com.vtea.dto.CategoryDTO;
+import com.vtea.dto.CustomerCheckoutResult;
+import com.vtea.service.CustomerService;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.dto.ProductDTO;
+import com.vtea.dto.UserSessionDTO;
 import com.vtea.model.Order;
 import com.vtea.service.OrderService;
+import com.vtea.utils.SessionManager;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -13,6 +18,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -33,11 +40,12 @@ public class POSController {
     //
     private final OrderService orderService = new OrderService();
 
-    // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager
-    private int currentUserId = 1;
+    private int currentCategoryId = -1;
 
     @FXML private FlowPane productGrid;
+    @FXML private TextField searchField;
 
+    @FXML private ScrollPane categoryScrollPane;
     @FXML private HBox categoryBar;
 
     @FXML private VBox cartItemsBox;
@@ -53,10 +61,50 @@ public class POSController {
     @FXML
     public void initialize() {
         setupPaymentMethods();
+        setupProductSearch();
         updateCartDisplay();
         updateTotalAmount();
 
         loadPOSCacheAsync();
+    }
+
+    private int resolveCurrentUserId() {
+        UserSessionDTO user = SessionManager.getCurrentUser();
+        return user != null ? user.getId() : 1;
+    }
+
+    private void setupProductSearch() {
+        if (searchField == null) {
+            return;
+        }
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> refreshProductGrid());
+    }
+
+    private void refreshProductGrid() {
+        if (toppingMode) {
+            displayProducts(filterProductsByName(posCacheService.getToppings()));
+            return;
+        }
+        if (currentCategoryId == -1) {
+            displayProducts(filterProductsByName(posCacheService.getProducts()));
+        } else {
+            displayProducts(filterProductsByName(posCacheService.getProductsByCategory(currentCategoryId)));
+        }
+    }
+
+    private List<ProductDTO> filterProductsByName(List<ProductDTO> products) {
+        if (products == null) {
+            return List.of();
+        }
+        String keyword = searchField != null && searchField.getText() != null
+                ? searchField.getText().trim().toLowerCase()
+                : "";
+        if (keyword.isEmpty()) {
+            return products;
+        }
+        return products.stream()
+                .filter(p -> p.getName() != null && p.getName().toLowerCase().contains(keyword))
+                .toList();
     }
 
     private void setupPaymentMethods() {
@@ -81,7 +129,8 @@ public class POSController {
         allButton.getStyleClass().add("category-btn-active");
         allButton.setOnAction(event -> {
             setActiveButton(allButton);
-            displayProducts(posCacheService.getProducts());
+            currentCategoryId = -1;
+            refreshProductGrid();
         });
         categoryBar.getChildren().add(allButton);
 
@@ -91,7 +140,8 @@ public class POSController {
                 Button categoryButton = createCategoryButton(category.getName());
                 categoryButton.setOnAction(event -> {
                     setActiveButton(categoryButton);
-                    filterByCategory(category.getCategoryId());
+                    currentCategoryId = category.getCategoryId();
+                    refreshProductGrid();
                 });
                 categoryBar.getChildren().add(categoryButton);
             }
@@ -145,6 +195,9 @@ public class POSController {
         }
 
         orderService.clearCart();
+        if (toppingMode) {
+            exitToppingMode();
+        }
         refreshCart();
         showInfoAlert("Thành công", "Giỏ hàng đã được xóa!");
     }
@@ -166,20 +219,41 @@ public class POSController {
                 return;
             }
 
+            BigDecimal subtotal = calculateCartSubtotal();
+            BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
+            BigDecimal total = orderService.getCurrentOrder().getTotalAmount();
+
+            CustomerCheckoutResult customerResult = CustomerDialogHelper.showCheckoutDialog(subtotal, vat, total);
+            if (!customerResult.isConfirmed()) {
+                return;
+            }
+
             Order order = orderService.getCurrentOrder();
-            order.setUserId(currentUserId);
+            order.setUserId(resolveCurrentUserId());
             order.setStatus("PAID");
             order.setPaymentMethod(paymentMethod);
+            order.setCustomerId(customerResult.getCustomerId());
+            order.setTotalAmount(customerResult.getFinalTotal());
 
-            boolean success = orderService.checkoutCurrentOrder();
+            int pointsDelta = 0;
+            if (customerResult.getCustomerId() != null) {
+                pointsDelta = customerResult.isUsePoints()
+                        ? -customerResult.getPointsUsed()
+                        : customerResult.getPointsToEarn();
+            }
+
+            boolean success = orderService.checkoutCurrentOrder(pointsDelta);
 
             if (success) {
                 showSuccessAlert(
                         "✓ Thanh toán thành công!",
-                        "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                        buildCheckoutSuccessMessage(customerResult)
                 );
 
                 orderService.clearCart();
+                if (toppingMode) {
+                    exitToppingMode();
+                }
                 refreshCart();
             } else {
                 showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
@@ -188,6 +262,29 @@ public class POSController {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
         }
+    }
+
+    private String buildCheckoutSuccessMessage(CustomerCheckoutResult customerResult) {
+        StringBuilder message = new StringBuilder();
+        message.append("Tổng tiền: ").append(formatPrice(customerResult.getFinalTotal()));
+
+        if (customerResult.getCustomerId() != null) {
+            if (customerResult.isUsePoints() && customerResult.getPointsUsed() > 0) {
+                message.append("\nĐã dùng ").append(customerResult.getPointsUsed()).append(" điểm");
+            } else if (customerResult.getPointsToEarn() > 0) {
+                message.append("\nĐã tích ").append(customerResult.getPointsToEarn()).append(" điểm");
+            }
+        }
+
+        return message.toString();
+    }
+
+    private BigDecimal calculateCartSubtotal() {
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (OrderDetailDTO item : orderService.getCartItems()) {
+            subtotal = subtotal.add(item.getSubTotal());
+        }
+        return subtotal;
     }
 
     // ==================== PRODUCT DISPLAY ====================
@@ -201,7 +298,7 @@ public class POSController {
                 .runAsync(() -> posCacheService.loadIfNeeded())
                 .thenRun(() -> Platform.runLater(() -> {
                     setupCategoryButtons();
-                    displayProducts(posCacheService.getProducts());
+                    refreshProductGrid();
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
@@ -217,20 +314,47 @@ public class POSController {
     Hien product tu cache lay tu Database
      */
     private void loadProductsFromDatabase() {
-        displayProducts(posCacheService.getProducts());
+        currentCategoryId = -1;
+        refreshProductGrid();
     }
 
-    /*
-    Hien topping tu cache lay tu Database
-     */
     private void showOnlyToppings() {
-        displayProducts(posCacheService.getToppings());
+        setCategoryBarVisible(false);
+        displayProducts(filterProductsByName(posCacheService.getToppings()));
     }
 
-
-    private void filterByCategory(int categoryId) {
-        displayProducts(posCacheService.getProductsByCategory(categoryId));
+    private void onCartItemRemoved(OrderDetailDTO removedItem) {
+        if (toppingMode && toppingTargetItem == removedItem) {
+            exitToppingMode();
+        }
     }
+
+    private void setCategoryBarVisible(boolean visible) {
+        if (categoryScrollPane != null) {
+            categoryScrollPane.setVisible(visible);
+            categoryScrollPane.setManaged(visible);
+        }
+    }
+
+    private void enterToppingMode(OrderDetailDTO item) {
+        toppingMode = true;
+        toppingTargetItem = item;
+        if (lblScreenTitle != null) {
+            lblScreenTitle.setText("Thêm topping");
+        }
+        showOnlyToppings();
+    }
+
+    private void exitToppingMode() {
+        toppingMode = false;
+        toppingTargetItem = null;
+        if (lblScreenTitle != null) {
+            lblScreenTitle.setText("Bán hàng (POS)");
+        }
+        setCategoryBarVisible(true);
+        loadProductsFromDatabase();
+    }
+
 
     private void displayProducts(List<ProductDTO> products) {
         productGrid.getChildren().clear();
@@ -473,16 +597,19 @@ public class POSController {
         // Sau đó refresh lại giao diện giỏ hàng và tổng tiền.
         if (btnMinus != null) {
             btnMinus.setOnAction(event -> {
+                boolean wasInCart = orderService.getCartItems().contains(item);
                 orderService.decreaseQuantity(item);
+                if (wasInCart && !orderService.getCartItems().contains(item)) {
+                    onCartItemRemoved(item);
+                }
                 refreshCart();
             });
         }
 
-        // Khi bấm nút xóa, xóa món hiện tại khỏi giỏ hàng,
-        // sau đó refresh lại giao diện giỏ hàng và tổng tiền.
         if (btnRemove != null) {
             btnRemove.setOnAction(event -> {
                 orderService.removeFromCart(item);
+                onCartItemRemoved(item);
                 refreshCart();
             });
         }
@@ -505,20 +632,11 @@ public class POSController {
             // 2. Xử lý logic khi click
             btnTopping.setOnAction(event -> {
                 if (!toppingMode || toppingTargetItem != item) {
-                    // Bật chế độ thêm topping
-                    toppingMode = true;
-                    toppingTargetItem = item;
-                    if (lblScreenTitle != null) lblScreenTitle.setText("Thêm topping");
-                    showOnlyToppings();
+                    enterToppingMode(item);
                 } else {
-                    // Tắt chế độ
-                    toppingMode = false;
-                    toppingTargetItem = null;
-                    if (lblScreenTitle != null) lblScreenTitle.setText("Bán hàng (POS)");
-                    loadProductsFromDatabase();
+                    exitToppingMode();
                 }
 
-                // Cập nhật lại toàn bộ giao diện giỏ hàng để đổi trạng thái UI của nút
                 refreshCart();
             });
         }
@@ -535,17 +653,17 @@ public class POSController {
                         Button btnRemoveT = (Button) hrow.getChildren().get(3);
 
                         btnMinusT.setOnAction(evt -> {
-                            orderService.changeToppingQuantity(item.getProductId(), toppingId, -1);
+                            orderService.changeToppingQuantity(item, toppingId, -1);
                             refreshCart();
                         });
 
                         btnPlusT.setOnAction(evt -> {
-                            orderService.changeToppingQuantity(item.getProductId(), toppingId, 1);
+                            orderService.changeToppingQuantity(item, toppingId, 1);
                             refreshCart();
                         });
 
                         btnRemoveT.setOnAction(evt -> {
-                            orderService.removeToppingFromItem(item.getProductId(), toppingId);
+                            orderService.removeToppingFromItem(item, toppingId);
                             refreshCart();
                         });
                     }

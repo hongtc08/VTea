@@ -158,6 +158,10 @@ public class OrderService {
     }
 
     public boolean checkoutCurrentOrder() {
+        return checkoutCurrentOrder(0);
+    }
+
+    public boolean checkoutCurrentOrder(int rewardPointsDelta) {
         if (cartItems.isEmpty()) {
             return false;
         }
@@ -166,7 +170,7 @@ public class OrderService {
 
         List<OrderDetail> details = getDetailsForCheckout(0);
 
-        return orderDAO.checkoutOrder(currentOrder, details);
+        return orderDAO.checkoutOrderWithRewardPoints(currentOrder, details, rewardPointsDelta);
     }
 
     // ==================== FIND CART ITEM METHODS ====================
@@ -271,29 +275,12 @@ public class OrderService {
         return null;
     }
 
-    // Thêm 1 topping (toppingId) cho món đã có trong giỏ (baseProductId)
-    public void addToppingToItem(int baseProductId, int toppingId) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) {
-            throw new IllegalArgumentException("Không tìm thấy món trong giỏ: " + baseProductId);
+    public void changeToppingQuantity(OrderDetailDTO item, int toppingId, int delta) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
         }
 
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        int prev = map.getOrDefault(toppingId, 0);
-        map.put(toppingId, prev + 1);
-        item.setToppingQuantities(map);
-
-        BigDecimal toppingPrice = calculateToppingPrice(map);
-        item.setToppingPrice(toppingPrice);
-        calculateTotal();
-    }
-
-    // Thay đổi số lượng topping (delta có thể là +1 hoặc -1), nếu kết quả <=0 thì xóa topping
-    public void changeToppingQuantity(int baseProductId, int toppingId, int delta) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) return;
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
+        Map<Integer, Integer> map = new HashMap<>(item.getToppingQuantities());
         int prev = map.getOrDefault(toppingId, 0);
         int now = prev + delta;
         if (now <= 0) {
@@ -303,21 +290,19 @@ public class OrderService {
         }
 
         item.setToppingQuantities(map);
-        BigDecimal toppingPrice = calculateToppingPrice(map);
-        item.setToppingPrice(toppingPrice);
+        item.setToppingPrice(calculateToppingPrice(map));
         calculateTotal();
     }
 
-    public void removeToppingFromItem(int baseProductId, int toppingId) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) return;
+    public void removeToppingFromItem(OrderDetailDTO item, int toppingId) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
+        }
 
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        if (map.containsKey(toppingId)) {
-            map.remove(toppingId);
+        Map<Integer, Integer> map = new HashMap<>(item.getToppingQuantities());
+        if (map.remove(toppingId) != null) {
             item.setToppingQuantities(map);
-            BigDecimal toppingPrice = calculateToppingPrice(map);
-            item.setToppingPrice(toppingPrice);
+            item.setToppingPrice(calculateToppingPrice(map));
             calculateTotal();
         }
     }

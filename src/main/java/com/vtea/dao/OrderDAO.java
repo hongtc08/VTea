@@ -25,6 +25,9 @@ public class OrderDAO {
 
         try{
             conn = DBConnection.getConnection();
+            if (conn == null) {
+                return false;
+            }
             conn.setAutoCommit(false);
 
             int generatedOrderId = -1;
@@ -98,27 +101,158 @@ public class OrderDAO {
             return true;
 
         } catch (SQLException e) {
-            // NẾU CÓ BẤT KỲ LỖI NÀO Ở ORDER HAY DETAIL -> HỦY BỎ TẤT CẢ (ROLLBACK)
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                    System.err.println("Transaction bị lỗi, đã Rollback an toàn!");
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            rollbackQuietly(conn);
             e.printStackTrace();
             return false;
 
         } finally {
-            // TRẢ LẠI TRẠNG THÁI CŨ VÀ ĐÓNG KẾT NỐI
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+            closeQuietly(conn);
+        }
+    }
+
+    /**
+     * Thanh toán đơn hàng và cập nhật điểm khách hàng trong cùng một transaction.
+     */
+    public boolean checkoutOrderWithRewardPoints(Order order, List<OrderDetail> details, int rewardPointsDelta) {
+        if (rewardPointsDelta == 0) {
+            return checkoutOrder(order, details);
+        }
+
+        Integer customerId = order.getCustomerId();
+        if (customerId == null || customerId <= 0) {
+            return checkoutOrder(order, details);
+        }
+
+        String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+        String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+        String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
+        String updatePointsSQL = "UPDATE customer SET reward_points = reward_points + ? WHERE customer_id = ? AND reward_points + ? >= 0";
+
+        Connection conn = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            if (conn == null) {
+                return false;
+            }
+            conn.setAutoCommit(false);
+
+            int generatedOrderId = insertOrderAndDetails(conn, order, details, insertOrderSQL, insertDetailSQL, insertToppingSQL);
+            if (generatedOrderId < 0) {
+                throw new SQLException("Không thể tạo đơn hàng.");
+            }
+
+            try (PreparedStatement psPoints = conn.prepareStatement(updatePointsSQL)) {
+                psPoints.setInt(1, rewardPointsDelta);
+                psPoints.setInt(2, customerId);
+                psPoints.setInt(3, rewardPointsDelta);
+
+                int updated = psPoints.executeUpdate();
+                if (updated == 0) {
+                    throw new SQLException("Không thể cập nhật điểm khách hàng (có thể không đủ điểm).");
                 }
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException e) {
+            rollbackQuietly(conn);
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            closeQuietly(conn);
+        }
+    }
+
+    private int insertOrderAndDetails(
+            Connection conn,
+            Order order,
+            List<OrderDetail> details,
+            String insertOrderSQL,
+            String insertDetailSQL,
+            String insertToppingSQL
+    ) throws SQLException {
+        int generatedOrderId = -1;
+
+        try (PreparedStatement psOrder = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
+            psOrder.setInt(1, order.getUserId());
+
+            if (order.getCustomerId() != null && order.getCustomerId() > 0) {
+                psOrder.setInt(2, order.getCustomerId());
+            } else {
+                psOrder.setNull(2, Types.INTEGER);
+            }
+
+            psOrder.setBigDecimal(3, order.getTotalAmount());
+            psOrder.setString(4, order.getStatus());
+            psOrder.setString(5, order.getPaymentMethod());
+            psOrder.executeUpdate();
+
+            try (ResultSet rs = psOrder.getGeneratedKeys()) {
+                if (rs.next()) {
+                    generatedOrderId = rs.getInt(1);
+                } else {
+                    throw new SQLException("Không thể lấy ID của Order vừa tạo.");
+                }
+            }
+        }
+
+        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)) {
+
+            for (OrderDetail detail : details) {
+                psDetail.setInt(1, generatedOrderId);
+                psDetail.setInt(2, detail.getProductId());
+                psDetail.setInt(3, detail.getQuantity());
+                psDetail.setBigDecimal(4, detail.getUnitPrice());
+                psDetail.executeUpdate();
+
+                int generatedDetailId = -1;
+                try (ResultSet rsDetail = psDetail.getGeneratedKeys()) {
+                    if (rsDetail.next()) {
+                        generatedDetailId = rsDetail.getInt(1);
+                    }
+                }
+
+                if (detail.getToppingQuantities() != null && !detail.getToppingQuantities().isEmpty()) {
+                    for (Map.Entry<Integer, Integer> entry : detail.getToppingQuantities().entrySet()) {
+                        int toppingId = entry.getKey();
+                        int toppingQty = entry.getValue();
+
+                        psTopping.setInt(1, generatedDetailId);
+                        psTopping.setInt(2, toppingId);
+                        psTopping.setInt(3, toppingId);
+                        psTopping.setInt(4, toppingQty);
+                        psTopping.addBatch();
+                    }
+                    psTopping.executeBatch();
+                }
+            }
+        }
+
+        return generatedOrderId;
+    }
+
+    private void rollbackQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.rollback();
+                System.err.println("Transaction bị lỗi, đã Rollback an toàn!");
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    private void closeQuietly(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.setAutoCommit(true);
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -257,5 +391,67 @@ public class OrderDAO {
             e.printStackTrace();
         }
         return totalRevenue;
+    }
+
+    public int countPaidOrdersToday() {
+        String sql = "SELECT COUNT(*) AS cnt FROM `order` WHERE status = 'PAID' AND DATE(created_at) = CURDATE()";
+        return querySingleInt(sql);
+    }
+
+    public int countDistinctCustomersToday() {
+        String sql = "SELECT COUNT(DISTINCT customer_id) AS cnt FROM `order` " +
+                "WHERE status = 'PAID' AND DATE(created_at) = CURDATE() AND customer_id IS NOT NULL";
+        return querySingleInt(sql);
+    }
+
+    public List<Object[]> getTopSellingProductsToday(int limit) {
+        List<Object[]> results = new ArrayList<>();
+        String sql = "SELECT p.name, SUM(od.quantity) AS sold_qty, SUM(od.quantity * od.unit_price) AS revenue " +
+                "FROM order_detail od " +
+                "JOIN product p ON od.product_id = p.product_id " +
+                "JOIN `order` o ON od.order_id = o.order_id " +
+                "WHERE o.status = 'PAID' AND DATE(o.created_at) = CURDATE() " +
+                "GROUP BY p.product_id, p.name " +
+                "ORDER BY sold_qty DESC " +
+                "LIMIT ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (conn == null) {
+                return results;
+            }
+
+            ps.setInt(1, limit);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    results.add(new Object[]{
+                            rs.getString("name"),
+                            rs.getInt("sold_qty"),
+                            rs.getBigDecimal("revenue")
+                    });
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy sản phẩm bán chạy: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    private int querySingleInt(String sql) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (conn != null && rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi truy vấn thống kê: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return 0;
     }
 }
