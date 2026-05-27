@@ -19,7 +19,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
+import com.vtea.dao.CustomerDAO;
+import com.vtea.model.Customer;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,6 +37,7 @@ public class POSController {
     private final POSCacheService posCacheService = POSCacheService.getInstance();
     //
     private final OrderService orderService = new OrderService();
+    private final CustomerDAO customerDAO = new CustomerDAO();
 
     // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager
     private int currentUserId = 1;
@@ -166,17 +172,38 @@ public class POSController {
                 return;
             }
 
+            CustomerDialogController customerDialog = showCustomerDialog();
+
+            if (customerDialog == null || !customerDialog.isSubmitted()) {
+                return;
+            }
+
+            Customer selectedCustomer = customerDialog.getSelectedCustomer();
+            int earnPoints = customerDialog.getEarnPoints();
+
             Order order = orderService.getCurrentOrder();
             order.setUserId(currentUserId);
             order.setStatus("PAID");
             order.setPaymentMethod(paymentMethod);
 
+            if (selectedCustomer != null) {
+                order.setCustomerId(selectedCustomer.getCustomerId());
+            }
+
             boolean success = orderService.checkoutCurrentOrder();
 
             if (success) {
+                if (selectedCustomer != null && earnPoints > 0) {
+                    customerDAO.updateRewardPoints(selectedCustomer.getCustomerId(), earnPoints);
+                }
+
                 showSuccessAlert(
                         "✓ Thanh toán thành công!",
                         "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                                + "\nKhách hàng: "
+                                + (selectedCustomer != null ? selectedCustomer.getFullName() : "Khách vãng lai")
+                                + "\nĐiểm cộng: "
+                                + (selectedCustomer != null ? earnPoints : 0)
                 );
 
                 orderService.clearCart();
@@ -583,6 +610,16 @@ public class POSController {
         lblTotalAmount.setText(formatPrice(total));
     }
 
+    private BigDecimal calculateSubtotal() {
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (OrderDetailDTO item : orderService.getCartItems()) {
+            subtotal = subtotal.add(item.getSubTotal());
+        }
+
+        return subtotal;
+    }
+
     // ==================== UI HELPERS ====================
 
     private void setActiveButton(Button clickedButton) {
@@ -608,9 +645,40 @@ public class POSController {
         return String.format("%,.0f đ", price);
     }
 
+    //======================CHECK OUT DISPLAY======================================
+    private CustomerDialogController showCustomerDialog() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/vtea/view/CustomerDialog.fxml")
+            );
+
+            Parent root = loader.load();
+            CustomerDialogController controller = loader.getController();
+
+            BigDecimal subtotal = calculateSubtotal();
+            BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
+            BigDecimal total = orderService.getCurrentOrder().getTotalAmount();
+
+            controller.setOrderSummary(subtotal, vat, total);
+
+            Stage stage = new Stage();
+            stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+
+            return controller;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Lỗi", "Không thể mở màn hình khách hàng: " + e.getMessage());
+            return null;
+        }
+    }
     // ==================== ALERT HELPERS ====================
 
-    // ==================== ALERT HELPERS (ĐÃ NÂNG CẤP LÊN CUSTOM DIALOG) ====================
+    // ==================== ALERT HELPERS====================
 
     private void showSuccessAlert(String title, String message) {
         DialogHelper.showInfo(title, message);
