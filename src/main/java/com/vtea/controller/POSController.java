@@ -19,7 +19,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import com.vtea.dao.CustomerDAO;
 import com.vtea.model.Customer;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -30,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import javafx.application.Platform;
 import java.util.concurrent.CompletableFuture;
+import com.vtea.service.CustomerService;
 
 public class POSController {
 
@@ -37,7 +37,7 @@ public class POSController {
     private final POSCacheService posCacheService = POSCacheService.getInstance();
     //
     private final OrderService orderService = new OrderService();
-    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final CustomerService customerService = new CustomerService();
 
     // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager
     private int currentUserId = 1;
@@ -194,7 +194,7 @@ public class POSController {
 
             if (success) {
                 if (selectedCustomer != null && earnPoints > 0) {
-                    customerDAO.updateRewardPoints(selectedCustomer.getCustomerId(), earnPoints);
+                    customerService.addRewardPoints(selectedCustomer.getCustomerId(), earnPoints);
                 }
 
                 showSuccessAlert(

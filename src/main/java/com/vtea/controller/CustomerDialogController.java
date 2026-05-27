@@ -1,6 +1,6 @@
 package com.vtea.controller;
 
-import com.vtea.dao.CustomerDAO;
+import com.vtea.service.CustomerService;
 import com.vtea.model.Customer;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -41,7 +41,7 @@ public class CustomerDialogController {
     @FXML private Button btnWalkIn;
 
     private boolean walkIn = false;
-    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final CustomerService customerService = new CustomerService();
 
     private Customer selectedCustomer;
     private boolean submitted = false;
@@ -144,7 +144,7 @@ public class CustomerDialogController {
             return;
         }
 
-        Customer customer = customerDAO.getCustomerByPhone(phone);
+        Customer customer = customerService.findCustomerByPhone(phone);
 
         if (customer != null) {
             selectedCustomer = customer;
@@ -176,14 +176,14 @@ public class CustomerDialogController {
             newCustomer.setPhoneNumber(phone);
             newCustomer.setFullName(name);
 
-            boolean inserted = customerDAO.insertCustomer(newCustomer);
+            boolean inserted = customerService.createCustomer(newCustomer);
 
             if (!inserted) {
                 showAlert("Lỗi", "Không thể tạo khách hàng mới.");
                 return;
             }
 
-            selectedCustomer = customerDAO.getCustomerByPhone(phone);
+            selectedCustomer = customerService.findCustomerByPhone(phone);
 
             if (selectedCustomer == null) {
                 showAlert("Lỗi", "Đã tạo khách nhưng không lấy lại được thông tin khách hàng.");
