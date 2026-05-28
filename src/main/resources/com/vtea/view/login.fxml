@@ -95,11 +95,11 @@
                 <VBox.margin><Insets bottom="28" /></VBox.margin>
                 <CheckBox fx:id="showPasswordCheckbox" styleClass="field-label" text="Hiển thị mật khẩu" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Hyperlink styleClass="forgot-password-link" text="Quên mật khẩu?" />
+                <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" styleClass="forgot-password-link" text="Quên mật khẩu?" />
             </HBox>
 
             <!-- Login Button -->
-            <Button fx:id="btnLogin" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Đăng nhập" />
+            <Button fx:id="btnLogin" defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" styleClass="btn-primary" text="Đăng nhập" />
 
         </VBox>
     </VBox>

@@ -1,5 +1,6 @@
 package com.vtea.controller;
 
+import com.vtea.utils.DialogHelper;
 import com.vtea.service.CustomerService;
 import com.vtea.model.Customer;
 import javafx.fxml.FXML;
@@ -84,23 +85,19 @@ public class CustomerDialogController {
     Neu khach ko tich diem thi bo qua
      */
     private void handleWalkIn() {
-        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmAlert.setTitle("Xác nhận");
-        confirmAlert.setHeaderText(null);
-        confirmAlert.setContentText("Bạn chắc chắn muốn bỏ qua tích điểm cho đơn hàng này?");
+        boolean confirmed = DialogHelper.showConfirm(
+                "Xác nhận",
+                "Bạn chắc chắn muốn bỏ qua tích điểm cho đơn hàng này?"
+        );
 
-        ButtonType btnYes = new ButtonType("Có, bỏ qua");
-        ButtonType btnNo = new ButtonType("Quay lại", ButtonBar.ButtonData.CANCEL_CLOSE);
+        if (!confirmed) {
+            return;
+        }
 
-        confirmAlert.getButtonTypes().setAll(btnYes, btnNo);
-
-        confirmAlert.showAndWait().ifPresent(result -> {
-            if (result == btnYes) {
-                selectedCustomer = null;
-                submitted = true;
-                closeDialog();
-            }
-        });
+        selectedCustomer = null;
+        walkIn = true;
+        submitted = true;
+        closeDialog();
     }
 
     public boolean isWalkIn() {

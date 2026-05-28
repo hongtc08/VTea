@@ -91,7 +91,16 @@ public class LoginController {
             preloadSystemDataThenOpenMain(sessionInfo.getFullName());
         } catch (Exception e) {
             // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
-            DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());        }
+            DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleForgotPassword(ActionEvent event) {
+        DialogHelper.showInfo(
+                "Quên mật khẩu",
+                "Vui lòng liên hệ số điện thoại 0987654321 để được hỗ trợ xử lý."
+        );
     }
 
     private void preloadSystemDataThenOpenMain(String fullName) {
