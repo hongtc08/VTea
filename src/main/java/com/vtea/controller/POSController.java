@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -44,6 +45,7 @@ public class POSController {
 
     @FXML private FlowPane productGrid;
 
+    @FXML private ScrollPane categoryScroll;
     @FXML private HBox categoryBar;
 
     @FXML private VBox cartItemsBox;
@@ -251,6 +253,7 @@ public class POSController {
     Hien topping tu cache lay tu Database
      */
     private void showOnlyToppings() {
+        setCategoryVisible(false);
         displayProducts(posCacheService.getToppings());
     }
 
@@ -542,6 +545,7 @@ public class POSController {
                     toppingMode = false;
                     toppingTargetItem = null;
                     if (lblScreenTitle != null) lblScreenTitle.setText("Bán hàng (POS)");
+                    setCategoryVisible(true);
                     loadProductsFromDatabase();
                 }
 
@@ -633,6 +637,19 @@ public class POSController {
 
         if (clickedButton != null && !clickedButton.getStyleClass().contains("category-btn-active")) {
             clickedButton.getStyleClass().add("category-btn-active");
+        }
+    }
+
+    private void setCategoryVisible(boolean visible) {
+        if (categoryScroll != null) {
+            categoryScroll.setVisible(visible);
+            categoryScroll.setManaged(visible);
+            return;
+        }
+
+        if (categoryBar != null) {
+            categoryBar.setVisible(visible);
+            categoryBar.setManaged(visible);
         }
     }
     

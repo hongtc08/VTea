@@ -21,11 +21,20 @@
             <Label text="Cập nhật danh sách món ăn và giá bán của hệ thống Vtea" styleClass="screen-subtitle"/>
         </VBox>
 
-        <Button onAction="#handleAddNewDish" styleClass="action-btn-primary">
+        <Button fx:id="btnToggleToppingMode" onAction="#handleToggleToppingMode" styleClass="btn-secondary">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <FontIcon iconLiteral="fth-layers" iconColor="#523628" iconSize="18"/>
+                    <Label fx:id="lblToggleToppingMode" text="Quản lý topping" style="-fx-text-fill: #523628; -fx-font-weight: bold;"/>
+                </HBox>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnAddItem" onAction="#handleAddNewDish" styleClass="action-btn-primary">
             <graphic>
                 <HBox spacing="8" alignment="CENTER">
                     <FontIcon iconLiteral="fth-plus" iconColor="white" iconSize="18"/>
-                    <Label text="Thêm món ăn" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Label fx:id="lblAddItem" text="Thêm món ăn" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
                 </HBox>
             </graphic>
         </Button>
@@ -48,7 +57,7 @@
 <!--            </Button>-->
         </HBox>
 
-        <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" fitToHeight="true"
+        <ScrollPane fx:id="categoryScroll" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" fitToHeight="true"
                     minHeight="60" prefHeight="60"
                     styleClass="category-scroll" style="-fx-background-color: transparent; -fx-background: transparent;">
             <HBox fx:id="categoryBar" spacing="10" alignment="CENTER_LEFT">
