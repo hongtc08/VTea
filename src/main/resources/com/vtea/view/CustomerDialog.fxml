@@ -120,6 +120,11 @@
                 styleClass="btn-dialog-cancel"
                 prefWidth="120"
                 prefHeight="44"/>
-        <Button fx:id="btnSubmit" text="Xác nhận" styleClass="btn-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity" prefHeight="44"/>
+        <Button fx:id="btnSubmit"
+                text="Xác nhận"
+                styleClass="btn-primary"
+                prefWidth="140"
+                minWidth="140"
+                prefHeight="44"/>
     </HBox>
 </VBox>
