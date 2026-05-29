@@ -1,5 +1,6 @@
 package com.vtea.controller;
 
+import com.vtea.dto.CustomerDTO;
 import com.vtea.utils.DialogHelper;
 import com.vtea.service.CustomerService;
 import com.vtea.model.Customer;
@@ -44,7 +45,7 @@ public class CustomerDialogController {
     private boolean walkIn = false;
     private final CustomerService customerService = new CustomerService();
 
-    private Customer selectedCustomer;
+    private CustomerDTO selectedCustomer;
     private boolean submitted = false;
 
     private BigDecimal orderTotal = BigDecimal.ZERO;
@@ -141,7 +142,7 @@ public class CustomerDialogController {
             return;
         }
 
-        Customer customer = customerService.findCustomerByPhone(phone);
+        CustomerDTO customer = customerService.findCustomerByPhone(phone);
 
         if (customer != null) {
             selectedCustomer = customer;
@@ -192,7 +193,7 @@ public class CustomerDialogController {
         closeDialog();
     }
 
-    private void showExistingCustomer(Customer customer) {
+    private void showExistingCustomer(CustomerDTO customer) {
         if (newCustomerBox != null) {
             newCustomerBox.setVisible(false);
             newCustomerBox.setManaged(false);
@@ -252,7 +253,7 @@ public class CustomerDialogController {
         }
     }
 
-    public Customer getSelectedCustomer() {
+    public CustomerDTO getSelectedCustomer() {
         return selectedCustomer;
     }
 
