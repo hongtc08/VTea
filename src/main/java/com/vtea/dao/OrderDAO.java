@@ -14,113 +14,77 @@ import java.util.Date;
 public class OrderDAO {
     /**
      * Xử lý lưu hóa đơn và chi tiết hóa đơn (Transaction)
-     * Trả về true nếu lưu thành công, false nếu thất bại
+     * Nhận Connection từ Service.
      */
-    public boolean checkoutOrder(Order order, List<OrderDetail> details){
+    public boolean checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
         String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
         String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
-        Connection conn = null;
+        int generatedOrderId = -1;
 
-        try{
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false);
+        // 1. INSERT VÀO BẢNG ORDER
+        try(PreparedStatement psOrder = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
+            psOrder.setInt(1, order.getUserId());
 
-            int generatedOrderId = -1;
+            if (order.getCustomerId() != null && order.getCustomerId() > 0) {
+                psOrder.setInt(2, order.getCustomerId());
+            } else {
+                psOrder.setNull(2, java.sql.Types.INTEGER);
+            }
 
-            // 1. INSERT VÀO BẢNG ORDER
-            // Thêm tham số Statement.RETURN_GENERATED_KEYS để lấy ID vừa tạo
-            try(PreparedStatement psOrder = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
-                psOrder.setInt(1, order.getUserId());
+            psOrder.setBigDecimal(3, order.getTotalAmount());
+            psOrder.setString(4, order.getStatus());
+            psOrder.setString(5, order.getPaymentMethod());
 
-                // Xử lý nếu khách hàng có ID hợp lệ (lớn hơn 0)
-                if (order.getCustomerId() != null && order.getCustomerId() > 0) {
-                    psOrder.setInt(2, order.getCustomerId());
+            psOrder.executeUpdate();
+
+            try (ResultSet rs = psOrder.getGeneratedKeys()) {
+                if (rs.next()) {
+                    generatedOrderId = rs.getInt(1);
                 } else {
-                    psOrder.setNull(2, java.sql.Types.INTEGER);
-                }
-
-                psOrder.setBigDecimal(3, order.getTotalAmount());
-                psOrder.setString(4, order.getStatus()); // Ví dụ: "PAID"
-                psOrder.setString(5, order.getPaymentMethod());
-
-                psOrder.executeUpdate();
-
-                // Lấy order_id vừa được database tự động tạo ra
-                try (ResultSet rs = psOrder.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedOrderId = rs.getInt(1);
-                    } else {
-                        throw new SQLException("Không thể lấy ID của Order vừa tạo.");
-                    }
-                }
-            }
-
-            // 2. INSERT VÀO BẢNG ORDER_DETAIL VÀ ORDER_DETAIL_TOPPING
-            try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
-                 PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)) {
-
-                for (OrderDetail detail : details) {
-                    psDetail.setInt(1, generatedOrderId); // Dùng ID vừa lấy được ở trên
-                    psDetail.setInt(2, detail.getProductId());
-                    psDetail.setInt(3, detail.getQuantity());
-                    psDetail.setBigDecimal(4, detail.getUnitPrice());
-                    psDetail.executeUpdate();
-
-                    int generatedDetailId = -1;
-                    try (ResultSet rsDetail = psDetail.getGeneratedKeys()) {
-                        if (rsDetail.next())
-                            generatedDetailId = rsDetail.getInt(1);
-                    }
-
-                    // 3. NẾU LY NƯỚC CÓ TOPPING -> INSERT VÀO BẢNG ORDER_DETAIL_TOPPING
-                    if (detail.getToppingQuantities() != null && !detail.getToppingQuantities().isEmpty()) {
-                        // Duyệt qua từng cặp (Topping ID - Số lượng) trong Map
-                        for (Map.Entry<Integer, Integer> entry : detail.getToppingQuantities().entrySet()) {
-                            int toppingId = entry.getKey();
-                            int toppingQty = entry.getValue();
-
-                            psTopping.setInt(1, generatedDetailId);
-                            psTopping.setInt(2, toppingId);
-                            psTopping.setInt(3, toppingId); // Truyền lần 2 cho câu subquery lấy giá
-                            psTopping.setInt(4, toppingQty);
-
-                            psTopping.addBatch();
-                        }
-                        psTopping.executeBatch();
-                    }
-                }
-            }
-
-            // NẾU TẤT CẢ ĐỀU ỔN -> XÁC NHẬN LƯU
-            conn.commit();
-            return true;
-
-        } catch (SQLException e) {
-            // NẾU CÓ BẤT KỲ LỖI NÀO Ở ORDER HAY DETAIL -> HỦY BỎ TẤT CẢ (ROLLBACK)
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                    System.err.println("Transaction bị lỗi, đã Rollback an toàn!");
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            e.printStackTrace();
-            return false;
-
-        } finally {
-            // TRẢ LẠI TRẠNG THÁI CŨ VÀ ĐÓNG KẾT NỐI
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+                    throw new SQLException("Không thể lấy ID của Order vừa tạo.");
                 }
             }
         }
+
+        // 2. INSERT VÀO BẢNG ORDER_DETAIL VÀ ORDER_DETAIL_TOPPING
+        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)) {
+
+            for (OrderDetail detail : details) {
+                psDetail.setInt(1, generatedOrderId);
+                psDetail.setInt(2, detail.getProductId());
+                psDetail.setInt(3, detail.getQuantity());
+                psDetail.setBigDecimal(4, detail.getUnitPrice());
+                psDetail.executeUpdate();
+
+                int generatedDetailId = -1;
+                try (ResultSet rsDetail = psDetail.getGeneratedKeys()) {
+                    if (rsDetail.next())
+                        generatedDetailId = rsDetail.getInt(1);
+                }
+
+                // 3. THÊM TOPPING
+                if (detail.getToppingQuantities() != null && !detail.getToppingQuantities().isEmpty()) {
+                    for (Map.Entry<Integer, Integer> entry : detail.getToppingQuantities().entrySet()) {
+                        int toppingId = entry.getKey();
+                        int toppingQty = entry.getValue();
+
+                        psTopping.setInt(1, generatedDetailId);
+                        psTopping.setInt(2, toppingId);
+                        psTopping.setInt(3, toppingId);
+                        psTopping.setInt(4, toppingQty);
+
+                        psTopping.addBatch();
+                    }
+                    psTopping.executeBatch();
+                }
+            }
+        }
+
+
+        return true;
     }
 
 
