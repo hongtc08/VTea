@@ -33,12 +33,12 @@
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;" hbarPolicy="NEVER">
         <VBox spacing="18">
             <VBox spacing="8">
-                <Label text="Tên món ăn" styleClass="form-label"/>
+                <Label fx:id="lblNameField" text="Tên món ăn" styleClass="form-label"/>
                 <TextField fx:id="txtName" promptText="Ví dụ: Trà sữa trân châu hoàng kim" styleClass="form-input-field"/>
             </VBox>
 
-            <HBox spacing="16">
-                <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <HBox fx:id="categoryPriceRow" spacing="16">
+                <VBox fx:id="categoryFieldBox" spacing="8" HBox.hgrow="ALWAYS">
                     <Label text="Loại món" styleClass="form-label"/>
                     <ComboBox fx:id="cbCategory" maxWidth="Infinity" promptText="Chọn loại..." styleClass="form-input-field"/>
                 </VBox>
@@ -48,8 +48,8 @@
                 </VBox>
             </HBox>
 
-            <VBox spacing="8">
-                <Label text="Hình ảnh món ăn" styleClass="form-label"/>
+            <VBox fx:id="imageSection" spacing="8">
+                <Label fx:id="lblImageField" text="Hình ảnh món ăn" styleClass="form-label"/>
                 <VBox fx:id="imageUploadArea" alignment="CENTER" spacing="12" prefHeight="150" styleClass="image-upload-placeholder">
                     <FontIcon iconLiteral="fth-image" iconSize="32" iconColor="#BBBBBB"/>
                     <VBox alignment="CENTER" spacing="2">
