@@ -2,8 +2,10 @@ package com.vtea.controller;
 import com.vtea.service.POSCacheService;
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
+import com.vtea.dto.ToppingDTO;
 import com.vtea.service.CategoryService;
 import com.vtea.service.ProductService;
+import com.vtea.service.ToppingService;
 import com.vtea.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -13,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -22,7 +25,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import com.vtea.service.POSCacheService;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -34,18 +36,24 @@ public class MenuController {
     // ===== ĐỊNH NGHĨA ID DANH MỤC CỐ ĐỊNH (Khớp với Database và POSController) =====
     private static final int CATEGORY_ALL = -1;
     @FXML private TextField searchField;
+    @FXML private ScrollPane categoryScroll;
     @FXML private HBox categoryBar;
     @FXML private FlowPane menuGrid;
+    @FXML private Label lblAddItem;
+    @FXML private Label lblToggleToppingMode;
 
     private ProductService productService = new ProductService();
     private CategoryService categoryService = new CategoryService();
+    private ToppingService toppingService = new ToppingService();
     private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     private List<ProductDTO> allProducts = new ArrayList<>();
     private List<CategoryDTO> allCategories = new ArrayList<>();
+    private List<ToppingDTO> allToppings = new ArrayList<>();
 
     // Thay thế biến String thành int để lưu ID danh mục đang chọn
     private int currentCategoryIdFilter = CATEGORY_ALL;
+    private boolean toppingMode = false;
 
     @FXML
     public void initialize() {
@@ -118,8 +126,52 @@ public class MenuController {
 
     private void setupSearch() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            filterProducts();
+            refreshGrid();
         });
+    }
+
+    @FXML
+    private void handleToggleToppingMode(ActionEvent event) {
+        toppingMode = !toppingMode;
+
+        if (toppingMode) {
+            loadToppingData();
+            setCategoryVisible(false);
+            if (lblAddItem != null) {
+                lblAddItem.setText("Thêm topping");
+            }
+            if (lblToggleToppingMode != null) {
+                lblToggleToppingMode.setText("Quản lý món");
+            }
+            refreshGrid();
+            return;
+        }
+
+        setCategoryVisible(true);
+        if (lblAddItem != null) {
+            lblAddItem.setText("Thêm món ăn");
+        }
+        if (lblToggleToppingMode != null) {
+            lblToggleToppingMode.setText("Quản lý topping");
+        }
+        loadData();
+    }
+
+    private void loadToppingData() {
+        try {
+            allToppings = toppingService.getAllActiveToppings();
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi tải dữ liệu", "Không thể tải danh sách topping: " + e.getMessage());
+        }
+    }
+
+    private void refreshGrid() {
+        if (toppingMode) {
+            filterToppings();
+        } else {
+            filterProducts();
+        }
     }
 
     // ===== BỘ LỌC ĐÃ ĐƯỢC NÂNG CẤP =====
@@ -138,6 +190,20 @@ public class MenuController {
             // Nếu thỏa mãn cả 2 điều kiện thì đưa lên giao diện
             if (matchesSearch && matchesCategory) {
                 menuGrid.getChildren().add(createProductCard(product));
+            }
+        }
+    }
+
+    private void filterToppings() {
+        menuGrid.getChildren().clear();
+        String searchText = searchField.getText() == null ? "" : searchField.getText().toLowerCase();
+
+        for (ToppingDTO topping : allToppings) {
+            boolean matchesSearch = topping.getName() != null
+                    && topping.getName().toLowerCase().contains(searchText);
+
+            if (matchesSearch) {
+                menuGrid.getChildren().add(createToppingCard(topping));
             }
         }
     }
@@ -186,6 +252,33 @@ public class MenuController {
         }
     }
 
+    private VBox createToppingCard(ToppingDTO topping) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuItem.fxml"));
+            VBox card = loader.load();
+
+            Label lblProductName = (Label) loader.getNamespace().get("lblProductName");
+            Label lblCategory = (Label) loader.getNamespace().get("lblCategory");
+            Label lblPrice = (Label) loader.getNamespace().get("lblPrice");
+            Button btnEdit = (Button) loader.getNamespace().get("btnEdit");
+            Button btnDelete = (Button) loader.getNamespace().get("btnDelete");
+
+            lblProductName.setText(topping.getName());
+            lblCategory.setText(topping.getAvailable() ? "Topping" : "Topping (ngừng bán)");
+
+            NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+            lblPrice.setText(formatter.format(topping.getPrice()) + "đ");
+
+            btnEdit.setOnAction(e -> handleEditTopping(topping));
+            btnDelete.setOnAction(e -> handleDeleteTopping(topping));
+
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox();
+        }
+    }
+
     private void handleEditProduct(ProductDTO product) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuForm.fxml"));
@@ -224,6 +317,11 @@ public class MenuController {
     }
 
     public void handleAddNewDish(ActionEvent actionEvent) {
+        if (toppingMode) {
+            handleAddNewTopping();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuForm.fxml"));
             Parent root = loader.load();
@@ -242,6 +340,80 @@ public class MenuController {
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở form thêm món: " + e.getMessage());
+        }
+    }
+
+    private void handleAddNewTopping() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuForm.fxml"));
+            Parent root = loader.load();
+
+            MenuFormController controller = loader.getController();
+            controller.setTopping(null, this);
+
+            showFormStage(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form thêm topping: " + e.getMessage());
+        }
+    }
+
+    private void handleEditTopping(ToppingDTO topping) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuForm.fxml"));
+            Parent root = loader.load();
+
+            MenuFormController controller = loader.getController();
+            controller.setTopping(topping, this);
+
+            showFormStage(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form sửa topping: " + e.getMessage());
+        }
+    }
+
+    private void handleDeleteTopping(ToppingDTO topping) {
+        boolean isConfirmed = DialogHelper.showConfirm("Xóa topping", "Bạn có chắc chắn muốn xóa '" + topping.getName() + "'?");
+        if (isConfirmed) {
+            try {
+                toppingService.softDeleteTopping(topping.getToppingId());
+                POSCacheService.getInstance().refresh();
+
+                DialogHelper.showInfo("Thành công", "Đã xóa topping thành công.");
+                reloadToppingMode();
+            } catch (Exception e) {
+                DialogHelper.showInfo("Lỗi", "Không thể xóa topping: " + e.getMessage());
+            }
+        }
+    }
+
+    public void reloadToppingMode() {
+        loadToppingData();
+        refreshGrid();
+    }
+
+    private void showFormStage(Parent root) {
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(StageStyle.TRANSPARENT);
+
+        Scene scene = new Scene(root);
+        scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        stage.setScene(scene);
+        stage.showAndWait();
+    }
+
+    private void setCategoryVisible(boolean visible) {
+        if (categoryScroll != null) {
+            categoryScroll.setVisible(visible);
+            categoryScroll.setManaged(visible);
+            return;
+        }
+
+        if (categoryBar != null) {
+            categoryBar.setVisible(visible);
+            categoryBar.setManaged(visible);
         }
     }
 

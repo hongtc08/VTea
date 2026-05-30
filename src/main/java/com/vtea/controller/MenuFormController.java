@@ -2,8 +2,10 @@ package com.vtea.controller;
 
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
+import com.vtea.dto.ToppingDTO;
 import com.vtea.service.CategoryService;
 import com.vtea.service.ProductService;
+import com.vtea.service.ToppingService;
 import com.vtea.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -13,10 +15,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
 import com.vtea.service.POSCacheService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,18 +29,19 @@ import java.nio.file.StandardCopyOption;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 public class MenuFormController {
 
     @FXML private Label lblFormTitle;
+    @FXML private Label lblNameField;
+    @FXML private Label lblImageField;
     @FXML private Button btnClose;
     @FXML private TextField txtName;
+    @FXML private HBox categoryPriceRow;
+    @FXML private VBox categoryFieldBox;
     @FXML private ComboBox<CategoryDTO> cbCategory;
     @FXML private TextField txtPrice;
+    @FXML private VBox imageSection;
     @FXML private VBox imageUploadArea;
     @FXML private ImageView imgPreview;
     @FXML private Button btnCancel;
@@ -46,10 +49,13 @@ public class MenuFormController {
 
     private ProductService productService = new ProductService();
     private CategoryService categoryService = new CategoryService();
+    private ToppingService toppingService = new ToppingService();
 
     private ProductDTO currentProduct;
+    private ToppingDTO currentTopping;
     private MenuController parentController;
     private String selectedImagePath = null;
+    private boolean toppingMode = false;
 
     @FXML
     public void initialize() {
@@ -90,6 +96,9 @@ public class MenuFormController {
     public void setProduct(ProductDTO product, MenuController parentController) {
         this.parentController = parentController;
         this.currentProduct = product;
+        this.currentTopping = null;
+        this.toppingMode = false;
+        setProductModeFields();
 
         if (product != null) {
             lblFormTitle.setText("Chỉnh sửa món");
@@ -129,6 +138,68 @@ public class MenuFormController {
             lblFormTitle.setText("Thêm món mới");
             btnSubmit.setText("Xác nhận thêm");
             currentProduct = new ProductDTO();
+        }
+    }
+
+    public void setTopping(ToppingDTO topping, MenuController parentController) {
+        this.parentController = parentController;
+        this.currentTopping = topping != null ? topping : new ToppingDTO();
+        this.currentProduct = null;
+        this.toppingMode = true;
+        this.selectedImagePath = null;
+
+        setToppingModeFields();
+
+        if (topping != null) {
+            lblFormTitle.setText("Chỉnh sửa topping");
+            btnSubmit.setText("Lưu thay đổi");
+            txtName.setText(topping.getName());
+            if (topping.getPrice() != null) {
+                txtPrice.setText(String.valueOf(topping.getPrice().longValue()));
+            }
+        } else {
+            lblFormTitle.setText("Thêm topping mới");
+            btnSubmit.setText("Xác nhận thêm");
+        }
+    }
+
+    private void setProductModeFields() {
+        if (lblNameField != null) {
+            lblNameField.setText("Tên món ăn");
+        }
+
+        if (lblImageField != null) {
+            lblImageField.setText("Hình ảnh món ăn");
+        }
+
+        if (categoryFieldBox != null) {
+            categoryFieldBox.setVisible(true);
+            categoryFieldBox.setManaged(true);
+        }
+
+        if (imageSection != null) {
+            imageSection.setVisible(true);
+            imageSection.setManaged(true);
+        }
+    }
+
+    private void setToppingModeFields() {
+        if (lblNameField != null) {
+            lblNameField.setText("Tên topping");
+        }
+
+        if (lblImageField != null) {
+            lblImageField.setText("Hình ảnh topping");
+        }
+
+        if (categoryFieldBox != null) {
+            categoryFieldBox.setVisible(false);
+            categoryFieldBox.setManaged(false);
+        }
+
+        if (imageSection != null) {
+            imageSection.setVisible(true);
+            imageSection.setManaged(true);
         }
     }
 
@@ -220,10 +291,10 @@ public class MenuFormController {
     private void handleSave() {
         try {
             if (txtName.getText() == null || txtName.getText().trim().isEmpty()) {
-                DialogHelper.showInfo("Lỗi", "Vui lòng nhập tên món ăn.");
+                DialogHelper.showInfo("Lỗi", toppingMode ? "Vui lòng nhập tên topping." : "Vui lòng nhập tên món ăn.");
                 return;
             }
-            if (cbCategory.getSelectionModel().getSelectedItem() == null) {
+            if (!toppingMode && cbCategory.getSelectionModel().getSelectedItem() == null) {
                 DialogHelper.showInfo("Lỗi", "Vui lòng chọn loại món.");
                 return;
             }
@@ -235,6 +306,11 @@ public class MenuFormController {
             BigDecimal price = new BigDecimal(txtPrice.getText());
             if (price.compareTo(BigDecimal.ZERO) <= 0) {
                 DialogHelper.showInfo("Lỗi", "Giá bán phải lớn hơn 0.");
+                return;
+            }
+
+            if (toppingMode) {
+                saveTopping(price);
                 return;
             }
 
@@ -266,6 +342,26 @@ public class MenuFormController {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi lưu dữ liệu", e.getMessage());
         }
+    }
+
+    private void saveTopping(BigDecimal price) throws Exception {
+        currentTopping.setName(txtName.getText().trim());
+        currentTopping.setPrice(price);
+        currentTopping.setAvailable(true);
+
+        if (currentTopping.getToppingId() > 0) {
+            toppingService.updateTopping(currentTopping);
+            DialogHelper.showInfo("Thành công", "Đã cập nhật topping.");
+        } else {
+            toppingService.createTopping(currentTopping);
+            DialogHelper.showInfo("Thành công", "Đã thêm topping mới.");
+        }
+
+        POSCacheService.getInstance().refresh();
+        if (parentController != null) {
+            parentController.reloadToppingMode();
+        }
+        closeWindow();
     }
 
     private void closeWindow() {
