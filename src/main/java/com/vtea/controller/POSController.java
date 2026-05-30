@@ -368,6 +368,13 @@ public class POSController {
     // ==================== CART DISPLAY ====================
 
     private void refreshCart() {
+        if (toppingMode && (toppingTargetItem == null || !orderService.getCartItems().contains(toppingTargetItem))) {
+            toppingMode = false;
+            toppingTargetItem = null;
+            if (lblScreenTitle != null) lblScreenTitle.setText("Bán hàng (POS)");
+            setCategoryVisible(true);
+            loadProductsFromDatabase();
+        }
         updateCartDisplay();
         updateTotalAmount();
     }

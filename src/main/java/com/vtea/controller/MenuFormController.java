@@ -9,6 +9,9 @@ import com.vtea.service.ToppingService;
 import com.vtea.utils.DialogHelper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -18,7 +21,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import com.vtea.service.POSCacheService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -44,6 +49,7 @@ public class MenuFormController {
     @FXML private VBox imageSection;
     @FXML private VBox imageUploadArea;
     @FXML private ImageView imgPreview;
+    @FXML private Button btnEditRecipe;
     @FXML private Button btnCancel;
     @FXML private Button btnSubmit;
 
@@ -82,6 +88,7 @@ public class MenuFormController {
         btnClose.setOnAction(e -> closeWindow());
         btnCancel.setOnAction(e -> closeWindow());
         btnSubmit.setOnAction(e -> handleSave());
+        btnEditRecipe.setOnAction(e -> openRecipeForm());
 
         imageUploadArea.setOnMouseClicked(e -> handleImageUpload());
 
@@ -200,6 +207,26 @@ public class MenuFormController {
         if (imageSection != null) {
             imageSection.setVisible(true);
             imageSection.setManaged(true);
+        }
+    }
+
+    private void openRecipeForm() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/RecipeForm.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+            stage.initOwner(btnEditRecipe.getScene().getWindow());
+
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form công thức: " + e.getMessage());
         }
     }
 
