@@ -7,7 +7,7 @@
 <?import java.net.URL?>
 
 <?import javafx.scene.image.ImageView?>
-<VBox spacing="20" styleClass="modal-container" prefWidth="480"
+<VBox spacing="20" styleClass="modal-container" prefWidth="520"
       xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.vtea.controller.MenuFormController">
 
@@ -57,6 +57,22 @@
                         <Label text="Hỗ trợ: JPG, PNG (Tối đa 2MB)" style="-fx-text-fill: #999999; -fx-font-size: 11px;"/>
                     </VBox>
                     <ImageView fx:id="imgPreview" fitWidth="100" fitHeight="100" preserveRatio="true" managed="false" visible="false"/>
+                </VBox>
+            </VBox>
+
+            <VBox spacing="10">
+                <HBox alignment="CENTER_LEFT">
+                    <VBox spacing="2">
+                        <Label text="Công thức" styleClass="form-label"/>
+                        <Label text="Nguyên liệu dùng để tạo món này" style="-fx-text-fill: #999999; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnEditRecipe" text="Thêm công thức" styleClass="action-btn-primary"/>
+                </HBox>
+                <VBox spacing="6"
+                      style="-fx-background-color: #FAF9F8; -fx-background-radius: 10; -fx-padding: 12;">
+                    <Label text="Chưa có nguyên liệu trong công thức."
+                           style="-fx-text-fill: #999999; -fx-font-size: 12px;"/>
                 </VBox>
             </VBox>
         </VBox>

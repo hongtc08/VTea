@@ -1188,3 +1188,542 @@
 .text-orange {
     -fx-text-fill: #F59E0B;
 }
+
+/* ============================================================ */
+/* RECIPE FORM */
+/* ============================================================ */
+.recipe-form {
+    -fx-background-color: linear-gradient(to bottom, #ffffff, #fffaf8);
+    -fx-border-color: #eadfd9;
+}
+
+.recipe-header {
+    -fx-background-color: linear-gradient(to right, #fff7f2, #ffffff);
+    -fx-background-radius: 14;
+    -fx-border-color: #f0e4df;
+    -fx-border-radius: 14;
+    -fx-padding: 12 14;
+}
+
+.recipe-header-icon {
+    -fx-background-color: #f0faf9;
+    -fx-background-radius: 12;
+    -fx-border-color: #b8ebe5;
+    -fx-border-radius: 12;
+    -fx-pref-width: 48;
+    -fx-pref-height: 48;
+}
+
+.recipe-title {
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #442a22;
+}
+
+.recipe-subtitle,
+.recipe-section-hint,
+.recipe-ingredient-note {
+    -fx-text-fill: #8b7b73;
+    -fx-font-size: 12px;
+}
+
+.recipe-close-btn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+    -fx-padding: 8;
+}
+
+.recipe-close-btn:hover {
+    -fx-background-color: #f5efed;
+}
+
+.recipe-add-card,
+.recipe-list-card {
+    -fx-background-color: #faf9f8;
+    -fx-background-radius: 14;
+    -fx-border-color: #eee5e0;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.recipe-add-card {
+    -fx-background-color: linear-gradient(to right, #faf9f8, #f0faf9);
+}
+
+.recipe-section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #442a22;
+}
+
+.recipe-step-badge,
+.recipe-count-badge {
+    -fx-background-color: #e6f4ea;
+    -fx-background-radius: 999;
+    -fx-text-fill: #1e8e3e;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 10;
+}
+
+.recipe-count-badge {
+    -fx-background-color: #fdf1ed;
+    -fx-text-fill: #78350f;
+}
+
+.recipe-field {
+    -fx-background-color: white;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-border-width: 1.5;
+    -fx-padding: 9 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1c1917;
+    -fx-pref-height: 42;
+}
+
+.recipe-field:focused {
+    -fx-border-color: #12b6a2;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.18), 10, 0, 0, 0);
+}
+
+.recipe-spinner,
+.recipe-row-spinner {
+    -fx-padding: 0;
+}
+
+.recipe-spinner .text-field,
+.recipe-row-spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-padding: 0 4;
+}
+
+.recipe-unit-label {
+    -fx-text-fill: #6b5b54;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-min-width: 50;
+}
+
+.recipe-add-btn,
+.recipe-submit-btn {
+    -fx-background-color: linear-gradient(to bottom right, #442a22, #5d4037);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 9;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.28), 10, 0, 0, 3);
+}
+
+.recipe-add-btn:hover,
+.recipe-submit-btn:hover {
+    -fx-background-color: linear-gradient(to bottom right, #5d4037, #6d4c41);
+}
+
+.recipe-table-header {
+    -fx-background-color: #f5efed;
+    -fx-background-radius: 10;
+    -fx-padding: 8 12;
+}
+
+.recipe-table-header .label {
+    -fx-text-fill: #8b7b73;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.recipe-row {
+    -fx-background-color: white;
+    -fx-border-color: #eee5e0;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 11 12;
+}
+
+.recipe-row:hover {
+    -fx-border-color: #12b6a2;
+    -fx-background-color: #fffdfc;
+}
+
+.recipe-row-index {
+    -fx-background-color: #fdf1ed;
+    -fx-background-radius: 8;
+    -fx-pref-width: 32;
+    -fx-pref-height: 32;
+}
+
+.recipe-row-index .label {
+    -fx-text-fill: #78350f;
+    -fx-font-weight: bold;
+}
+
+.recipe-ingredient-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c1917;
+}
+
+.recipe-remove-btn {
+    -fx-background-color: #fef2f2;
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+
+.recipe-remove-btn:hover {
+    -fx-background-color: #fee2e2;
+}
+
+.recipe-footer {
+    -fx-border-color: #eee5e0 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 16 0 0 0;
+}
+
+.recipe-cancel-btn {
+    -fx-background-color: white;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 9;
+    -fx-background-radius: 9;
+    -fx-text-fill: #57534e;
+    -fx-font-weight: bold;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+}
+
+.recipe-cancel-btn:hover {
+    -fx-background-color: #faf9f8;
+    -fx-border-color: #a8998f;
+}
+
+/* Stronger visual treatment for the recipe modal */
+.recipe-form {
+    -fx-background-color: #fffaf8;
+    -fx-background-radius: 18;
+    -fx-border-color: #eadfd9;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.28), 32, 0.16, 0, 12);
+}
+
+.recipe-hero {
+    -fx-background-color: linear-gradient(to bottom right, #442a22, #6d4c41);
+    -fx-background-radius: 18 18 0 0;
+    -fx-padding: 24 28 24 28;
+}
+
+.recipe-hero-icon {
+    -fx-background-color: rgba(255,255,255,0.16);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(255,255,255,0.26);
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-pref-width: 58;
+    -fx-pref-height: 58;
+}
+
+.recipe-hero-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.recipe-hero-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #eadfd9;
+}
+
+.recipe-hero-chip {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 10;
+}
+
+.recipe-hero-close-btn {
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+    -fx-padding: 9;
+}
+
+.recipe-hero-close-btn:hover {
+    -fx-background-color: rgba(255,255,255,0.22);
+}
+
+.recipe-body {
+    -fx-padding: 22 28 26 28;
+    -fx-background-color: linear-gradient(to bottom, #fffaf8, #f5efed);
+    -fx-background-radius: 0 0 18 18;
+}
+
+.recipe-add-card,
+.recipe-list-card {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: #eadfd9;
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.08), 16, 0, 0, 4);
+}
+
+.recipe-add-card {
+    -fx-background-color: linear-gradient(to bottom right, #ffffff, #f0faf9);
+    -fx-border-color: #cdeeea;
+}
+
+.recipe-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2f1d17;
+}
+
+.recipe-section-hint {
+    -fx-text-fill: #8b7b73;
+    -fx-font-size: 12px;
+}
+
+.recipe-field-label {
+    -fx-text-fill: #6b5b54;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.recipe-step-badge,
+.recipe-count-badge {
+    -fx-background-color: #fdf1ed;
+    -fx-background-radius: 999;
+    -fx-border-color: #f3d2c5;
+    -fx-border-radius: 999;
+    -fx-text-fill: #78350f;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 12;
+}
+
+.recipe-count-badge {
+    -fx-background-color: #e6f4ea;
+    -fx-border-color: #bfe5ca;
+    -fx-text-fill: #1e8e3e;
+}
+
+.recipe-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-padding: 10 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1c1917;
+    -fx-pref-height: 44;
+}
+
+.recipe-field:focused {
+    -fx-border-color: #12b6a2;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.22), 12, 0, 0, 0);
+}
+
+.recipe-unit-pill {
+    -fx-background-color: #fdf1ed;
+    -fx-background-radius: 12;
+    -fx-border-color: #f3d2c5;
+    -fx-border-radius: 12;
+    -fx-pref-width: 72;
+    -fx-pref-height: 44;
+}
+
+.recipe-unit-pill .label {
+    -fx-text-fill: #78350f;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.recipe-add-btn,
+.recipe-submit-btn {
+    -fx-background-color: linear-gradient(to bottom right, #12b6a2, #0f8f82);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 12;
+    -fx-padding: 11 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.32), 14, 0, 0, 4);
+}
+
+.recipe-submit-btn {
+    -fx-background-color: linear-gradient(to bottom right, #442a22, #6d4c41);
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.30), 14, 0, 0, 4);
+}
+
+.recipe-add-btn:hover {
+    -fx-background-color: linear-gradient(to bottom right, #14c7b1, #0f8f82);
+}
+
+.recipe-submit-btn:hover {
+    -fx-background-color: linear-gradient(to bottom right, #5d4037, #7b5548);
+}
+
+.recipe-table-header {
+    -fx-background-color: #f5efed;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+}
+
+.recipe-table-header .label {
+    -fx-text-fill: #7a675e;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.recipe-row {
+    -fx-background-color: #fffdfc;
+    -fx-border-color: #eee5e0;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 13 14;
+}
+
+.recipe-row:hover {
+    -fx-border-color: #12b6a2;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.14), 12, 0, 0, 3);
+}
+
+.recipe-row-index {
+    -fx-background-color: linear-gradient(to bottom right, #fdf1ed, #f5dfd4);
+    -fx-background-radius: 12;
+    -fx-border-color: #efd1c4;
+    -fx-border-radius: 12;
+    -fx-pref-width: 38;
+    -fx-pref-height: 38;
+}
+
+.recipe-row-index .label {
+    -fx-text-fill: #78350f;
+    -fx-font-weight: bold;
+}
+
+.recipe-ingredient-name {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1c1917;
+}
+
+.recipe-ingredient-note {
+    -fx-text-fill: #9b8a82;
+    -fx-font-size: 12px;
+}
+
+.recipe-remove-btn {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+}
+
+.recipe-remove-btn:hover {
+    -fx-background-color: #fee2e2;
+}
+
+.recipe-stepper {
+    -fx-background-color: white;
+    -fx-border-color: #d7cdc7;
+    -fx-border-radius: 14;
+    -fx-background-radius: 14;
+    -fx-border-width: 1.5;
+    -fx-padding: 4;
+    -fx-effect: innershadow(gaussian, rgba(68, 42, 34, 0.06), 8, 0, 0, 1);
+}
+
+.recipe-stepper:hover {
+    -fx-border-color: #12b6a2;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.16), 12, 0, 0, 2);
+}
+
+.recipe-stepper-btn {
+    -fx-background-color: #f5efed;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-text-fill: #442a22;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 34;
+    -fx-pref-height: 34;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+
+.recipe-stepper-btn:hover {
+    -fx-background-color: #12b6a2;
+    -fx-text-fill: white;
+}
+
+.recipe-stepper-btn:pressed {
+    -fx-background-color: #0f8f82;
+    -fx-scale-x: 0.96;
+    -fx-scale-y: 0.96;
+}
+
+.recipe-stepper-value {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #1c1917;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 54;
+    -fx-pref-height: 34;
+    -fx-padding: 0 4;
+}
+
+.recipe-stepper-value:focused {
+    -fx-background-color: #fffaf8;
+    -fx-background-radius: 8;
+}
+
+.recipe-remove-icon-btn {
+    -fx-background-color: #fef2f2;
+    -fx-border-color: #fecaca;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-pref-width: 44;
+    -fx-pref-height: 44;
+    -fx-cursor: hand;
+}
+
+.recipe-remove-icon-btn:hover {
+    -fx-background-color: #fee2e2;
+    -fx-border-color: #fca5a5;
+}
+
+.recipe-footer {
+    -fx-padding: 2 0 0 0;
+}
+
+.recipe-cancel-btn {
+    -fx-background-color: white;
+    -fx-border-color: #d6d3d1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-text-fill: #57534e;
+    -fx-font-weight: bold;
+    -fx-padding: 11 18;
+    -fx-cursor: hand;
+}
+
+.recipe-cancel-btn:hover {
+    -fx-background-color: #faf9f8;
+    -fx-border-color: #a8998f;
+}
