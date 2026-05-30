@@ -1,13 +1,17 @@
 package com.vtea.service;
 
+import com.vtea.dao.CustomerDAO;
 import com.vtea.dao.OrderDAO;
 import com.vtea.dao.ToppingDAO;
+import com.vtea.dto.CustomerDTO;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.model.Topping;
+import com.vtea.utils.DBConnection;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,18 +19,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+
 public class OrderService {
 
     private Order currentOrder;
     private final List<OrderDetailDTO> cartItems;
     private final OrderDAO orderDAO;
     private final ToppingDAO toppingDAO;
+    private final CustomerDAO customerDAO;
+    private List<Topping> cachedActiveToppings;
+
+    // Thông tin liên quan đến khách hàng và điểm thưởng
+    private int currentCustomerId = 0; // 0 nghĩa là Khách vãng lai (Không có thẻ)
+    private int pointsToUse = 0;       // Số điểm khách muốn dùng để trừ tiền
+    private BigDecimal discountAmount = BigDecimal.ZERO; // Tiền được giảm
+    // Hằng số quy đổi điểm thưởng -> tiền: 1 điểm thưởng tương ứng với 1000 VND.
+    public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000");
 
     public OrderService() {
         this.currentOrder = new Order();
         this.cartItems = new ArrayList<>();
         this.orderDAO = new OrderDAO();
         this.toppingDAO = new ToppingDAO();
+        this.customerDAO = new CustomerDAO();
+        this.cachedActiveToppings = toppingDAO.getAllActiveToppings();
 
         calculateTotal();
     }
@@ -48,6 +64,13 @@ public class OrderService {
 
         Map<Integer, Integer> safeToppingQuantities = normalizeToppingQuantities(toppingQuantities);
         BigDecimal toppingPrice = calculateToppingPrice(safeToppingQuantities);
+
+        OrderDetailDTO existingItem = findCartItemByProductIdAndToppings(productId, safeToppingQuantities);
+        if (existingItem != null) {
+            existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            calculateTotal();
+            return;
+        }
 
         OrderDetailDTO newItem = new OrderDetailDTO(
                 productId,
@@ -163,11 +186,70 @@ public class OrderService {
         }
 
         calculateTotal();
+        currentOrder.setCustomerId(currentCustomerId);
 
         List<OrderDetail> details = getDetailsForCheckout(0);
 
-        return orderDAO.checkoutOrder(currentOrder, details);
+        // --- BẮT ĐẦU TRANSACTION ---
+        Connection conn = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // Thao tác 1: Lưu Order và Order Details
+            boolean isOrderSaved = orderDAO.checkoutOrder(conn, currentOrder, details);
+            if (!isOrderSaved) {
+                throw new Exception("Lỗi hệ thống: Không thể tạo hóa đơn!");
+            }
+
+            // Thao tác 2 & 3: Trừ điểm và Cộng điểm
+            if (currentCustomerId > 0) {
+                if (pointsToUse > 0) {
+                    customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
+                }
+
+                int pointsEarned = currentOrder.getTotalAmount().divide(new BigDecimal("10000"), java.math.RoundingMode.DOWN).intValue();
+                if (pointsEarned > 0) {
+                    customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
+                }
+            }
+
+            // NẾU CẢ 3 BƯỚC ĐỀU THỰC HIỆN THÀNH CÔNG -> LƯU DATABASE
+            conn.commit();
+
+            // Dọn dẹp giỏ hàng
+            clearCart();
+            currentCustomerId = 0;
+            pointsToUse = 0;
+            return true;
+
+        } catch (Exception e) {
+            // NẾU CÓ BẤT CỨ LỖI GÌ XẢY RA -> TRẢ TOÀN BỘ DỮ LIỆU VỀ NHƯ CŨ
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    System.err.println(">>> TRANSACTION FAILED: Đã Rollback giao dịch an toàn!");
+                } catch (java.sql.SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            // Trả lại trạng thái cũ và đóng đường ống
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (java.sql.SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
+
 
     // ==================== FIND CART ITEM METHODS ====================
 
@@ -228,14 +310,13 @@ public class OrderService {
             return BigDecimal.ZERO;
         }
 
-        List<Topping> activeToppings = toppingDAO.getAllActiveToppings();
         BigDecimal total = BigDecimal.ZERO;
 
         for (Map.Entry<Integer, Integer> entry : toppingQuantities.entrySet()) {
             int toppingId = entry.getKey();
             int quantity = entry.getValue();
 
-            Topping topping = findActiveToppingById(activeToppings, toppingId);
+            Topping topping = findActiveToppingById(this.cachedActiveToppings, toppingId);
 
             if (topping == null) {
                 throw new IllegalArgumentException("Topping không tồn tại hoặc đã ngừng bán: " + toppingId);
@@ -322,19 +403,66 @@ public class OrderService {
         }
     }
 
+
+
+    // ==================== CUSTOMER & POINTS METHODS ====================
+
+    // Gọi hàm này khi thu ngân quét mã hoặc nhập xong SĐT khách
+    public void setCustomer(int customerId) {
+        this.currentCustomerId = customerId;
+        this.pointsToUse = 0; // Đổi khách thì reset điểm muốn dùng về 0
+        calculateTotal();
+    }
+
+    // Gọi hàm này khi thu ngân gõ số điểm muốn xài vào ô Text
+    public void applyRewardPoints(int points) throws Exception {
+        if (currentCustomerId <= 0) {
+            throw new Exception("Lỗi: Vui lòng chọn khách hàng thành viên trước!");
+        }
+
+        CustomerDTO customer = customerDAO.getCustomerById(currentCustomerId);
+        if (customer == null || customer.getRewardPoints() < points) {
+            throw new Exception("Lỗi: Khách hàng không đủ điểm!");
+        }
+
+        this.pointsToUse = points;
+        calculateTotal(); // Tính lại tổng tiền ngay lập tức
+    }
+
+    // Lấy tiền giảm giá để UI hiển thị
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
     // ==================== CALCULATE / VALIDATE METHODS ====================
 
     private void calculateTotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
 
-        for (OrderDetailDTO item : cartItems) {
+        for (OrderDetailDTO item: cartItems) {
             subtotal = subtotal.add(item.getSubTotal());
         }
 
-        BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
-        BigDecimal total = subtotal.add(vat);
+        // 1. Tính số tiền giảm giá thông qua quy đổi điểm thưởng (Ví dụ 1 điểm = 1000đ)
+        this.discountAmount = new BigDecimal(this.pointsToUse).multiply(POINT_CONVERSION_RATE);
 
-        currentOrder.setTotalAmount(total);
+        // 2. Ép bảo mật: Không được giảm lố tiền món nước
+        if (this.discountAmount.compareTo(subtotal) > 0) {
+            this.discountAmount = subtotal; // Ép tiền giảm = tiền gốc
+            // Ép ngược lại số điểm thực tế bị trừ
+            this.pointsToUse = subtotal.divide(POINT_CONVERSION_RATE, java.math.RoundingMode.DOWN).intValue();
+        }
+
+        // 3. Tính lại tiền gốc sau khi đã trừ giảm giá
+        BigDecimal amountAfterDiscount = subtotal.subtract(this.discountAmount);
+
+        // 4. Áp dụng thuế VAT lên số tiền sau khi giảm giá
+        BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
+
+        // 5. Tính tổng tiền cuối cùng = Tiền sau giảm giá + VAT
+        BigDecimal finalTotal = amountAfterDiscount.add(vat);
+
+        currentOrder.setTotalAmount(finalTotal);
     }
 
     private void validateCartItem(int productId, String productName, BigDecimal price, int quantity) {

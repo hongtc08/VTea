@@ -34,7 +34,7 @@ public class CategoryDAO {
             }
         } catch (SQLException e){
             System.err.println("Lỗi khi lấy danh sách Category: " + e.getMessage());
-            e.printStackTrace();;
+            e.printStackTrace();
         }
         return categoryList;
     }

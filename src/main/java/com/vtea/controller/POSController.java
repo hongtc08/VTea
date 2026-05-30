@@ -1,4 +1,5 @@
 package com.vtea.controller;
+import com.vtea.dto.CustomerDTO;
 import com.vtea.service.POSCacheService;
 import com.vtea.utils.DialogHelper;
 import com.vtea.dto.CategoryDTO;
@@ -20,7 +21,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import com.vtea.model.Customer;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
@@ -34,7 +34,7 @@ import com.vtea.service.CustomerService;
 
 public class POSController {
 
-    //Them cache cai thien toc do
+    // Cache cai thien toc do
     private final POSCacheService posCacheService = POSCacheService.getInstance();
     //
     private final OrderService orderService = new OrderService();
@@ -180,7 +180,7 @@ public class POSController {
                 return;
             }
 
-            Customer selectedCustomer = customerDialog.getSelectedCustomer();
+            CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
             int earnPoints = customerDialog.getEarnPoints();
 
             Order order = orderService.getCurrentOrder();
@@ -192,13 +192,10 @@ public class POSController {
                 order.setCustomerId(selectedCustomer.getCustomerId());
             }
 
+            // Gọi Transaction chốt đơn từ OrderService (Bao gồm cả lưu bill, trừ tiền, cộng điểm)
             boolean success = orderService.checkoutCurrentOrder();
 
             if (success) {
-                if (selectedCustomer != null && earnPoints > 0) {
-                    customerService.addRewardPoints(selectedCustomer.getCustomerId(), earnPoints);
-                }
-
                 showSuccessAlert(
                         "✓ Thanh toán thành công!",
                         "Tổng tiền: " + formatPrice(order.getTotalAmount())

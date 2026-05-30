@@ -1,13 +1,18 @@
 package com.vtea.service;
 
 import com.vtea.dao.CustomerDAO;
+import com.vtea.dto.CustomerDTO;
 import com.vtea.model.Customer;
+import com.vtea.utils.DBConnection;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class CustomerService {
 
     private final CustomerDAO customerDAO = new CustomerDAO();
 
-    public Customer findCustomerByPhone(String phoneNumber) {
+    public CustomerDTO findCustomerByPhone(String phoneNumber) {
         return customerDAO.getCustomerByPhone(phoneNumber);
     }
 
@@ -15,11 +20,4 @@ public class CustomerService {
         return customerDAO.insertCustomer(customer);
     }
 
-    public boolean addRewardPoints(int customerId, int pointsToAdd) {
-        if (customerId <= 0 || pointsToAdd <= 0) {
-            return false;
-        }
-
-        return customerDAO.updateRewardPoints(customerId, pointsToAdd);
-    }
 }

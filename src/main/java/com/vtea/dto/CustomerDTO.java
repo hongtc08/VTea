@@ -1,23 +1,25 @@
-package com.vtea.model;
+package com.vtea.dto;
 
-public class Customer {
+public class CustomerDTO {
     private Integer customerId;
     private String phoneNumber;
     private String fullName;
     private int rewardPoints;
     private int totalAccumulatedPoints;
     private int tierId;
+    private String tierName;
 
-    public Customer() {
+    public CustomerDTO(){
 
     }
 
-    public Customer(Integer customerId, String fullName, String phoneNumber, int rewardPoints, int tierId, String tierName, int totalAccumulatedPoints) {
+    public CustomerDTO(Integer customerId, String fullName, String phoneNumber, int rewardPoints, int tierId, String tierName, int totalAccumulatedPoints) {
         this.customerId = customerId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.rewardPoints = rewardPoints;
         this.tierId = tierId;
+        this.tierName = tierName;
         this.totalAccumulatedPoints = totalAccumulatedPoints;
     }
 
@@ -37,6 +39,18 @@ public class Customer {
         return rewardPoints;
     }
 
+    public int getTierId() {
+        return tierId;
+    }
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public int getTotalAccumulatedPoints() {
+        return totalAccumulatedPoints;
+    }
+
     public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
@@ -53,20 +67,15 @@ public class Customer {
         this.rewardPoints = rewardPoints;
     }
 
-    public int getTierId() {
-        return tierId;
-    }
-
-    public int getTotalAccumulatedPoints() {
-        return totalAccumulatedPoints;
-    }
-
     public void setTierId(int tierId) {
         this.tierId = tierId;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
     }
 
     public void setTotalAccumulatedPoints(int totalAccumulatedPoints) {
         this.totalAccumulatedPoints = totalAccumulatedPoints;
     }
-
 }
