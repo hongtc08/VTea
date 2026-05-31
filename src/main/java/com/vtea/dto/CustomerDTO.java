@@ -8,12 +8,13 @@ public class CustomerDTO {
     private int totalAccumulatedPoints;
     private int tierId;
     private String tierName;
+    private int discountPercent;
 
     public CustomerDTO(){
 
     }
 
-    public CustomerDTO(Integer customerId, String fullName, String phoneNumber, int rewardPoints, int tierId, String tierName, int totalAccumulatedPoints) {
+    public CustomerDTO(Integer customerId, String fullName, String phoneNumber, int rewardPoints, int tierId, String tierName, int totalAccumulatedPoints, int discountPercent) {
         this.customerId = customerId;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
@@ -21,6 +22,7 @@ public class CustomerDTO {
         this.tierId = tierId;
         this.tierName = tierName;
         this.totalAccumulatedPoints = totalAccumulatedPoints;
+        this.discountPercent = discountPercent;
     }
 
     public Integer getCustomerId() {
@@ -77,5 +79,13 @@ public class CustomerDTO {
 
     public void setTotalAccumulatedPoints(int totalAccumulatedPoints) {
         this.totalAccumulatedPoints = totalAccumulatedPoints;
+    }
+
+    public int getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(int discountPercent) {
+        this.discountPercent = discountPercent;
     }
 }

@@ -16,7 +16,7 @@ public class CustomerDAO {
      */
     public CustomerDTO getCustomerByPhone(String phone) {
         CustomerDTO customer = null;
-        String query = "SELECT c.*, t.tier_name FROM customer c " +
+        String query = "SELECT c.*, t.tier_name, t.discount_percent FROM customer c " +
                 "JOIN member_tier t ON c.tier_id = t.tier_id " +
                 "WHERE c.phone_number = ?";
 
@@ -35,6 +35,7 @@ public class CustomerDAO {
                     customer.setTotalAccumulatedPoints(rs.getInt("total_accumulated_points"));
                     customer.setTierId(rs.getInt("tier_id"));
                     customer.setTierName(rs.getString("tier_name"));
+                    customer.setDiscountPercent(rs.getInt("discount_percent"));
                 }
             }
         } catch (SQLException e) {
@@ -51,7 +52,7 @@ public class CustomerDAO {
      */
     public CustomerDTO getCustomerById(int customerId) {
         CustomerDTO customer = null;
-        String query = "SELECT c.*, t.tier_name FROM customer c " +
+        String query = "SELECT c.*, t.tier_name, t.discount_percent FROM customer c " +
                 "JOIN member_tier t ON c.tier_id = t.tier_id " +
                 "WHERE c.customer_id = ?";
 
@@ -70,6 +71,7 @@ public class CustomerDAO {
                     customer.setTotalAccumulatedPoints(rs.getInt("total_accumulated_points"));
                     customer.setTierId(rs.getInt("tier_id"));
                     customer.setTierName(rs.getString("tier_name"));
+                    customer.setDiscountPercent(rs.getInt("discount_percent"));
                 }
             }
         } catch (SQLException e) {
@@ -114,7 +116,6 @@ public class CustomerDAO {
     public boolean deductRewardPoints(Connection conn, int customerId, int pointsUsed) throws SQLException {
         String sql = "UPDATE customer SET reward_points = reward_points - ? WHERE customer_id = ? AND reward_points >= ?";
 
-        // Chỉ dùng try-with-resources cho PreparedStatement để tự động đóng nó
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, pointsUsed);
             ps.setInt(2, customerId);
@@ -133,14 +134,15 @@ public class CustomerDAO {
                 "SET reward_points = reward_points + ?, " +
                 "    total_accumulated_points = total_accumulated_points + ?, " +
                 "    tier_id = (SELECT tier_id FROM member_tier " +
-                "               WHERE required_points <= (total_accumulated_points) " +
+                "               WHERE required_points <= (total_accumulated_points + ?) " +
                 "               ORDER BY required_points DESC LIMIT 1) " +
                 "WHERE customer_id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, pointsEarned);
-            ps.setInt(2, pointsEarned);
-            ps.setInt(3, customerId);
+            ps.setInt(1, pointsEarned); // Cộng điểm thưởng
+            ps.setInt(2, pointsEarned); // Cộng điểm xét hạng
+            ps.setInt(3, pointsEarned); // Truyền vào subquery để check điểm mới
+            ps.setInt(4, customerId);
 
             return ps.executeUpdate() > 0;
         }
