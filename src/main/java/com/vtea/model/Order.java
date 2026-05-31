@@ -13,6 +13,8 @@ public class Order {
     private String status = "PENDING";
     private LocalDateTime createdAt;
     private String paymentMethod;
+    private BigDecimal tierDiscountAmount;
+    private BigDecimal pointDiscountAmount;
 
     // Danh sách các món trong giỏ
     private List<OrderDetail> details = new ArrayList<>();
@@ -45,4 +47,20 @@ public class Order {
 
     public String getPaymentMethod() { return paymentMethod; }
     public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public BigDecimal getTierDiscountAmount() {
+        return tierDiscountAmount;
+    }
+
+    public void setTierDiscountAmount(BigDecimal tierDiscountAmount) {
+        this.tierDiscountAmount = tierDiscountAmount;
+    }
+
+    public BigDecimal getPointDiscountAmount() {
+        return pointDiscountAmount;
+    }
+
+    public void setPointDiscountAmount(BigDecimal pointDiscountAmount) {
+        this.pointDiscountAmount = pointDiscountAmount;
+    }
 }
