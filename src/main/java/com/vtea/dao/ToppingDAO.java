@@ -28,6 +28,7 @@ public class ToppingDAO {
                 topping.setToppingId(rs.getInt("topping_id"));
                 topping.setName(rs.getString("name"));
                 topping.setPrice(rs.getBigDecimal("price"));
+                topping.setImageUrl(rs.getString("image_url"));
                 topping.setAvailable(rs.getBoolean("is_available"));
 
                 toppingList.add(topping);
@@ -83,6 +84,7 @@ public class ToppingDAO {
                 topping.setToppingId(rs.getInt("topping_id"));
                 topping.setName(rs.getString("name"));
                 topping.setPrice(rs.getBigDecimal("price"));
+                topping.setImageUrl(rs.getString("image_url"));
                 topping.setAvailable(rs.getBoolean("is_available"));
 
                 toppingList.add(topping);
@@ -98,14 +100,15 @@ public class ToppingDAO {
      * Thêm Topping mới
      */
     public boolean insertTopping(Topping topping) {
-        String sql = "INSERT INTO topping (name, price, is_available) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO topping (name, price, image_url,is_available) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, topping.getName());
             ps.setBigDecimal(2, topping.getPrice());
-            ps.setBoolean(3, true); // Mặc định khi mới tạo là true
+            ps.setString(3, topping.getImageUrl());
+            ps.setBoolean(4, true); // Mặc định khi mới tạo là true
 
             return ps.executeUpdate() > 0;
 
@@ -120,15 +123,16 @@ public class ToppingDAO {
      * Cập nhật thông tin Topping (Sửa tên, giá, trạng thái)
      */
     public boolean updateTopping(Topping topping) {
-        String sql = "UPDATE topping SET name = ?, price = ?, is_available = ? WHERE topping_id = ?";
+        String sql = "UPDATE topping SET name = ?, price = ?, image_url = ?,is_available = ? WHERE topping_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, topping.getName());
             ps.setBigDecimal(2, topping.getPrice());
-            ps.setBoolean(3, topping.getAvailable());
-            ps.setInt(4, topping.getToppingId());
+            ps.setString(3, topping.getImageUrl());
+            ps.setBoolean(4, topping.getAvailable());
+            ps.setInt(5, topping.getToppingId());
 
             return ps.executeUpdate() > 0;
 
