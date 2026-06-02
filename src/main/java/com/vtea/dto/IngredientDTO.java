@@ -3,7 +3,7 @@ package com.vtea.dto;
 import com.vtea.model.Ingredient;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class IngredientDTO extends Ingredient {
     private int ingredientId;
@@ -12,7 +12,7 @@ public class IngredientDTO extends Ingredient {
     private BigDecimal stockQty;
     private boolean isAvailable;
     private BigDecimal minStock;
-    private Timestamp lastUpdated;
+    private LocalDateTime lastUpdated;
     private Integer updatedBy;
     private String staffName;
 
@@ -71,11 +71,11 @@ public class IngredientDTO extends Ingredient {
         this.minStock = minStock;
     }
 
-    public Timestamp getLastUpdated() {
+    public LocalDateTime getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(Timestamp lastUpdated) {
+    public void setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 

@@ -33,7 +33,7 @@ public class IngredientDAO {
                 item.setStockQty(rs.getBigDecimal("stock_qty"));
                 item.setAvailable(rs.getBoolean("is_available"));
                 item.setMinStock(rs.getBigDecimal("min_stock"));
-                item.setLastUpdated(rs.getTimestamp("last_updated"));
+                item.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
                 int updatedBy = rs.getInt("updated_by");
                 if (!rs.wasNull()) {
                     item.setUpdatedBy(updatedBy);
@@ -73,7 +73,7 @@ public class IngredientDAO {
                 item.setStockQty(rs.getBigDecimal("stock_qty"));
                 item.setAvailable(rs.getBoolean("is_available"));
                 item.setMinStock(rs.getBigDecimal("min_stock"));
-                item.setLastUpdated(rs.getTimestamp("last_updated"));
+                item.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
 
                 int updatedBy = rs.getInt("updated_by");
                 if (!rs.wasNull()) {

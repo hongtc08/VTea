@@ -1,7 +1,7 @@
 package com.vtea.model;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class Ingredient {
     private int ingredientId;
@@ -10,14 +10,14 @@ public class Ingredient {
     private  BigDecimal stockQty;
     private boolean isAvailable;
     private BigDecimal minStock;
-    private Timestamp lastUpdated;
+    private LocalDateTime lastUpdated;
     private Integer updatedBy;
 
     public Ingredient() {
 
     }
 
-    public Ingredient(int ingredientId, String name, BigDecimal stockQty, String unit, boolean isAvailable, BigDecimal minStock, Timestamp lastUpdated, Integer updatedBy) {
+    public Ingredient(int ingredientId, String name, BigDecimal stockQty, String unit, boolean isAvailable, BigDecimal minStock, LocalDateTime lastUpdated, Integer updatedBy) {
         this.ingredientId = ingredientId;
         this.name = name;
         this.stockQty = stockQty;
@@ -71,11 +71,11 @@ public class Ingredient {
         this.minStock = minStock;
     }
 
-    public Timestamp getLastUpdated() {
+    public LocalDateTime getLastUpdated() {
         return lastUpdated;
     }
 
-    public void setLastUpdated(Timestamp lastUpdated) {
+    public void setLastUpdated(LocalDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
 
