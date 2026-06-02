@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.vtea.controller.BillPreviewController"
+      spacing="14"
+      prefWidth="470"
+      prefHeight="680"
+      style="-fx-background-color: #eeeeee;">
+
+    <padding>
+        <Insets top="18" right="18" bottom="18" left="18"/>
+    </padding>
+
+    <TextArea fx:id="billContentTextArea"
+              editable="false"
+              wrapText="false"
+              focusTraversable="false"
+              prefWidth="430"
+              prefHeight="585"
+              style="
+                  -fx-font-family: 'DejaVu Sans Mono';
+                  -fx-font-size: 14px;
+                  -fx-control-inner-background: white;
+                  -fx-background-color: white;
+                  -fx-border-color: #d0d0d0;
+                  -fx-border-radius: 4;
+                  -fx-background-radius: 4;
+                  -fx-padding: 16;
+                  -fx-focus-color: transparent;
+                  -fx-faint-focus-color: transparent;
+              "/>
+
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <Button text="Xuất PDF"
+                onAction="#handleExportPdf"
+                style="
+                    -fx-background-color: #222222;
+                    -fx-text-fill: white;
+                    -fx-font-weight: bold;
+                    -fx-padding: 8 18;
+                    -fx-background-radius: 4;
+                "/>
+
+        <Button text="Đóng"
+                onAction="#handleClose"
+                style="
+                    -fx-background-color: #dddddd;
+                    -fx-text-fill: #222222;
+                    -fx-padding: 8 18;
+                    -fx-background-radius: 4;
+                "/>
+    </HBox>
+</VBox>
