@@ -1162,6 +1162,14 @@
     -fx-border-width: 1.5;
 }
 
+.customer-info-card .label {
+    -fx-text-fill: #1f2937;
+}
+
+.customer-info-card .avatar-text {
+    -fx-text-fill: white;
+}
+
 /* Hộp tùy chọn Radio Button (Tích điểm / Dùng điểm) */
 .point-option-card {
     -fx-background-color: white;
@@ -1173,6 +1181,10 @@
 }
 .point-option-card:hover {
     -fx-border-color: #12B6A2;
+}
+
+.point-option-card .label {
+    -fx-text-fill: #374151;
 }
 
 /* Nền xám cho khu vực tính tiền Tạm tính / VAT */
@@ -1726,4 +1738,57 @@
 .recipe-cancel-btn:hover {
     -fx-background-color: #faf9f8;
     -fx-border-color: #a8998f;
+}
+
+/* Thẻ bọc ngoài từng Nhóm hóa đơn (Tháng / Hôm nay) */
+.invoice-group-card {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: #EAEAEA;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);
+}
+
+/* Phần Header của Nhóm (Phần có thể click để đóng/mở) */
+.invoice-group-header {
+    -fx-padding: 16 20;
+    -fx-cursor: hand;
+    -fx-background-radius: 12;
+}
+.invoice-group-header:hover {
+    -fx-background-color: #FAFAFA;
+}
+
+/* Badge Thanh toán bằng Điểm (Màu Xanh lơ) */
+.badge-teal {
+    -fx-background-color: #E0F2F1;
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+}
+.badge-teal .label {
+    -fx-text-fill: #12B6A2;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+}
+
+/* Chữ "Chi tiết" có thể click */
+.link-text {
+    -fx-text-fill: #12B6A2;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.link-text:hover {
+    -fx-underline: true;
+}
+
+/* Các dòng thông tin 2 cột trong Dialog Chi tiết Hóa đơn */
+.info-row-label {
+    -fx-text-fill: #666666;
+    -fx-font-size: 13px;
+}
+.info-row-value {
+    -fx-text-fill: #333333;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
 }

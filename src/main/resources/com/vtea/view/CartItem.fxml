@@ -5,8 +5,13 @@
 <?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+<?import java.net.URL?>
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       styleClass="cart-item-container" spacing="10" alignment="TOP_LEFT">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
 
     <!-- Left spacer (no image) -->
     <Region minWidth="12" />

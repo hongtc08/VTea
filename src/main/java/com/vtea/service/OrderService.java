@@ -31,6 +31,7 @@ public class OrderService {
     // Thông tin liên quan đến khách hàng và điểm thưởng
     private int currentCustomerId = 0; // 0 nghĩa là Khách vãng lai (Không có thẻ)
     private int pointsToUse = 0;       // Số điểm khách muốn dùng để trừ tiền
+    private int lastEarnedPoints = 0;  // Số điểm đã cộng ở lần checkout gần nhất.
     private BigDecimal discountAmount = BigDecimal.ZERO; // Tiền được giảm
     // Hằng số quy đổi điểm thưởng -> tiền: 1 điểm thưởng tương ứng với 1000 VND.
     public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000");
@@ -82,6 +83,9 @@ public class OrderService {
     public void clearCart() {
         cartItems.clear();
         currentOrder = new Order();
+        currentCustomerId = 0;
+        pointsToUse = 0;
+        lastEarnedPoints = 0;
         calculateTotal();
     }
 
@@ -235,6 +239,9 @@ public class OrderService {
 
         try {
             conn = DBConnection.getConnection();
+            if (conn == null) {
+                throw new java.sql.SQLException("Khong the ket noi database.");
+            }
             conn.setAutoCommit(false);
 
             calculateTotalForCheckout();
@@ -250,7 +257,10 @@ public class OrderService {
 
             if (currentCustomerId > 0) {
                 if (pointsToUse > 0) {
-                    customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
+                    boolean deducted = customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
+                    if (!deducted) {
+                        throw new java.sql.SQLException("Khach hang khong du diem de su dung.");
+                    }
                 }
 
                 int pointsEarned = currentOrder.getTotalAmount()
@@ -258,8 +268,13 @@ public class OrderService {
                         .intValue();
 
                 if (pointsEarned > 0) {
-                    customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
+                    boolean added = customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
+                    if (!added) {
+                        throw new java.sql.SQLException("Khong the cong diem cho khach hang.");
+                    }
                 }
+
+                lastEarnedPoints = pointsEarned;
             }
 
             conn.commit();
@@ -454,7 +469,14 @@ public class OrderService {
 
     // Gọi hàm này khi thu ngân quét mã hoặc nhập xong SĐT khách
     public void setCustomer(int customerId) {
-        this.currentCustomerId = customerId;
+        if (customerId > 0) {
+            this.currentCustomerId = customerId;
+            this.currentOrder.setCustomerId(customerId);
+        } else {
+            this.currentCustomerId = 0;
+            this.currentOrder.setCustomerId(null);
+        }
+
         this.pointsToUse = 0; // Đổi khách thì reset điểm muốn dùng về 0
         calculateTotal();
     }
@@ -477,6 +499,10 @@ public class OrderService {
     // Lấy tiền giảm giá để UI hiển thị
     public BigDecimal getDiscountAmount() {
         return discountAmount;
+    }
+
+    public int getLastEarnedPoints() {
+        return lastEarnedPoints;
     }
 
     // ==================== CALCULATE / VALIDATE METHODS ====================
@@ -564,6 +590,8 @@ public class OrderService {
         // 5. Tính tổng tiền cuối cùng = Tiền sau giảm giá + VAT
         BigDecimal finalTotal = amountAfterDiscount.add(vat);
 
+        currentOrder.setPointDiscountAmount(this.discountAmount);
+        currentOrder.setTierDiscountAmount(BigDecimal.ZERO);
         currentOrder.setTotalAmount(finalTotal);
     }
 
