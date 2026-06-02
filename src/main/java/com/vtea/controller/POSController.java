@@ -7,7 +7,6 @@ import com.vtea.dto.OrderDetailDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
 import com.vtea.service.BillService;
-import com.vtea.service.CustomerService;
 import com.vtea.service.OrderService;
 import com.vtea.service.POSCacheService;
 import com.vtea.utils.DialogHelper;
@@ -49,9 +48,6 @@ public class POSController {
 
     // Service xử lý nghiệp vụ giỏ hàng và thanh toán.
     private final OrderService orderService = new OrderService();
-
-    // Service xử lý khách hàng khi tích điểm.
-    private final CustomerService customerService = new CustomerService();
 
     // Service lấy dữ liệu hóa đơn để preview hoặc in lại bill.
     private final BillService billService = new BillService();
@@ -137,27 +133,36 @@ public class POSController {
             }
 
             CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
-            int earnPoints = customerDialog.getEarnPoints();
 
             Order order = orderService.getCurrentOrder();
             order.setUserId(currentUserId);
             order.setStatus("PAID");
             order.setPaymentMethod(paymentMethod);
 
-            if (selectedCustomer != null) {
-                order.setCustomerId(selectedCustomer.getCustomerId());
+            if (selectedCustomer != null && selectedCustomer.getCustomerId() != null) {
+                orderService.setCustomer(selectedCustomer.getCustomerId());
+                if (customerDialog.getPointsToUse() > 0) {
+                    orderService.applyRewardPoints(customerDialog.getPointsToUse());
+                }
+            } else {
+                orderService.setCustomer(0);
             }
 
             boolean success = orderService.checkoutCurrentOrder();
 
             if (success) {
+                int awardedPoints = selectedCustomer != null ? orderService.getLastEarnedPoints() : 0;
+                int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
+
                 boolean exportBill = DialogHelper.showSuccessWithBillButton(
                         "✓ Thanh toán thành công!",
                         "Tổng tiền: " + formatPrice(order.getTotalAmount())
                                 + "\nKhách hàng: "
                                 + (selectedCustomer != null ? selectedCustomer.getFullName() : "Khách vãng lai")
+                                + "\nĐiểm đã dùng: "
+                                + usedPoints
                                 + "\nĐiểm cộng: "
-                                + (selectedCustomer != null ? earnPoints : 0)
+                                + awardedPoints
                 );
 
                 if (exportBill) {

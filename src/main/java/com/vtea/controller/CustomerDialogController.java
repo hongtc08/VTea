@@ -48,8 +48,13 @@ public class CustomerDialogController {
     private CustomerDTO selectedCustomer;
     private boolean submitted = false;
 
+    private BigDecimal orderSubtotal = BigDecimal.ZERO;
     private BigDecimal orderTotal = BigDecimal.ZERO;
     private int earnPoints = 0;
+    private int pointsToUse = 0;
+
+    private static final BigDecimal POINT_CONVERSION_RATE = BigDecimal.valueOf(1000);
+    private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.10);
 
     @FXML
     public void initialize() {
@@ -63,10 +68,11 @@ public class CustomerDialogController {
         // Công việc tuần này chỉ làm tích điểm, chưa xử lý dùng điểm.
         if (radioEarn != null) {
             radioEarn.setSelected(true);
+            radioEarn.selectedProperty().addListener((obs, oldValue, selected) -> updatePointActionPreview());
         }
 
         if (radioUse != null) {
-            radioUse.setDisable(true);
+            radioUse.selectedProperty().addListener((obs, oldValue, selected) -> updatePointActionPreview());
         }
         if (btnWalkIn != null) {
             btnWalkIn.setOnAction(event -> handleWalkIn());
@@ -96,6 +102,7 @@ public class CustomerDialogController {
         }
 
         selectedCustomer = null;
+        pointsToUse = 0;
         walkIn = true;
         submitted = true;
         closeDialog();
@@ -106,6 +113,7 @@ public class CustomerDialogController {
     }
 
     public void setOrderSummary(BigDecimal subtotal, BigDecimal vat, BigDecimal total) {
+        this.orderSubtotal = subtotal != null ? subtotal : BigDecimal.ZERO;
         this.orderTotal = total != null ? total : BigDecimal.ZERO;
         this.earnPoints = calculateEarnPoints(this.orderTotal);
 
@@ -132,6 +140,8 @@ public class CustomerDialogController {
         if (lblUsePreview != null) {
             lblUsePreview.setText("Chức năng dùng điểm sẽ làm sau");
         }
+
+        updatePointActionPreview();
     }
 
     private void handleCheckCustomer() {
@@ -189,6 +199,7 @@ public class CustomerDialogController {
             }
         }
 
+        updatePointActionPreview();
         submitted = true;
         closeDialog();
     }
@@ -223,6 +234,8 @@ public class CustomerDialogController {
         if (lblAvatarInitials != null) {
             lblAvatarInitials.setText(getInitial(customer.getFullName()));
         }
+
+        updatePointActionPreview();
     }
 
     private void showNewCustomerForm(String phone) {
@@ -239,6 +252,8 @@ public class CustomerDialogController {
         if (txtName != null) {
             txtName.requestFocus();
         }
+
+        updatePointActionPreview();
     }
 
     private void hideCustomerInfo() {
@@ -263,6 +278,83 @@ public class CustomerDialogController {
 
     public int getEarnPoints() {
         return earnPoints;
+    }
+
+    public int getPointsToUse() {
+        return pointsToUse;
+    }
+
+    private void updatePointActionPreview() {
+        boolean canUsePoints = selectedCustomer != null && calculateMaxUsablePoints(selectedCustomer) > 0;
+
+        if (radioUse != null) {
+            radioUse.setDisable(!canUsePoints);
+            if (!canUsePoints && radioUse.isSelected() && radioEarn != null) {
+                radioEarn.setSelected(true);
+            }
+        }
+
+        if (selectedCustomer == null || radioUse == null || !radioUse.isSelected()) {
+            pointsToUse = 0;
+            earnPoints = calculateEarnPoints(orderTotal);
+
+            if (lblVat != null) {
+                lblVat.setText(formatPrice(orderSubtotal.multiply(VAT_RATE)));
+            }
+
+            if (lblTotal != null) {
+                lblTotal.setText(formatPrice(orderTotal));
+            }
+
+            if (lblEarnPreview != null) {
+                lblEarnPreview.setText("Nhận thêm " + earnPoints + " điểm");
+            }
+
+            if (lblUsePreview != null) {
+                lblUsePreview.setText(canUsePoints
+                        ? "Có thể dùng tối đa " + calculateMaxUsablePoints(selectedCustomer) + " điểm"
+                        : "Không có điểm khả dụng cho đơn này");
+            }
+
+            return;
+        }
+
+        pointsToUse = calculateMaxUsablePoints(selectedCustomer);
+        BigDecimal discount = POINT_CONVERSION_RATE.multiply(BigDecimal.valueOf(pointsToUse));
+        BigDecimal amountAfterDiscount = orderSubtotal.subtract(discount);
+
+        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterDiscount = BigDecimal.ZERO;
+        }
+
+        BigDecimal vatAfterDiscount = amountAfterDiscount.multiply(VAT_RATE);
+        BigDecimal totalAfterDiscount = amountAfterDiscount.add(vatAfterDiscount);
+        earnPoints = calculateEarnPoints(totalAfterDiscount);
+
+        if (lblVat != null) {
+            lblVat.setText(formatPrice(vatAfterDiscount));
+        }
+
+        if (lblTotal != null) {
+            lblTotal.setText(formatPrice(totalAfterDiscount));
+        }
+
+        if (lblEarnPreview != null) {
+            lblEarnPreview.setText("Sau khi trừ điểm sẽ nhận " + earnPoints + " điểm");
+        }
+
+        if (lblUsePreview != null) {
+            lblUsePreview.setText("Dùng " + pointsToUse + " điểm, giảm " + formatPrice(discount));
+        }
+    }
+
+    private int calculateMaxUsablePoints(CustomerDTO customer) {
+        if (customer == null || orderSubtotal.compareTo(BigDecimal.ZERO) <= 0) {
+            return 0;
+        }
+
+        int maxByOrder = orderSubtotal.divide(POINT_CONVERSION_RATE, 0, RoundingMode.DOWN).intValue();
+        return Math.min(customer.getRewardPoints(), maxByOrder);
     }
 
     private int calculateEarnPoints(BigDecimal total) {
