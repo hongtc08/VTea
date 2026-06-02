@@ -5,16 +5,18 @@ public class MemberTier {
     private String tierName;;
     private int requiredPoints;
     private String description;
+    private int discountPercent;
 
     public MemberTier() {
 
     }
 
-    public MemberTier(String description, int requiredPoints, int tierId, String tierName) {
+    public MemberTier(String description, int requiredPoints, int tierId, String tierName, int discountPercent) {
         this.description = description;
         this.requiredPoints = requiredPoints;
         this.tierId = tierId;
         this.tierName = tierName;
+        this.discountPercent = discountPercent;
     }
 
     public String getDescription() {
@@ -47,5 +49,13 @@ public class MemberTier {
 
     public void setTierName(String tierName) {
         this.tierName = tierName;
+    }
+
+    public int getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(int discountPercent) {
+        this.discountPercent = discountPercent;
     }
 }
