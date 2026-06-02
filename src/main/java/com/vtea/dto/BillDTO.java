@@ -24,6 +24,12 @@ public class BillDTO {
     private String status;
     private BigDecimal totalAmount;
 
+    private BigDecimal tierDiscountAmount;
+    private BigDecimal pointDiscountAmount;
+
+    private String tierName;
+    private int discountPercent;
+
     // Danh sách các món trong hóa đơn
     private List<BillItemDTO> items = new ArrayList<>();
 
@@ -130,6 +136,44 @@ public class BillDTO {
         this.items = items;
     }
 
+    public BigDecimal getTierDiscountAmount() {
+        if (tierDiscountAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return tierDiscountAmount;
+    }
+
+    public void setTierDiscountAmount(BigDecimal tierDiscountAmount) {
+        this.tierDiscountAmount = tierDiscountAmount;
+    }
+
+    public BigDecimal getPointDiscountAmount() {
+        if (pointDiscountAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return pointDiscountAmount;
+    }
+
+    public void setPointDiscountAmount(BigDecimal pointDiscountAmount) {
+        this.pointDiscountAmount = pointDiscountAmount;
+    }
+
+
+    public String getTierName() {
+        return tierName;
+    }
+
+    public void setTierName(String tierName) {
+        this.tierName = tierName;
+    }
+
+    public int getDiscountPercent() {
+        return discountPercent;
+    }
+
+    public void setDiscountPercent(int discountPercent) {
+        this.discountPercent = discountPercent;
+    }
     /**
      * Thêm một dòng món vào hóa đơn.
      * Dùng khi BillDAO đọc danh sách order_detail.

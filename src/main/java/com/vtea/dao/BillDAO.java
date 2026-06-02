@@ -59,12 +59,17 @@ public class BillDAO {
                     o.customer_id,
                     c.full_name AS customer_name,
                     c.phone_number AS customer_phone,
+                    mt.tier_name,
+                    mt.discount_percent,
                     o.payment_method,
                     o.status,
+                    o.tier_discount_amount,
+                    o.point_discount_amount,
                     o.total_amount
                 FROM `order` o
                 LEFT JOIN user u ON o.user_id = u.user_id
                 LEFT JOIN customer c ON o.customer_id = c.customer_id
+                LEFT JOIN member_tier mt ON c.tier_id = mt.tier_id
                 WHERE o.order_id = ?
                 """;
 
@@ -98,8 +103,12 @@ public class BillDAO {
 
                     bill.setCustomerName(rs.getString("customer_name"));
                     bill.setCustomerPhone(rs.getString("customer_phone"));
+                    bill.setTierName(rs.getString("tier_name"));
+                    bill.setDiscountPercent(rs.getInt("discount_percent"));
                     bill.setPaymentMethod(rs.getString("payment_method"));
                     bill.setStatus(rs.getString("status"));
+                    bill.setTierDiscountAmount(rs.getBigDecimal("tier_discount_amount"));
+                    bill.setPointDiscountAmount(rs.getBigDecimal("point_discount_amount"));
                     bill.setTotalAmount(rs.getBigDecimal("total_amount"));
 
                     return bill;

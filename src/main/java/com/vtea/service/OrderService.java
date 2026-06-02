@@ -222,8 +222,6 @@ public class OrderService {
             return false;
         }
 
-        calculateTotal();
-
         if (currentOrder.getCustomerId() != null && currentOrder.getCustomerId() > 0) {
             currentCustomerId = currentOrder.getCustomerId();
         } else {
@@ -238,6 +236,8 @@ public class OrderService {
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
+
+            calculateTotalForCheckout();
 
             int savedOrderId = orderDAO.checkoutOrder(conn, currentOrder, details);
 
@@ -480,6 +480,63 @@ public class OrderService {
     }
 
     // ==================== CALCULATE / VALIDATE METHODS ====================
+
+    private void calculateTotalForCheckout() {
+        BigDecimal subtotal = BigDecimal.ZERO;
+
+        for (OrderDetailDTO item : cartItems) {
+            subtotal = subtotal.add(item.getSubTotal());
+        }
+
+        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
+
+        // Giảm hạng thành viên được tự động áp dụng nếu hóa đơn có khách hàng.
+        if (currentCustomerId > 0) {
+            CustomerDTO customer = customerDAO.getCustomerById(currentCustomerId);
+
+            if (customer != null) {
+                BigDecimal discountPercent = BigDecimal.valueOf(customer.getDiscountPercent());
+
+                tierDiscountAmount = subtotal
+                        .multiply(discountPercent)
+                        .divide(new BigDecimal("100"));
+            }
+        }
+
+        BigDecimal amountAfterTierDiscount = subtotal.subtract(tierDiscountAmount);
+
+        if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterTierDiscount = BigDecimal.ZERO;
+        }
+
+        int maxUsablePoints = amountAfterTierDiscount
+                .divide(POINT_CONVERSION_RATE, java.math.RoundingMode.DOWN)
+                .intValue();
+
+        int actualPointsToUse = Math.min(pointsToUse, maxUsablePoints);
+
+        BigDecimal pointDiscountAmount = BigDecimal.valueOf(actualPointsToUse)
+                .multiply(POINT_CONVERSION_RATE);
+
+        BigDecimal amountAfterDiscount = subtotal
+                .subtract(tierDiscountAmount)
+                .subtract(pointDiscountAmount);
+
+        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterDiscount = BigDecimal.ZERO;
+        }
+
+        // VAT tính sau khi đã trừ giảm hạng và giảm điểm.
+        BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
+        BigDecimal finalTotal = amountAfterDiscount.add(vat);
+
+        this.pointsToUse = actualPointsToUse;
+        this.discountAmount = tierDiscountAmount.add(pointDiscountAmount);
+
+        currentOrder.setTierDiscountAmount(tierDiscountAmount);
+        currentOrder.setPointDiscountAmount(pointDiscountAmount);
+        currentOrder.setTotalAmount(finalTotal);
+    }
 
     private void calculateTotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
