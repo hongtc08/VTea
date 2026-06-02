@@ -49,7 +49,6 @@ public class MenuFormController {
     @FXML private VBox imageSection;
     @FXML private VBox imageUploadArea;
     @FXML private ImageView imgPreview;
-    @FXML private Button btnEditRecipe;
     @FXML private Button btnCancel;
     @FXML private Button btnSubmit;
 
@@ -88,7 +87,6 @@ public class MenuFormController {
         btnClose.setOnAction(e -> closeWindow());
         btnCancel.setOnAction(e -> closeWindow());
         btnSubmit.setOnAction(e -> handleSave());
-        btnEditRecipe.setOnAction(e -> openRecipeForm());
 
         imageUploadArea.setOnMouseClicked(e -> handleImageUpload());
 
@@ -207,26 +205,6 @@ public class MenuFormController {
         if (imageSection != null) {
             imageSection.setVisible(true);
             imageSection.setManaged(true);
-        }
-    }
-
-    private void openRecipeForm() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/RecipeForm.fxml"));
-            Parent root = loader.load();
-
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.TRANSPARENT);
-            stage.initOwner(btnEditRecipe.getScene().getWindow());
-
-            Scene scene = new Scene(root);
-            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            DialogHelper.showInfo("Lỗi", "Không thể mở form công thức: " + e.getMessage());
         }
     }
 

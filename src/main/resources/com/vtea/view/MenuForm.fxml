@@ -59,22 +59,6 @@
                     <ImageView fx:id="imgPreview" fitWidth="100" fitHeight="100" preserveRatio="true" managed="false" visible="false"/>
                 </VBox>
             </VBox>
-
-            <VBox spacing="10">
-                <HBox alignment="CENTER_LEFT">
-                    <VBox spacing="2">
-                        <Label text="Công thức" styleClass="form-label"/>
-                        <Label text="Nguyên liệu dùng để tạo món này" style="-fx-text-fill: #999999; -fx-font-size: 11px;"/>
-                    </VBox>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnEditRecipe" text="Thêm công thức" styleClass="action-btn-primary"/>
-                </HBox>
-                <VBox spacing="6"
-                      style="-fx-background-color: #FAF9F8; -fx-background-radius: 10; -fx-padding: 12;">
-                    <Label text="Chưa có nguyên liệu trong công thức."
-                           style="-fx-text-fill: #999999; -fx-font-size: 12px;"/>
-                </VBox>
-            </VBox>
         </VBox>
     </ScrollPane>
 
