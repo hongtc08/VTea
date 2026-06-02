@@ -6,6 +6,10 @@ import com.vtea.dto.BillToppingDTO;
 
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service format nội dung hóa đơn dạng text.
@@ -40,6 +44,15 @@ public class BillReceiptFormatter {
             builder.append("SĐT: ").append(bill.getCustomerPhone()).append("\n");
         }
 
+        if (bill.getTierName() != null && !bill.getTierName().isBlank()) {
+            builder.append("Hạng TV: ")
+                    .append(bill.getTierName())
+                    .append(" (")
+                    .append(bill.getDiscountPercent())
+                    .append("%)")
+                    .append("\n");
+        }
+
         builder.append("Thanh toán: ").append(nullToDefault(bill.getPaymentMethod(), "Không rõ")).append("\n");
         builder.append(line()).append("\n");
 
@@ -48,7 +61,7 @@ public class BillReceiptFormatter {
 
         BigDecimal subtotal = BigDecimal.ZERO;
 
-        for (BillItemDTO item : bill.getItems()) {
+        for (BillItemDTO item : buildDisplayItems(bill.getItems())) {
             BigDecimal productTotal = item.getProductTotal();
             subtotal = subtotal.add(productTotal);
 
@@ -76,11 +89,30 @@ public class BillReceiptFormatter {
             }
         }
 
-        BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
+        BigDecimal tierDiscount = bill.getTierDiscountAmount();
+        BigDecimal pointDiscount = bill.getPointDiscountAmount();
+
+        BigDecimal discountTotal = tierDiscount.add(pointDiscount);
+        BigDecimal amountAfterDiscount = subtotal.subtract(discountTotal);
+
+        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterDiscount = BigDecimal.ZERO;
+        }
+
+        BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
         BigDecimal total = bill.getTotalAmount();
 
         builder.append(line()).append("\n");
         builder.append(moneyLine("Tạm tính:", subtotal)).append("\n");
+
+        if (tierDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            builder.append(moneyLine("Ưu đãi hạng TV:", tierDiscount.negate())).append("\n");
+        }
+
+        if (pointDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            builder.append(moneyLine("Giảm điểm:", pointDiscount.negate())).append("\n");
+        }
+
         builder.append(moneyLine("VAT 10%:", vat)).append("\n");
         builder.append(moneyLine("Tổng cộng:", total)).append("\n");
         builder.append(line()).append("\n");
@@ -174,7 +206,44 @@ public class BillReceiptFormatter {
 
         return text.substring(0, maxLength - 1) + ".";
     }
+    /**
+     * Gom các món giống nhau không có topping để bill hiển thị gọn hơn.
+     * Các món có topping vẫn giữ riêng để tránh sai topping từng ly.
+     */
+    private List<BillItemDTO> buildDisplayItems(List<BillItemDTO> items) {
+        List<BillItemDTO> displayItems = new ArrayList<>();
+        Map<String, BillItemDTO> groupedItems = new LinkedHashMap<>();
 
+        for (BillItemDTO item : items) {
+            boolean hasTopping = item.getToppings() != null && !item.getToppings().isEmpty();
+
+            if (hasTopping) {
+                displayItems.add(item);
+                continue;
+            }
+
+            String key = item.getProductId() + "|" + item.getUnitPrice();
+
+            if (groupedItems.containsKey(key)) {
+                BillItemDTO existingItem = groupedItems.get(key);
+                existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
+            } else {
+                BillItemDTO copiedItem = new BillItemDTO(
+                        item.getDetailId(),
+                        item.getProductId(),
+                        item.getProductName(),
+                        item.getQuantity(),
+                        item.getUnitPrice()
+                );
+
+                copiedItem.setToppings(new ArrayList<>());
+                groupedItems.put(key, copiedItem);
+                displayItems.add(copiedItem);
+            }
+        }
+
+        return displayItems;
+    }
     private String formatDateTime(BillDTO bill) {
         if (bill.getCreatedAt() == null) {
             return "";
