@@ -1,69 +1,38 @@
-package com.vtea.controller;
+package com.vtea.service;
 
 import com.vtea.dto.BillDTO;
 import com.vtea.dto.BillItemDTO;
 import com.vtea.dto.BillToppingDTO;
-import com.vtea.service.BillPdfService;
-import com.vtea.service.BillReceiptFormatter;
-import com.vtea.utils.DialogHelper;
-import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
-import javafx.stage.FileChooser;
-import java.io.File;
+
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Controller hiển thị bill preview dạng hóa đơn in.
- * Chỉ dùng một TextArea để render bill giống hóa đơn cửa hàng.
+ * Service format nội dung hóa đơn dạng text.
+ * Dùng chung cho bill preview, lịch sử hóa đơn và xuất PDF.
  */
-public class BillPreviewController {
+public class BillReceiptFormatter {
 
     private static final int BILL_WIDTH = 42;
 
-    @FXML
-    private TextArea billContentTextArea;
-
-    private BillDTO bill;
-
-    private final DateTimeFormatter dateTimeFormatter =
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    private final BillReceiptFormatter receiptFormatter = new BillReceiptFormatter();
-    private final BillPdfService billPdfService = new BillPdfService();
-
     /**
-     * Nhận dữ liệu hóa đơn từ POSController hoặc màn lịch sử hóa đơn.
+     * Tạo nội dung hóa đơn dạng bill cửa hàng.
      */
-    public void setBill(BillDTO bill) {
-        this.bill = bill;
-        renderBill();
-    }
-
-    /**
-     * Render toàn bộ nội dung bill lên TextArea.
-     */
-    private void renderBill() {
+    public String format(BillDTO bill) {
         if (bill == null) {
-            return;
+            return "";
         }
 
-        billContentTextArea.setText(receiptFormatter.format(bill));
-        billContentTextArea.positionCaret(0);
-    }
-
-    /**
-     * Tạo nội dung bill theo kiểu hóa đơn cửa hàng / máy in nhiệt.
-     */
-    private String buildReceiptContent() {
         StringBuilder builder = new StringBuilder();
 
         builder.append(center("VTEA COFFEE")).append("\n");
         builder.append(center("HÓA ĐƠN THANH TOÁN")).append("\n");
         builder.append(line()).append("\n");
 
-        builder.append(leftRight("Mã HĐ: #" + bill.getOrderId(), formatDateTime())).append("\n");
+        builder.append(leftRight("Mã HĐ: #" + bill.getOrderId(), formatDateTime(bill))).append("\n");
         builder.append("Nhân viên: ").append(nullToDefault(bill.getStaffName(), "Không rõ")).append("\n");
         builder.append("Khách hàng: ").append(bill.getCustomerName()).append("\n");
 
@@ -123,8 +92,7 @@ public class BillPreviewController {
     }
 
     /**
-     * Thêm một dòng món/topping vào bill.
-     * Nếu tên quá dài thì tự cắt để không vỡ cột.
+     * Thêm một dòng món hoặc topping vào bill.
      */
     private void appendItemLine(
             StringBuilder builder,
@@ -145,7 +113,7 @@ public class BillPreviewController {
     }
 
     /**
-     * Format dòng tiền bên dưới bill như tạm tính, VAT, tổng cộng.
+     * Format dòng tiền ở cuối bill.
      */
     private String moneyLine(String label, BigDecimal amount) {
         return leftRight(label, formatMoney(amount));
@@ -188,15 +156,12 @@ public class BillPreviewController {
         return " ".repeat(leftPadding) + text;
     }
 
-    /**
-     * Tạo đường kẻ ngang cho bill.
-     */
     private String line() {
         return "-".repeat(BILL_WIDTH);
     }
 
     /**
-     * Cắt ngắn tên món nếu tên quá dài làm lệch cột.
+     * Cắt ngắn tên món để không vỡ cột bill.
      */
     private String shorten(String text, int maxLength) {
         if (text == null) {
@@ -210,17 +175,14 @@ public class BillPreviewController {
         return text.substring(0, maxLength - 1) + ".";
     }
 
-    private String formatDateTime() {
+    private String formatDateTime(BillDTO bill) {
         if (bill.getCreatedAt() == null) {
             return "";
         }
 
-        return bill.getCreatedAt().format(dateTimeFormatter);
+        return bill.getCreatedAt().format(DATE_TIME_FORMATTER);
     }
 
-    /**
-     * Format tiền đầy đủ cho phần tổng tiền.
-     */
     private String formatMoney(BigDecimal amount) {
         if (amount == null) {
             return "0 đ";
@@ -229,9 +191,6 @@ public class BillPreviewController {
         return String.format("%,.0f đ", amount);
     }
 
-    /**
-     * Format tiền ngắn cho bảng món để không bị lệch cột.
-     */
     private String formatShortMoney(BigDecimal amount) {
         if (amount == null) {
             return "0";
@@ -246,54 +205,5 @@ public class BillPreviewController {
         }
 
         return value;
-    }
-
-    /**
-     * Tạm thời báo chưa làm PDF.
-     * Bước sau sẽ nối method này với BillPdfService.
-     */
-    @FXML
-    private void handleExportPdf() {
-        if (bill == null) {
-            DialogHelper.showInfo("Thông báo", "Không có dữ liệu hóa đơn để xuất PDF.");
-            return;
-        }
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Lưu hóa đơn PDF");
-        fileChooser.setInitialFileName("bill-" + bill.getOrderId() + ".pdf");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("PDF files", "*.pdf")
-        );
-
-        File file = fileChooser.showSaveDialog(billContentTextArea.getScene().getWindow());
-
-        if (file == null) {
-            return;
-        }
-
-        try {
-            billPdfService.exportBillToPdf(bill, file);
-            DialogHelper.showInfo("Thành công", "Xuất PDF hóa đơn thành công.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            DialogHelper.showInfo("Lỗi", "Không thể xuất PDF: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Đóng cửa sổ bill preview.
-     */
-    @FXML
-    private void handleClose() {
-        billContentTextArea.getScene().getWindow().hide();
-    }
-
-    private void showInfo(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông báo");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 }
