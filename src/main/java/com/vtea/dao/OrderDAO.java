@@ -17,7 +17,7 @@ public class OrderDAO {
      * Nhận Connection từ Service.
      */
     public boolean checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
-        String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, created_at, status, payment_method) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+        String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
         String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
         String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
@@ -34,8 +34,12 @@ public class OrderDAO {
             }
 
             psOrder.setBigDecimal(3, order.getTotalAmount());
-            psOrder.setString(4, order.getStatus());
-            psOrder.setString(5, order.getPaymentMethod());
+
+            psOrder.setBigDecimal(4, order.getTierDiscountAmount() != null ? order.getTierDiscountAmount() : java.math.BigDecimal.ZERO);
+            psOrder.setBigDecimal(5, order.getPointDiscountAmount() != null ? order.getPointDiscountAmount() : java.math.BigDecimal.ZERO);
+
+            psOrder.setString(6, order.getStatus());
+            psOrder.setString(7, order.getPaymentMethod());
 
             psOrder.executeUpdate();
 
