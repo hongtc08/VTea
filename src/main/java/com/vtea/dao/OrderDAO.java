@@ -13,18 +13,22 @@ import java.util.Date;
 
 public class OrderDAO {
     /**
-     * Xử lý lưu hóa đơn và chi tiết hóa đơn (Transaction)
-     * Nhận Connection từ Service.
+     * Xử lý lưu hóa đơn và chi tiết hóa đơn trong cùng một transaction.
+     * Nhận Connection từ Service để Service quản lý commit/rollback.
+     *
+     * @return order_id vừa được database tạo ra, dùng để mở bill preview sau thanh toán.
      */
-    public boolean checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
-        String insertOrderSQL = "INSERT INTO `order` (user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
-        String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
+    public int checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
+    String insertOrderSQL = "INSERT INTO `order` " +
+            "(user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method) " +
+            "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+      String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
         String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
         int generatedOrderId = -1;
 
-        // 1. INSERT VÀO BẢNG ORDER
-        try(PreparedStatement psOrder = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
+        // 1. Lưu thông tin chính của hóa đơn vào bảng order.
+        try (PreparedStatement psOrder = conn.prepareStatement(insertOrderSQL, Statement.RETURN_GENERATED_KEYS)) {
             psOrder.setInt(1, order.getUserId());
 
             if (order.getCustomerId() != null && order.getCustomerId() > 0) {
@@ -43,6 +47,7 @@ public class OrderDAO {
 
             psOrder.executeUpdate();
 
+            // Lấy order_id vừa được database tự tăng.
             try (ResultSet rs = psOrder.getGeneratedKeys()) {
                 if (rs.next()) {
                     generatedOrderId = rs.getInt(1);
@@ -52,10 +57,12 @@ public class OrderDAO {
             }
         }
 
-        // 2. INSERT VÀO BẢNG ORDER_DETAIL VÀ ORDER_DETAIL_TOPPING
-        try (PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)) {
-
+        // 2. Lưu từng món trong hóa đơn vào bảng order_detail.
+        // Sau mỗi order_detail, lấy detail_id để lưu topping tương ứng.
+        try (
+                PreparedStatement psDetail = conn.prepareStatement(insertDetailSQL, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement psTopping = conn.prepareStatement(insertToppingSQL)
+        ) {
             for (OrderDetail detail : details) {
                 psDetail.setInt(1, generatedOrderId);
                 psDetail.setInt(2, detail.getProductId());
@@ -64,12 +71,17 @@ public class OrderDAO {
                 psDetail.executeUpdate();
 
                 int generatedDetailId = -1;
+
+                // Lấy detail_id vừa tạo để gắn topping cho đúng dòng món.
                 try (ResultSet rsDetail = psDetail.getGeneratedKeys()) {
-                    if (rsDetail.next())
+                    if (rsDetail.next()) {
                         generatedDetailId = rsDetail.getInt(1);
+                    } else {
+                        throw new SQLException("Không thể lấy ID của Order Detail vừa tạo.");
+                    }
                 }
 
-                // 3. THÊM TOPPING
+                // 3. Lưu topping của dòng món nếu có.
                 if (detail.getToppingQuantities() != null && !detail.getToppingQuantities().isEmpty()) {
                     for (Map.Entry<Integer, Integer> entry : detail.getToppingQuantities().entrySet()) {
                         int toppingId = entry.getKey();
@@ -82,13 +94,13 @@ public class OrderDAO {
 
                         psTopping.addBatch();
                     }
+
                     psTopping.executeBatch();
                 }
             }
         }
 
-
-        return true;
+        return generatedOrderId;
     }
 
 

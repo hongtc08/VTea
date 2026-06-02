@@ -8,7 +8,16 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 public class DialogHelper {
 
     // Gọi hàm này để tạo cửa sổ xác nhận (Trả về true/false)
@@ -44,5 +53,95 @@ public class DialogHelper {
             e.printStackTrace();
             return false;
         }
+    }
+    public static boolean showSuccessWithBillButton(String title, String message) {
+        final boolean[] exportBill = {false};
+
+        Stage stage = new Stage();
+        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.initModality(Modality.APPLICATION_MODAL);
+
+        Label iconLabel = new Label("ⓘ");
+        iconLabel.setStyle("""
+            -fx-font-size: 34px;
+            -fx-text-fill: #5a3a2b;
+            -fx-background-color: #f8eee9;
+            -fx-background-radius: 50;
+            -fx-min-width: 72;
+            -fx-min-height: 72;
+            -fx-alignment: center;
+            """);
+
+        Label titleLabel = new Label(title);
+        titleLabel.setStyle("""
+            -fx-font-size: 26px;
+            -fx-font-weight: bold;
+            -fx-text-fill: #111827;
+            """);
+
+        HBox titleBox = new HBox(18, iconLabel, titleLabel);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        messageLabel.setStyle("""
+            -fx-font-size: 20px;
+            -fx-text-fill: #5f6368;
+            -fx-line-spacing: 6;
+            """);
+
+        Button closeButton = new Button("Đóng");
+        closeButton.setPrefWidth(140);
+        closeButton.setPrefHeight(52);
+        closeButton.setStyle("""
+            -fx-background-color: #5a3a2b;
+            -fx-text-fill: white;
+            -fx-font-size: 18px;
+            -fx-font-weight: bold;
+            -fx-background-radius: 14;
+            -fx-cursor: hand;
+            """);
+
+        Button exportButton = new Button("Xuất bill");
+        exportButton.setPrefWidth(150);
+        exportButton.setPrefHeight(52);
+        exportButton.setStyle("""
+            -fx-background-color: #2d8cff;
+            -fx-text-fill: white;
+            -fx-font-size: 18px;
+            -fx-font-weight: bold;
+            -fx-background-radius: 14;
+            -fx-cursor: hand;
+            """);
+
+        closeButton.setOnAction(event -> {
+            exportBill[0] = false;
+            stage.close();
+        });
+
+        exportButton.setOnAction(event -> {
+            exportBill[0] = true;
+            stage.close();
+        });
+
+        HBox buttonBox = new HBox(14, closeButton, exportButton);
+        buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+        VBox root = new VBox(28, titleBox, messageLabel, buttonBox);
+        root.setPadding(new Insets(34, 48, 34, 48));
+        root.setPrefWidth(700);
+        root.setStyle("""
+            -fx-background-color: white;
+            -fx-background-radius: 24;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 24, 0, 0, 8);
+            """);
+
+        Scene scene = new Scene(root);
+        scene.setFill(null);
+
+        stage.setScene(scene);
+        stage.showAndWait();
+
+        return exportBill[0];
     }
 }

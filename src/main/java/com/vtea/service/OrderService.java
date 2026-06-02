@@ -9,7 +9,6 @@ import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.model.Topping;
 import com.vtea.utils.DBConnection;
-
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class OrderService {
         this.toppingDAO = new ToppingDAO();
         this.customerDAO = new CustomerDAO();
         this.cachedActiveToppings = toppingDAO.getAllActiveToppings();
-
         calculateTotal();
     }
 
@@ -65,13 +63,7 @@ public class OrderService {
         Map<Integer, Integer> safeToppingQuantities = normalizeToppingQuantities(toppingQuantities);
         BigDecimal toppingPrice = calculateToppingPrice(safeToppingQuantities);
 
-        OrderDetailDTO existingItem = findCartItemByProductIdAndToppings(productId, safeToppingQuantities);
-        if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + quantity);
-            calculateTotal();
-            return;
-        }
-
+        // Mỗi lần thêm món tạo một dòng riêng để topping không bị dính sang ly khác.
         OrderDetailDTO newItem = new OrderDetailDTO(
                 productId,
                 productName.trim(),
@@ -125,6 +117,51 @@ public class OrderService {
             }
             calculateTotal();
         }
+    }
+    public void changeToppingQuantity(OrderDetailDTO item, int toppingId, int delta) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
+        }
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+
+        if (map == null) {
+            map = new HashMap<>();
+        } else {
+            map = new HashMap<>(map);
+        }
+
+        int prev = map.getOrDefault(toppingId, 0);
+        int now = prev + delta;
+
+        if (now <= 0) {
+            map.remove(toppingId);
+        } else {
+            map.put(toppingId, now);
+        }
+
+        item.setToppingQuantities(map);
+        item.setToppingPrice(calculateToppingPrice(map));
+        calculateTotal();
+    }
+
+    public void removeToppingFromItem(OrderDetailDTO item, int toppingId) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
+        }
+
+        Map<Integer, Integer> map = item.getToppingQuantities();
+
+        if (map == null || !map.containsKey(toppingId)) {
+            return;
+        }
+
+        map = new HashMap<>(map);
+        map.remove(toppingId);
+
+        item.setToppingQuantities(map);
+        item.setToppingPrice(calculateToppingPrice(map));
+        calculateTotal();
     }
 
     /*
@@ -186,46 +223,54 @@ public class OrderService {
         }
 
         calculateTotal();
-        currentOrder.setCustomerId(currentCustomerId);
+
+        if (currentOrder.getCustomerId() != null && currentOrder.getCustomerId() > 0) {
+            currentCustomerId = currentOrder.getCustomerId();
+        } else {
+            currentOrder.setCustomerId(null);
+            currentCustomerId = 0;
+        }
 
         List<OrderDetail> details = getDetailsForCheckout(0);
 
-        // --- BẮT ĐẦU TRANSACTION ---
         Connection conn = null;
 
         try {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
 
-            // Thao tác 1: Lưu Order và Order Details
-            boolean isOrderSaved = orderDAO.checkoutOrder(conn, currentOrder, details);
-            if (!isOrderSaved) {
+            int savedOrderId = orderDAO.checkoutOrder(conn, currentOrder, details);
+
+            if (savedOrderId <= 0) {
                 throw new Exception("Lỗi hệ thống: Không thể tạo hóa đơn!");
             }
 
-            // Thao tác 2 & 3: Trừ điểm và Cộng điểm
+            // Lưu lại order_id vừa tạo để POSController mở bill preview.
+            currentOrder.setOrderId(savedOrderId);
+
             if (currentCustomerId > 0) {
                 if (pointsToUse > 0) {
                     customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
                 }
 
-                int pointsEarned = currentOrder.getTotalAmount().divide(new BigDecimal("10000"), java.math.RoundingMode.DOWN).intValue();
+                int pointsEarned = currentOrder.getTotalAmount()
+                        .divide(new BigDecimal("10000"), java.math.RoundingMode.DOWN)
+                        .intValue();
+
                 if (pointsEarned > 0) {
                     customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
                 }
             }
 
-            // NẾU CẢ 3 BƯỚC ĐỀU THỰC HIỆN THÀNH CÔNG -> LƯU DATABASE
             conn.commit();
 
-            // Dọn dẹp giỏ hàng
-            clearCart();
+            // Không clearCart ở đây vì POSController còn cần order_id để mở bill preview.
             currentCustomerId = 0;
             pointsToUse = 0;
+
             return true;
 
         } catch (Exception e) {
-            // NẾU CÓ BẤT CỨ LỖI GÌ XẢY RA -> TRẢ TOÀN BỘ DỮ LIỆU VỀ NHƯ CŨ
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -234,11 +279,11 @@ public class OrderService {
                     ex.printStackTrace();
                 }
             }
+
             e.printStackTrace();
             return false;
 
         } finally {
-            // Trả lại trạng thái cũ và đóng đường ống
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
