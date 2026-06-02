@@ -104,7 +104,7 @@
                     </HBox>
                     <Separator style="-fx-padding: 4 0;"/>
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="Tổng cộng:" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                        <Label text="Tổng cộng:" style="-fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #100000"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="lblTotal" text="60.500đ" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #78350F;"/>
                     </HBox>

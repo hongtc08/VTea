@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<?import java.net.URL?>
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      styleClass="list-item-row" alignment="CENTER_LEFT" spacing="16">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <Label fx:id="lblInvoiceId" text="HD003" style="-fx-font-weight: bold; -fx-font-size: 14px;" prefWidth="80"/>
+
+    <Label fx:id="lblTime" text="16:00" style="-fx-text-fill: #444444;" prefWidth="80"/>
+
+    <VBox alignment="CENTER_LEFT" prefWidth="140">
+        <Label fx:id="lblEmployee" text="Trần Thị Bình" style="-fx-text-fill: #666666;"/>
+    </VBox>
+
+    <VBox alignment="CENTER_LEFT" spacing="2" prefWidth="180">
+        <Label fx:id="lblCustomerName" text="Trần Thị B" style="-fx-font-size: 14px; -fx-text-fill: #333333;"/>
+        <Label fx:id="lblCustomerPhone" text="0912345678" style="-fx-text-fill: #888888; -fx-font-size: 12px;"/>
+    </VBox>
+
+    <HBox prefWidth="100" alignment="CENTER_LEFT">
+        <StackPane fx:id="badgePayment" styleClass="badge-teal">
+            <Label fx:id="lblPaymentMethod" text="Dùng điểm"/>
+        </StackPane>
+    </HBox>
+
+    <Label fx:id="lblTotalAmount" text="55.000đ" style="-fx-font-weight: bold; -fx-text-fill: #523628; -fx-font-size: 14px;" prefWidth="100"/>
+
+    <VBox alignment="CENTER_LEFT" prefWidth="80">
+        <Label fx:id="btnDetails" text="Chi tiết" styleClass="link-text"/>
+    </VBox>
+</HBox>
