@@ -1162,6 +1162,14 @@
     -fx-border-width: 1.5;
 }
 
+.customer-info-card .label {
+    -fx-text-fill: #1f2937;
+}
+
+.customer-info-card .avatar-text {
+    -fx-text-fill: white;
+}
+
 /* Hộp tùy chọn Radio Button (Tích điểm / Dùng điểm) */
 .point-option-card {
     -fx-background-color: white;
@@ -1173,6 +1181,10 @@
 }
 .point-option-card:hover {
     -fx-border-color: #12B6A2;
+}
+
+.point-option-card .label {
+    -fx-text-fill: #374151;
 }
 
 /* Nền xám cho khu vực tính tiền Tạm tính / VAT */

@@ -63,54 +63,56 @@ public class DialogHelper {
 
         Label iconLabel = new Label("ⓘ");
         iconLabel.setStyle("""
-            -fx-font-size: 34px;
+            -fx-font-size: 24px;
             -fx-text-fill: #5a3a2b;
             -fx-background-color: #f8eee9;
             -fx-background-radius: 50;
-            -fx-min-width: 72;
-            -fx-min-height: 72;
+            -fx-min-width: 48;
+            -fx-min-height: 48;
+            -fx-max-width: 48;
+            -fx-max-height: 48;
             -fx-alignment: center;
             """);
 
         Label titleLabel = new Label(title);
         titleLabel.setStyle("""
-            -fx-font-size: 26px;
+            -fx-font-size: 20px;
             -fx-font-weight: bold;
             -fx-text-fill: #111827;
             """);
 
-        HBox titleBox = new HBox(18, iconLabel, titleLabel);
+        HBox titleBox = new HBox(14, iconLabel, titleLabel);
         titleBox.setAlignment(Pos.CENTER_LEFT);
 
         Label messageLabel = new Label(message);
         messageLabel.setWrapText(true);
         messageLabel.setStyle("""
-            -fx-font-size: 20px;
+            -fx-font-size: 15px;
             -fx-text-fill: #5f6368;
-            -fx-line-spacing: 6;
+            -fx-line-spacing: 4;
             """);
 
         Button closeButton = new Button("Đóng");
-        closeButton.setPrefWidth(140);
-        closeButton.setPrefHeight(52);
+        closeButton.setPrefWidth(108);
+        closeButton.setPrefHeight(40);
         closeButton.setStyle("""
             -fx-background-color: #5a3a2b;
             -fx-text-fill: white;
-            -fx-font-size: 18px;
+            -fx-font-size: 14px;
             -fx-font-weight: bold;
-            -fx-background-radius: 14;
+            -fx-background-radius: 10;
             -fx-cursor: hand;
             """);
 
         Button exportButton = new Button("Xuất bill");
-        exportButton.setPrefWidth(150);
-        exportButton.setPrefHeight(52);
+        exportButton.setPrefWidth(118);
+        exportButton.setPrefHeight(40);
         exportButton.setStyle("""
             -fx-background-color: #2d8cff;
             -fx-text-fill: white;
-            -fx-font-size: 18px;
+            -fx-font-size: 14px;
             -fx-font-weight: bold;
-            -fx-background-radius: 14;
+            -fx-background-radius: 10;
             -fx-cursor: hand;
             """);
 
@@ -124,16 +126,16 @@ public class DialogHelper {
             stage.close();
         });
 
-        HBox buttonBox = new HBox(14, closeButton, exportButton);
+        HBox buttonBox = new HBox(12, closeButton, exportButton);
         buttonBox.setAlignment(Pos.CENTER_RIGHT);
 
-        VBox root = new VBox(28, titleBox, messageLabel, buttonBox);
-        root.setPadding(new Insets(34, 48, 34, 48));
-        root.setPrefWidth(700);
+        VBox root = new VBox(18, titleBox, messageLabel, buttonBox);
+        root.setPadding(new Insets(24, 30, 24, 30));
+        root.setPrefWidth(480);
         root.setStyle("""
             -fx-background-color: white;
-            -fx-background-radius: 24;
-            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 24, 0, 0, 8);
+            -fx-background-radius: 16;
+            -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 18, 0, 0, 6);
             """);
 
         Scene scene = new Scene(root);
