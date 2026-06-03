@@ -1,67 +1,298 @@
 package com.vtea.controller;
 
+import com.vtea.dto.BillDTO;
+import com.vtea.dto.OrderHistoryDTO;
+import com.vtea.service.BillService;
+import com.vtea.utils.DialogHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Controller cho tab lịch sử hóa đơn.
+ * Màn này chỉ load danh sách hóa đơn cơ bản, khi bấm Chi tiết mới query full bill.
+ */
 public class InvoiceHistoryController {
 
     @FXML private TextField searchField;
-    @FXML private VBox invoiceGroupsContainer; // Đây là "cái thùng" chứa các tháng
+    @FXML private VBox invoiceGroupsContainer;
+
+    private final BillService billService = new BillService();
+
+    private final DateTimeFormatter timeFormatter =
+            DateTimeFormatter.ofPattern("HH:mm");
+
+    private final DateTimeFormatter monthFormatter =
+            DateTimeFormatter.ofPattern("MM/yyyy");
 
     @FXML
     public void initialize() {
-        // Gọi hàm load dữ liệu ngay khi mở màn hình
         loadInvoiceData();
+
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> handleSearch());
     }
 
+    /**
+     * Load danh sách hóa đơn ban đầu.
+     */
     private void loadInvoiceData() {
+        try {
+            List<OrderHistoryDTO> invoices = billService.getOrderHistory();
+            renderInvoiceGroups(invoices);
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể tải lịch sử hóa đơn: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Tìm kiếm hóa đơn theo mã hóa đơn, tên khách hàng, SĐT hoặc nhân viên.
+     */
+    private void handleSearch() {
+        try {
+            String keyword = searchField.getText();
+
+            List<OrderHistoryDTO> invoices;
+
+            if (keyword == null || keyword.isBlank()) {
+                invoices = billService.getOrderHistory();
+            } else {
+                invoices = billService.searchOrderHistory(keyword.trim());
+            }
+
+            renderInvoiceGroups(invoices);
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể tìm kiếm hóa đơn: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Render danh sách hóa đơn theo từng nhóm thời gian.
+     */
+    private void renderInvoiceGroups(List<OrderHistoryDTO> invoices) {
         invoiceGroupsContainer.getChildren().clear();
 
-        // TODO: (Ví dụ) Lấy danh sách các tháng có hóa đơn từ DB
-        String[] danhSachCacThang = {"Hôm nay", "Tháng 6/2026", "Tháng 5/2026"};
+        Map<String, List<OrderHistoryDTO>> groupedInvoices = groupInvoices(invoices);
 
-        for (String monthName : danhSachCacThang) {
+        for (Map.Entry<String, List<OrderHistoryDTO>> entry : groupedInvoices.entrySet()) {
             try {
-                // 1. Đúc ra cái khung của Tháng
-                FXMLLoader groupLoader = new FXMLLoader(getClass().getResource("/com/vtea/view/InvoiceGroup.fxml"));
-                VBox groupNode = groupLoader.load();
-
-                // 2. Gắn tên tháng
-                Label lblGroupName = (Label) groupNode.lookup("#lblGroupName");
-                if (lblGroupName != null) lblGroupName.setText(monthName);
-
-                // 3. Xử lý logic Đóng/Mở cho riêng cái tháng này
-                VBox groupContent = (VBox) groupNode.lookup("#groupContent");
-                FontIcon iconArrow = (FontIcon) groupNode.lookup("#iconArrow");
-                HBox groupHeader = (HBox) groupNode.lookup("#groupHeader");
-
-                if (groupHeader != null && groupContent != null && iconArrow != null) {
-                    // Ràng buộc managed = visible
-                    groupContent.managedProperty().bind(groupContent.visibleProperty());
-
-                    // Sự kiện click
-                    groupHeader.setOnMouseClicked(e -> {
-                        boolean isVisible = groupContent.isVisible();
-                        groupContent.setVisible(!isVisible);
-                        iconArrow.setIconLiteral(isVisible ? "fth-chevron-right" : "fth-chevron-down");
-                    });
-                }
-
-                // 4. TODO: Đúc các dòng Hóa đơn (InvoiceRow) nhét vào bên trong groupContent ở đây
-
-                // 5. Thêm cái Tháng đã đúc xong ra màn hình
+                VBox groupNode = createInvoiceGroup(entry.getKey(), entry.getValue());
                 invoiceGroupsContainer.getChildren().add(groupNode);
-
             } catch (IOException e) {
                 e.printStackTrace();
+                DialogHelper.showInfo("Lỗi", "Không thể tạo nhóm hóa đơn: " + e.getMessage());
             }
         }
+    }
+
+    /**
+     * Gom hóa đơn theo Hôm nay hoặc Tháng MM/yyyy.
+     */
+    private Map<String, List<OrderHistoryDTO>> groupInvoices(List<OrderHistoryDTO> invoices) {
+        Map<String, List<OrderHistoryDTO>> groupedInvoices = new LinkedHashMap<>();
+
+        for (OrderHistoryDTO invoice : invoices) {
+            String groupName = getGroupName(invoice.getCreatedAt());
+
+            groupedInvoices
+                    .computeIfAbsent(groupName, key -> new java.util.ArrayList<>())
+                    .add(invoice);
+        }
+
+        return groupedInvoices;
+    }
+
+    private VBox createInvoiceGroup(String groupName, List<OrderHistoryDTO> invoices) throws IOException {
+        FXMLLoader groupLoader = new FXMLLoader(getClass().getResource("/com/vtea/view/InvoiceGroup.fxml"));
+        VBox groupNode = groupLoader.load();
+
+        Label lblGroupName = (Label) groupNode.lookup("#lblGroupName");
+        Label lblGroupSub = (Label) groupNode.lookup("#lblGroupSub");
+        Label lblInvoiceCount = (Label) groupNode.lookup("#lblInvoiceCount");
+
+        VBox groupContent = (VBox) groupNode.lookup("#groupContent");
+        VBox invoiceListContainer = (VBox) groupNode.lookup("#invoiceListContainer");
+        FontIcon iconArrow = (FontIcon) groupNode.lookup("#iconArrow");
+        HBox groupHeader = (HBox) groupNode.lookup("#groupHeader");
+
+        if (lblGroupName != null) {
+            lblGroupName.setText(groupName);
+        }
+
+        if (lblGroupSub != null) {
+            lblGroupSub.setText("Danh sách hóa đơn");
+        }
+
+        if (lblInvoiceCount != null) {
+            lblInvoiceCount.setText(invoices.size() + " hóa đơn");
+        }
+
+        if (invoiceListContainer != null) {
+            invoiceListContainer.getChildren().clear();
+
+            for (OrderHistoryDTO invoice : invoices) {
+                invoiceListContainer.getChildren().add(createInvoiceRow(invoice));
+            }
+        }
+
+        setupCollapseEvent(groupHeader, groupContent, iconArrow);
+
+        return groupNode;
+    }
+
+    /**
+     * Tạo một dòng hóa đơn cơ bản.
+     */
+    private HBox createInvoiceRow(OrderHistoryDTO invoice) throws IOException {
+        FXMLLoader rowLoader = new FXMLLoader(getClass().getResource("/com/vtea/view/InvoiceRow.fxml"));
+        HBox rowNode = rowLoader.load();
+
+        Label lblInvoiceId = (Label) rowNode.lookup("#lblInvoiceId");
+        Label lblTime = (Label) rowNode.lookup("#lblTime");
+        Label lblEmployee = (Label) rowNode.lookup("#lblEmployee");
+        Label lblCustomerName = (Label) rowNode.lookup("#lblCustomerName");
+        Label lblCustomerPhone = (Label) rowNode.lookup("#lblCustomerPhone");
+        Label lblPaymentMethod = (Label) rowNode.lookup("#lblPaymentMethod");
+        Label lblTotalAmount = (Label) rowNode.lookup("#lblTotalAmount");
+        Label btnDetails = (Label) rowNode.lookup("#btnDetails");
+
+        if (lblInvoiceId != null) {
+            lblInvoiceId.setText("#" + invoice.getOrderId());
+        }
+
+        if (lblTime != null) {
+            lblTime.setText(formatTime(invoice.getCreatedAt()));
+        }
+
+        if (lblEmployee != null) {
+            lblEmployee.setText(nullToDefault(invoice.getStaffName(), "Không rõ"));
+        }
+
+        if (lblCustomerName != null) {
+            lblCustomerName.setText(nullToDefault(invoice.getCustomerName(), "Khách vãng lai"));
+        }
+
+        if (lblCustomerPhone != null) {
+            lblCustomerPhone.setText(nullToDefault(invoice.getCustomerPhone(), ""));
+        }
+
+        if (lblPaymentMethod != null) {
+            lblPaymentMethod.setText(nullToDefault(invoice.getPaymentMethod(), "Không rõ"));
+        }
+
+        if (lblTotalAmount != null) {
+            lblTotalAmount.setText(formatPrice(invoice.getTotalAmount()));
+        }
+
+        if (btnDetails != null) {
+            btnDetails.setOnMouseClicked(event -> openBillPreview(invoice.getOrderId()));
+        }
+
+        return rowNode;
+    }
+
+    /**
+     * Bấm Chi tiết mới query full bill theo order_id.
+     */
+    private void openBillPreview(int orderId) {
+        try {
+            BillDTO bill = billService.getBillByOrderId(orderId);
+
+            if (bill == null) {
+                DialogHelper.showInfo("Thông báo", "Không tìm thấy hóa đơn #" + orderId);
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/vtea/view/bill-preview.fxml")
+            );
+
+            Parent root = loader.load();
+
+            BillPreviewController controller = loader.getController();
+            controller.setBill(bill);
+
+            Stage stage = new Stage();
+            stage.setTitle("Chi tiết hóa đơn");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setResizable(false);
+            stage.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở chi tiết hóa đơn: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Xử lý đóng/mở từng nhóm hóa đơn.
+     */
+    private void setupCollapseEvent(HBox groupHeader, VBox groupContent, FontIcon iconArrow) {
+        if (groupHeader == null || groupContent == null || iconArrow == null) {
+            return;
+        }
+
+        groupContent.managedProperty().bind(groupContent.visibleProperty());
+
+        groupHeader.setOnMouseClicked(event -> {
+            boolean isVisible = groupContent.isVisible();
+
+            groupContent.setVisible(!isVisible);
+            iconArrow.setIconLiteral(isVisible ? "fth-chevron-right" : "fth-chevron-down");
+        });
+    }
+
+    private String getGroupName(LocalDateTime createdAt) {
+        if (createdAt == null) {
+            return "Không rõ thời gian";
+        }
+
+        if (createdAt.toLocalDate().equals(LocalDate.now())) {
+            return "Hôm nay";
+        }
+
+        return "Tháng " + createdAt.format(monthFormatter);
+    }
+
+    private String formatTime(LocalDateTime dateTime) {
+        if (dateTime == null) {
+            return "";
+        }
+
+        return dateTime.format(timeFormatter);
+    }
+
+    private String formatPrice(BigDecimal price) {
+        if (price == null) {
+            return "0 đ";
+        }
+
+        return String.format("%,.0f đ", price);
+    }
+
+    private String nullToDefault(String value, String defaultValue) {
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+
+        return value;
     }
 }
