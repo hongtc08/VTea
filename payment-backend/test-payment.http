@@ -1,0 +1,14 @@
+POST http://localhost:8080/api/payments/webhook
+Content-Type: application/json
+
+{
+  "code": "00",
+  "desc": "success",
+  "success": true,
+  "data": {
+    "orderCode": 1234567890,
+    "amount": 85000,
+    "description": "VTEA HD123"
+  },
+  "signature": "test"
+}
