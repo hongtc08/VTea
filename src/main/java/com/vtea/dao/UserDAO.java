@@ -79,7 +79,7 @@ public class UserDAO {
      * Lưu ý: Mật khẩu truyền vào qua object User phải là mật khẩu đã được BE mã hóa.
      */
     public boolean insertUser(User user){
-        String sql = "INSERT INTO `user` (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+        String sql = "INSERT INTO `user` (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -89,6 +89,7 @@ public class UserDAO {
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
             ps.setString(5, "Active");
+            ps.setObject(6, java.time.LocalDateTime.now());
 
             return ps.executeUpdate() > 0;
 
