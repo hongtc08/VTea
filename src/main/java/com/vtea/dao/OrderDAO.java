@@ -21,7 +21,7 @@ public class OrderDAO {
     public int checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
     String insertOrderSQL = "INSERT INTO `order` " +
             "(user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method) " +
-            "VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)";
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
       String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
         String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
@@ -42,8 +42,9 @@ public class OrderDAO {
             psOrder.setBigDecimal(4, order.getTierDiscountAmount() != null ? order.getTierDiscountAmount() : java.math.BigDecimal.ZERO);
             psOrder.setBigDecimal(5, order.getPointDiscountAmount() != null ? order.getPointDiscountAmount() : java.math.BigDecimal.ZERO);
 
-            psOrder.setString(6, order.getStatus());
-            psOrder.setString(7, order.getPaymentMethod());
+            psOrder.setObject(6, java.time.LocalDateTime.now());
+            psOrder.setString(7, order.getStatus());
+            psOrder.setString(8, order.getPaymentMethod());
 
             psOrder.executeUpdate();
 
@@ -194,7 +195,7 @@ public class OrderDAO {
                     }
 
                     order.setTotalAmount(rs.getBigDecimal("total_amount"));
-                    order.setCreatedAt(rs.getTimestamp("created_at"));
+                    order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                     order.setStatus(rs.getString("status"));
                     order.setPaymentMethod(rs.getString("payment_method"));
 
