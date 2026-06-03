@@ -1,31 +1,31 @@
-package com.vtea.model;
+package com.vtea.dto;
+
+import com.vtea.model.Ingredient;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Ingredient {
+public class IngredientDTO extends Ingredient {
     private int ingredientId;
     private String name;
     private String unit;
-    private  BigDecimal stockQty;
+    private BigDecimal stockQty;
     private boolean isAvailable;
     private BigDecimal minStock;
     private LocalDateTime lastUpdated;
     private Integer updatedBy;
+    private String staffName;
 
-    public Ingredient() {
+    public IngredientDTO() {
 
     }
 
-    public Ingredient(int ingredientId, String name, BigDecimal stockQty, String unit, boolean isAvailable, BigDecimal minStock, LocalDateTime lastUpdated, Integer updatedBy) {
-        this.ingredientId = ingredientId;
-        this.name = name;
-        this.stockQty = stockQty;
-        this.unit = unit;
-        this.isAvailable = isAvailable;
-        this.minStock = minStock;
-        this.lastUpdated = lastUpdated;
-        this.updatedBy = updatedBy;
+    public String getStaffName() {
+        return staffName;
+    }
+
+    public void setStaffName(String staffName) {
+        this.staffName = staffName;
     }
 
     public int getIngredientId() {
