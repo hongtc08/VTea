@@ -36,8 +36,8 @@ public class InvoiceHistoryController {
 
     private final BillService billService = new BillService();
 
-    private final DateTimeFormatter timeFormatter =
-            DateTimeFormatter.ofPattern("HH:mm");
+    private final DateTimeFormatter dateFormatter =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final DateTimeFormatter monthFormatter =
             DateTimeFormatter.ofPattern("MM/yyyy");
@@ -179,7 +179,7 @@ public class InvoiceHistoryController {
         }
 
         if (lblTime != null) {
-            lblTime.setText(formatTime(invoice.getCreatedAt()));
+            lblTime.setText(formatDate(invoice.getCreatedAt()));
         }
 
         if (lblEmployee != null) {
@@ -272,12 +272,12 @@ public class InvoiceHistoryController {
         return "Tháng " + createdAt.format(monthFormatter);
     }
 
-    private String formatTime(LocalDateTime dateTime) {
+    private String formatDate(LocalDateTime dateTime) {
         if (dateTime == null) {
             return "";
         }
 
-        return dateTime.format(timeFormatter);
+        return dateTime.format(dateFormatter);
     }
 
     private String formatPrice(BigDecimal price) {
