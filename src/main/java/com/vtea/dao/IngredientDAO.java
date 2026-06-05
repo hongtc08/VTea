@@ -96,7 +96,7 @@ public class IngredientDAO {
      */
     public boolean insertIngredient(Ingredient item, int adminId) {
         String sql = "INSERT INTO ingredient (name, unit, stock_qty, min_stock, is_available, updated_by, last_updated) " +
-                "VALUES (?, ?, ?, ?, true, ?, CURRENT_TIMESTAMP)";
+                "VALUES (?, ?, ?, ?, true, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -106,6 +106,7 @@ public class IngredientDAO {
             ps.setBigDecimal(3, item.getStockQty());
             ps.setBigDecimal(4, item.getMinStock());
             ps.setInt(5, adminId);
+            ps.setObject(6, java.time.LocalDateTime.now());
 
             return ps.executeUpdate() > 0;
 
@@ -121,7 +122,7 @@ public class IngredientDAO {
      * Lưu ý: Không dùng hàm này để cập nhật số lượng tồn kho.
      */
     public boolean updateIngredientInfo(Ingredient item, int adminId) {
-        String sql = "UPDATE ingredient SET name = ?, unit = ?, min_stock = ?, stock_qty = ?, updated_by = ?, last_updated = CURRENT_TIMESTAMP " +
+        String sql = "UPDATE ingredient SET name = ?, unit = ?, min_stock = ?, stock_qty = ?, updated_by = ?, last_updated = ? " +
                 "WHERE ingredient_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -132,7 +133,8 @@ public class IngredientDAO {
             ps.setBigDecimal(3, item.getMinStock());
             ps.setBigDecimal(4, item.getStockQty());
             ps.setInt(5, adminId);
-            ps.setInt(6, item.getIngredientId());
+            ps.setObject(6, java.time.LocalDateTime.now());
+            ps.setInt(7, item.getIngredientId());
 
             return ps.executeUpdate() > 0;
 
@@ -166,14 +168,15 @@ public class IngredientDAO {
      * Cách dùng: Staff đếm trong kho còn bao nhiêu thì nhập số đó vào,
      */
     public boolean updateActualQuantity(int ingredientId, BigDecimal quantity, int userId){
-        String sql = "UPDATE ingredient SET stock_qty = ?, last_updated = CURRENT_TIMESTAMP, updated_by = ? WHERE ingredient_id = ?";
+        String sql = "UPDATE ingredient SET stock_qty = ?, last_updated = ?, updated_by = ? WHERE ingredient_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
 
             ps.setBigDecimal(1, quantity);
-            ps.setInt(2, userId);
-            ps.setInt(3, ingredientId);
+            ps.setObject(2, java.time.LocalDateTime.now());
+            ps.setInt(3, userId);
+            ps.setInt(4, ingredientId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e){
             System.err.println("Lỗi cập nhật số lượng tồn kho: " + e.getMessage());
