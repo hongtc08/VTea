@@ -9,14 +9,15 @@ import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.model.Topping;
 import com.vtea.utils.DBConnection;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 
 public class OrderService {
@@ -28,12 +29,13 @@ public class OrderService {
     private final CustomerDAO customerDAO;
     private List<Topping> cachedActiveToppings;
 
-    // Thông tin liên quan đến khách hàng và điểm thưởng
-    private int currentCustomerId = 0; // 0 nghĩa là Khách vãng lai (Không có thẻ)
-    private int pointsToUse = 0;       // Số điểm khách muốn dùng để trừ tiền
-    private int lastEarnedPoints = 0;  // Số điểm đã cộng ở lần checkout gần nhất.
-    private BigDecimal discountAmount = BigDecimal.ZERO; // Tiền được giảm
-    // Hằng số quy đổi điểm thưởng -> tiền: 1 điểm thưởng tương ứng với 1000 VND.
+    // Thong tin lien quan den khach hang va diem thuong
+    private int currentCustomerId = 0;
+    private CustomerDTO currentCustomerInfo = null; // Cache thong tin khach de tinh tien
+    private int pointsToUse = 0;
+    private int lastEarnedPoints = 0;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+
     public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000");
 
     public OrderService() {
@@ -64,7 +66,6 @@ public class OrderService {
         Map<Integer, Integer> safeToppingQuantities = normalizeToppingQuantities(toppingQuantities);
         BigDecimal toppingPrice = calculateToppingPrice(safeToppingQuantities);
 
-        // Mỗi lần thêm món tạo một dòng riêng để topping không bị dính sang ly khác.
         OrderDetailDTO newItem = new OrderDetailDTO(
                 productId,
                 productName.trim(),
@@ -84,6 +85,7 @@ public class OrderService {
         cartItems.clear();
         currentOrder = new Order();
         currentCustomerId = 0;
+        currentCustomerInfo = null;
         pointsToUse = 0;
         lastEarnedPoints = 0;
         calculateTotal();
@@ -101,10 +103,6 @@ public class OrderService {
         return currentOrder;
     }
 
-    /*----------------------------------------------------------------------
-    Nếu có 2 ly nước (cùng id) mà mỗi ly có topping khác nhau sẽ dễ gây lỗi topping
-    Cần đưa dữ liệu vào là item thay vì chỉ dùng id
-     ----------------------------------------------------------------------*/
     public void increaseQuantity(OrderDetailDTO item) {
         if (item != null && cartItems.contains(item)) {
             item.setQuantity(item.getQuantity() + 1);
@@ -122,13 +120,22 @@ public class OrderService {
             calculateTotal();
         }
     }
+
+    public void removeFromCart(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
+            cartItems.remove(item);
+            calculateTotal();
+        }
+    }
+
+    // ==================== TOPPING MANIPULATION FOR SPECIFIC ITEM ====================
+
     public void changeToppingQuantity(OrderDetailDTO item, int toppingId, int delta) {
         if (item == null || !cartItems.contains(item)) {
             return;
         }
 
         Map<Integer, Integer> map = item.getToppingQuantities();
-
         if (map == null) {
             map = new HashMap<>();
         } else {
@@ -155,7 +162,6 @@ public class OrderService {
         }
 
         Map<Integer, Integer> map = item.getToppingQuantities();
-
         if (map == null || !map.containsKey(toppingId)) {
             return;
         }
@@ -168,24 +174,12 @@ public class OrderService {
         calculateTotal();
     }
 
-    /*
-        Khi người dùng bấm nút xóa món trong giỏ hàng.
-        Hoặc khi bấm - mà quantity của món đang là 1.
-    */
-    public void removeFromCart(OrderDetailDTO item) {
-        if (item != null && cartItems.contains(item)) {
-            cartItems.remove(item);
-            calculateTotal();
-        }
-    }
-
     public void addToppingToItem(OrderDetailDTO item, int toppingId) {
         if (item == null || !cartItems.contains(item)) {
-            throw new IllegalArgumentException("Không tìm thấy món trong giỏ!");
+            throw new IllegalArgumentException("Khong tim thay mon trong gio!");
         }
 
         Map<Integer, Integer> map = item.getToppingQuantities();
-
         if (map == null) {
             map = new HashMap<>();
         } else {
@@ -214,7 +208,6 @@ public class OrderService {
             );
 
             detail.setToppingQuantities(dto.getToppingQuantities());
-
             detailsForDB.add(detail);
         }
 
@@ -231,40 +224,40 @@ public class OrderService {
         } else {
             currentOrder.setCustomerId(null);
             currentCustomerId = 0;
+            currentCustomerInfo = null;
         }
 
         List<OrderDetail> details = getDetailsForCheckout(0);
-
         Connection conn = null;
 
         try {
             conn = DBConnection.getConnection();
             if (conn == null) {
-                throw new java.sql.SQLException("Khong the ket noi database.");
+                throw new java.sql.SQLException("Khong the ket noi den co so du lieu.");
             }
             conn.setAutoCommit(false);
 
-            calculateTotalForCheckout();
+            // Tinh toan tien lan cuoi cung de dam bao du lieu chinh xac tuyet doi
+            calculateTotal();
 
             int savedOrderId = orderDAO.checkoutOrder(conn, currentOrder, details);
 
             if (savedOrderId <= 0) {
-                throw new Exception("Lỗi hệ thống: Không thể tạo hóa đơn!");
+                throw new Exception("Loi he thong: Khong the tao hoa don!");
             }
 
-            // Lưu lại order_id vừa tạo để POSController mở bill preview.
             currentOrder.setOrderId(savedOrderId);
 
             if (currentCustomerId > 0) {
                 if (pointsToUse > 0) {
                     boolean deducted = customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
                     if (!deducted) {
-                        throw new java.sql.SQLException("Khach hang khong du diem de su dung.");
+                        throw new java.sql.SQLException("Khach hang khong du diem de su dung hoac thong tin da thay doi.");
                     }
                 }
 
                 int pointsEarned = currentOrder.getTotalAmount()
-                        .divide(new BigDecimal("10000"), java.math.RoundingMode.DOWN)
+                        .divide(new BigDecimal("10000"), RoundingMode.DOWN)
                         .intValue();
 
                 if (pointsEarned > 0) {
@@ -279,8 +272,8 @@ public class OrderService {
 
             conn.commit();
 
-            // Không clearCart ở đây vì POSController còn cần order_id để mở bill preview.
             currentCustomerId = 0;
+            currentCustomerInfo = null;
             pointsToUse = 0;
 
             return true;
@@ -289,12 +282,11 @@ public class OrderService {
             if (conn != null) {
                 try {
                     conn.rollback();
-                    System.err.println(">>> TRANSACTION FAILED: Đã Rollback giao dịch an toàn!");
+                    System.err.println(">>> TRANSACTION FAILED: Da Rollback giao dich an toan!");
                 } catch (java.sql.SQLException ex) {
                     ex.printStackTrace();
                 }
             }
-
             e.printStackTrace();
             return false;
 
@@ -310,35 +302,7 @@ public class OrderService {
         }
     }
 
-
-    // ==================== FIND CART ITEM METHODS ====================
-
-    private OrderDetailDTO findCartItemByProductId(int productId) {
-        for (OrderDetailDTO item : cartItems) {
-            if (item.getProductId() == productId) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    //Xu li order co topping rieng
-    private OrderDetailDTO findCartItemByProductIdAndToppings(
-            int productId,
-            Map<Integer, Integer> toppingQuantities
-    ) {
-        for (OrderDetailDTO item : cartItems) {
-            if (item.getProductId() == productId
-                    && Objects.equals(item.getToppingQuantities(), toppingQuantities)) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    // ==================== TOPPING METHODS ====================
+    // ==================== TOPPING HELPERS ====================
 
     private Map<Integer, Integer> normalizeToppingQuantities(Map<Integer, Integer> toppingQuantities) {
         Map<Integer, Integer> normalized = new HashMap<>();
@@ -352,11 +316,11 @@ public class OrderService {
             Integer quantity = entry.getValue();
 
             if (toppingId == null || toppingId <= 0) {
-                throw new IllegalArgumentException("Topping ID không hợp lệ!");
+                throw new IllegalArgumentException("Topping ID khong hop le!");
             }
 
             if (quantity == null || quantity <= 0) {
-                throw new IllegalArgumentException("Số lượng topping phải lớn hơn 0!");
+                throw new IllegalArgumentException("So luong topping phai lon hon 0!");
             }
 
             normalized.put(toppingId, quantity);
@@ -379,7 +343,7 @@ public class OrderService {
             Topping topping = findActiveToppingById(this.cachedActiveToppings, toppingId);
 
             if (topping == null) {
-                throw new IllegalArgumentException("Topping không tồn tại hoặc đã ngừng bán: " + toppingId);
+                throw new IllegalArgumentException("Topping khong ton tai hoac da ngung ban: " + toppingId);
             }
 
             total = total.add(topping.getPrice().multiply(BigDecimal.valueOf(quantity)));
@@ -394,16 +358,13 @@ public class OrderService {
                 return topping;
             }
         }
-
         return null;
     }
 
-    // Public helper: lấy tất cả topping đang bán (dùng cho UI)
     public java.util.List<Topping> getAllActiveToppings() {
         return toppingDAO.getAllActiveToppings();
     }
 
-    // Public helper: tìm topping đang bán theo id
     public Topping findActiveToppingById(int toppingId) {
         List<Topping> list = toppingDAO.getAllActiveToppings();
         for (Topping t : list) {
@@ -412,91 +373,37 @@ public class OrderService {
         return null;
     }
 
-    // Thêm 1 topping (toppingId) cho món đã có trong giỏ (baseProductId)
-    public void addToppingToItem(int baseProductId, int toppingId) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) {
-            throw new IllegalArgumentException("Không tìm thấy món trong giỏ: " + baseProductId);
-        }
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        int prev = map.getOrDefault(toppingId, 0);
-        map.put(toppingId, prev + 1);
-        item.setToppingQuantities(map);
-
-        BigDecimal toppingPrice = calculateToppingPrice(map);
-        item.setToppingPrice(toppingPrice);
-        calculateTotal();
-    }
-
-    // Thay đổi số lượng topping (delta có thể là +1 hoặc -1), nếu kết quả <=0 thì xóa topping
-    public void changeToppingQuantity(int baseProductId, int toppingId, int delta) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) return;
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        int prev = map.getOrDefault(toppingId, 0);
-        int now = prev + delta;
-        if (now <= 0) {
-            map.remove(toppingId);
-        } else {
-            map.put(toppingId, now);
-        }
-
-        item.setToppingQuantities(map);
-        BigDecimal toppingPrice = calculateToppingPrice(map);
-        item.setToppingPrice(toppingPrice);
-        calculateTotal();
-    }
-
-    public void removeToppingFromItem(int baseProductId, int toppingId) {
-        OrderDetailDTO item = findCartItemByProductId(baseProductId);
-        if (item == null) return;
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        if (map.containsKey(toppingId)) {
-            map.remove(toppingId);
-            item.setToppingQuantities(map);
-            BigDecimal toppingPrice = calculateToppingPrice(map);
-            item.setToppingPrice(toppingPrice);
-            calculateTotal();
-        }
-    }
-
-
 
     // ==================== CUSTOMER & POINTS METHODS ====================
 
-    // Gọi hàm này khi thu ngân quét mã hoặc nhập xong SĐT khách
     public void setCustomer(int customerId) {
         if (customerId > 0) {
             this.currentCustomerId = customerId;
             this.currentOrder.setCustomerId(customerId);
+            this.currentCustomerInfo = customerDAO.getCustomerById(customerId);
         } else {
             this.currentCustomerId = 0;
             this.currentOrder.setCustomerId(null);
+            this.currentCustomerInfo = null;
         }
 
-        this.pointsToUse = 0; // Đổi khách thì reset điểm muốn dùng về 0
+        this.pointsToUse = 0;
         calculateTotal();
     }
 
-    // Gọi hàm này khi thu ngân gõ số điểm muốn xài vào ô Text
     public void applyRewardPoints(int points) throws Exception {
-        if (currentCustomerId <= 0) {
-            throw new Exception("Lỗi: Vui lòng chọn khách hàng thành viên trước!");
+        if (currentCustomerId <= 0 || currentCustomerInfo == null) {
+            throw new Exception("Loi: Vui long chon khach hang thanh vien truoc!");
         }
 
-        CustomerDTO customer = customerDAO.getCustomerById(currentCustomerId);
-        if (customer == null || customer.getRewardPoints() < points) {
-            throw new Exception("Lỗi: Khách hàng không đủ điểm!");
+        if (currentCustomerInfo.getRewardPoints() < points) {
+            throw new Exception("Loi: Khach hang khong du diem!");
         }
 
         this.pointsToUse = points;
-        calculateTotal(); // Tính lại tổng tiền ngay lập tức
+        calculateTotal();
     }
 
-    // Lấy tiền giảm giá để UI hiển thị
     public BigDecimal getDiscountAmount() {
         return discountAmount;
     }
@@ -507,63 +414,6 @@ public class OrderService {
 
     // ==================== CALCULATE / VALIDATE METHODS ====================
 
-    private void calculateTotalForCheckout() {
-        BigDecimal subtotal = BigDecimal.ZERO;
-
-        for (OrderDetailDTO item : cartItems) {
-            subtotal = subtotal.add(item.getSubTotal());
-        }
-
-        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
-
-        // Giảm hạng thành viên được tự động áp dụng nếu hóa đơn có khách hàng.
-        if (currentCustomerId > 0) {
-            CustomerDTO customer = customerDAO.getCustomerById(currentCustomerId);
-
-            if (customer != null) {
-                BigDecimal discountPercent = BigDecimal.valueOf(customer.getDiscountPercent());
-
-                tierDiscountAmount = subtotal
-                        .multiply(discountPercent)
-                        .divide(new BigDecimal("100"));
-            }
-        }
-
-        BigDecimal amountAfterTierDiscount = subtotal.subtract(tierDiscountAmount);
-
-        if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) {
-            amountAfterTierDiscount = BigDecimal.ZERO;
-        }
-
-        int maxUsablePoints = amountAfterTierDiscount
-                .divide(POINT_CONVERSION_RATE, java.math.RoundingMode.DOWN)
-                .intValue();
-
-        int actualPointsToUse = Math.min(pointsToUse, maxUsablePoints);
-
-        BigDecimal pointDiscountAmount = BigDecimal.valueOf(actualPointsToUse)
-                .multiply(POINT_CONVERSION_RATE);
-
-        BigDecimal amountAfterDiscount = subtotal
-                .subtract(tierDiscountAmount)
-                .subtract(pointDiscountAmount);
-
-        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
-            amountAfterDiscount = BigDecimal.ZERO;
-        }
-
-        // VAT tính sau khi đã trừ giảm hạng và giảm điểm.
-        BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
-        BigDecimal finalTotal = amountAfterDiscount.add(vat);
-
-        this.pointsToUse = actualPointsToUse;
-        this.discountAmount = tierDiscountAmount.add(pointDiscountAmount);
-
-        currentOrder.setTierDiscountAmount(tierDiscountAmount);
-        currentOrder.setPointDiscountAmount(pointDiscountAmount);
-        currentOrder.setTotalAmount(finalTotal);
-    }
-
     private void calculateTotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -571,45 +421,63 @@ public class OrderService {
             subtotal = subtotal.add(item.getSubTotal());
         }
 
-        // 1. Tính số tiền giảm giá thông qua quy đổi điểm thưởng (Ví dụ 1 điểm = 1000đ)
-        this.discountAmount = new BigDecimal(this.pointsToUse).multiply(POINT_CONVERSION_RATE);
+        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
 
-        // 2. Ép bảo mật: Không được giảm lố tiền món nước
-        if (this.discountAmount.compareTo(subtotal) > 0) {
-            this.discountAmount = subtotal; // Ép tiền giảm = tiền gốc
-            // Ép ngược lại số điểm thực tế bị trừ
-            this.pointsToUse = subtotal.divide(POINT_CONVERSION_RATE, java.math.RoundingMode.DOWN).intValue();
+        // 1. Ap dung giam gia hang thanh vien tu cache
+        if (currentCustomerInfo != null) {
+            BigDecimal discountPercent = BigDecimal.valueOf(currentCustomerInfo.getDiscountPercent());
+            tierDiscountAmount = subtotal.multiply(discountPercent).divide(new BigDecimal("100"), RoundingMode.DOWN);
         }
 
-        // 3. Tính lại tiền gốc sau khi đã trừ giảm giá
-        BigDecimal amountAfterDiscount = subtotal.subtract(this.discountAmount);
+        BigDecimal amountAfterTierDiscount = subtotal.subtract(tierDiscountAmount);
+        if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterTierDiscount = BigDecimal.ZERO;
+        }
 
-        // 4. Áp dụng thuế VAT lên số tiền sau khi giảm giá
+        // 2. Tinh toan tien giam gia tu diem thuong va ap dung luat TOI DA 50% don hang
+        BigDecimal maxAllowedPointDiscount = amountAfterTierDiscount.multiply(new BigDecimal("0.50"));
+        BigDecimal requestedPointDiscount = new BigDecimal(this.pointsToUse).multiply(POINT_CONVERSION_RATE);
+
+        // Neu khach yeu cau dung diem vuot qua 50% gia tri don hang (sau khi giam hang)
+        if (requestedPointDiscount.compareTo(maxAllowedPointDiscount) > 0) {
+            requestedPointDiscount = maxAllowedPointDiscount;
+            // Tinh nguoc lai so diem hop le toi da khach duoc phep dung
+            this.pointsToUse = requestedPointDiscount.divide(POINT_CONVERSION_RATE, RoundingMode.DOWN).intValue();
+            // Tinh lai chinh xac so tien duoc giam dua tren diem hop le nguyen con
+            requestedPointDiscount = new BigDecimal(this.pointsToUse).multiply(POINT_CONVERSION_RATE);
+        }
+
+        BigDecimal amountAfterDiscount = amountAfterTierDiscount.subtract(requestedPointDiscount);
+        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterDiscount = BigDecimal.ZERO;
+        }
+
+        // 3. Ap dung thue VAT len so tien cuoi cung
         BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
-
-        // 5. Tính tổng tiền cuối cùng = Tiền sau giảm giá + VAT
         BigDecimal finalTotal = amountAfterDiscount.add(vat);
 
-        currentOrder.setPointDiscountAmount(this.discountAmount);
-        currentOrder.setTierDiscountAmount(BigDecimal.ZERO);
+        this.discountAmount = tierDiscountAmount.add(requestedPointDiscount);
+
+        currentOrder.setTierDiscountAmount(tierDiscountAmount);
+        currentOrder.setPointDiscountAmount(requestedPointDiscount);
         currentOrder.setTotalAmount(finalTotal);
     }
 
     private void validateCartItem(int productId, String productName, BigDecimal price, int quantity) {
         if (productId <= 0) {
-            throw new IllegalArgumentException("Product ID không hợp lệ!");
+            throw new IllegalArgumentException("Product ID khong hop le!");
         }
 
         if (productName == null || productName.trim().isEmpty()) {
-            throw new IllegalArgumentException("Tên sản phẩm không được để trống!");
+            throw new IllegalArgumentException("Ten san pham khong duoc de trong!");
         }
 
         if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Giá sản phẩm phải lớn hơn 0!");
+            throw new IllegalArgumentException("Gia san pham phai lon hon 0!");
         }
 
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Số lượng sản phẩm phải lớn hơn 0!");
+            throw new IllegalArgumentException("So luong san pham phai lon hon 0!");
         }
     }
 }
