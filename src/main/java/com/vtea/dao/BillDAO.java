@@ -231,7 +231,7 @@ public class BillDAO {
                 FROM `order` o
                 LEFT JOIN user u ON o.user_id = u.user_id
                 LEFT JOIN customer c ON o.customer_id = c.customer_id
-                ORDER BY o.created_at DESC
+                ORDER BY o.order_id DESC
                 """;
 
         try (
@@ -271,7 +271,7 @@ public class BillDAO {
                 LEFT JOIN user u ON o.user_id = u.user_id
                 LEFT JOIN customer c ON o.customer_id = c.customer_id
                 WHERE DATE(o.created_at) BETWEEN ? AND ?
-                ORDER BY o.created_at DESC
+                ORDER BY o.order_id DESC
                 """;
 
         try (
@@ -318,7 +318,7 @@ public class BillDAO {
                     OR c.full_name LIKE ?
                     OR c.phone_number LIKE ?
                     OR u.full_name LIKE ?
-                ORDER BY o.created_at DESC
+                ORDER BY o.order_id DESC
                 """;
 
         try (
