@@ -1,14 +1,14 @@
 package com.vtea.dto;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 public class OrderDTO {
     private int orderId;
     private int userId;
     private Integer customerId; // Dùng Integer vì có thể null
     private BigDecimal totalAmount;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
     private String status;
     private String paymentMethod;
 
@@ -30,8 +30,8 @@ public class OrderDTO {
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
