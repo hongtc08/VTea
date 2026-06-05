@@ -1,5 +1,7 @@
 package com.vtea.payment.dto;
-
+/**
+ * Response trả về trạng thái thanh toán của một giao dịch payOS.
+ */
 public class PaymentStatusResponse {
     private long orderCode;
     private String status;

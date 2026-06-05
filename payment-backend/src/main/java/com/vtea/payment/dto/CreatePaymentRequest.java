@@ -1,5 +1,7 @@
 package com.vtea.payment.dto;
-
+/**
+ * Request từ app JavaFX gửi lên backend để tạo giao dịch payOS.
+ */
 public class CreatePaymentRequest {
     private long amount;
     private String description;

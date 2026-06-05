@@ -1,5 +1,8 @@
 package com.vtea.service.payment;
-
+/**
+ * Client gọi payment-backend từ app JavaFX.
+ * Dùng để tạo link thanh toán payOS, mở trang thanh toán và kiểm tra trạng thái.
+ */
 import java.awt.Desktop;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -15,6 +18,10 @@ public class PayOSPaymentClient {
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
+
+    /**
+     * Gửi số tiền và mô tả đơn hàng sang backend để tạo link thanh toán payOS.
+     */
     public PayOSCreateResponse createPayment(BigDecimal amount, String description)
             throws IOException, InterruptedException {
 
@@ -45,6 +52,11 @@ public class PayOSPaymentClient {
         return parseCreateResponse(response.body());
     }
 
+
+    /**
+     * Kiểm tra trạng thái giao dịch payOS theo orderCode.
+     * POSController dùng method này để polling đến khi trạng thái là PAID.
+     */
     public String getStatus(long orderCode)
             throws IOException, InterruptedException {
 
@@ -65,6 +77,11 @@ public class PayOSPaymentClient {
         return extractJsonString(response.body(), "status");
     }
 
+
+    /**
+     * Mở checkoutUrl của payOS trên trình duyệt mặc định.
+     * Có fallback xdg-open cho Linux nếu Desktop API không hoạt động.
+     */
     public void openCheckoutUrl(String checkoutUrl) {
         try {
             if (checkoutUrl == null || checkoutUrl.trim().isEmpty()) {
@@ -89,6 +106,10 @@ public class PayOSPaymentClient {
         }
     }
 
+
+    /**
+     * Parse response JSON từ backend thành PayOSCreateResponse.
+     */
     private PayOSCreateResponse parseCreateResponse(String json) {
         long orderCode = Long.parseLong(extractJsonValue(json, "orderCode"));
         String checkoutUrl = extractJsonString(json, "checkoutUrl");
@@ -97,6 +118,9 @@ public class PayOSPaymentClient {
         return new PayOSCreateResponse(orderCode, checkoutUrl, status);
     }
 
+    /**
+     * Lấy value dạng String từ JSON response đơn giản.
+     */
     private String extractJsonString(String json, String key) {
         return extractJsonValue(json, key);
     }
@@ -129,6 +153,9 @@ public class PayOSPaymentClient {
         return json.substring(start, end).trim();
     }
 
+    /**
+     * Escape dấu nháy kép để tránh lỗi khi nhúng description vào JSON body.
+     */
     private String escapeJson(String value) {
         return value == null ? "" : value.replace("\"", "\\\"");
     }

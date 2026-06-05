@@ -1,5 +1,8 @@
 package com.vtea.payment.controller;
-
+/**
+ * Controller xử lý thanh toán payOS.
+ * Cung cấp API tạo link thanh toán, kiểm tra trạng thái và nhận kết quả thanh toán.
+ */
 import com.vtea.payment.dto.CreatePaymentRequest;
 import com.vtea.payment.dto.CreatePaymentResponse;
 import com.vtea.payment.dto.PaymentStatusResponse;
@@ -25,6 +28,12 @@ public class PaymentController {
         this.paymentStore = paymentStore;
     }
 
+
+
+    /**
+     * Tạo link thanh toán payOS cho đơn hàng.
+     * Backend gửi số tiền và mô tả đơn hàng sang payOS, sau đó trả checkoutUrl cho app JavaFX.
+     */
     @PostMapping("/create")
     public ResponseEntity<CreatePaymentResponse> createPayment(
             @RequestBody CreatePaymentRequest request
@@ -61,6 +70,10 @@ public class PaymentController {
     }
 
 
+    /**
+     * Nhận webhook từ payOS khi thanh toán thành công.
+     * Bản demo dùng payload để cập nhật trạng thái giao dịch thành PAID.
+     */
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody Map<String, Object> payload) {
         try {
@@ -92,6 +105,11 @@ public class PaymentController {
         }
     }
 
+
+    /**
+     * Trả về trạng thái thanh toán hiện tại của giao dịch.
+     * App JavaFX gọi API này liên tục để biết đơn đã PAID hay chưa.
+     */
     @GetMapping("/{orderCode}/status")
     public ResponseEntity<PaymentStatusResponse> getStatus(
             @PathVariable("orderCode") long orderCode
@@ -104,6 +122,11 @@ public class PaymentController {
         );
     }
 
+
+    /**
+     * URL payOS chuyển về sau khi khách thanh toán thành công.
+     * Dùng trong môi trường local để đánh dấu giao dịch PAID.
+     */
     @GetMapping({"/return", "/return/{orderCode}"})
     public ResponseEntity<String> returnUrl(
             @PathVariable(value = "orderCode", required = false) Long orderCode,
@@ -145,6 +168,11 @@ public class PaymentController {
         }
     }
 
+
+    /**
+     * URL payOS chuyển về khi khách hủy thanh toán.
+     * Đánh dấu giao dịch là CANCELLED.
+     */
     @GetMapping({"/cancel", "/cancel/{orderCode}"})
     public ResponseEntity<String> cancelUrl(
             @PathVariable(value = "orderCode", required = false) Long orderCode,

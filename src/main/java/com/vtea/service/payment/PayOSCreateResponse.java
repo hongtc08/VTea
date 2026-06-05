@@ -1,5 +1,7 @@
 package com.vtea.service.payment;
-
+/**
+ * DTO lưu thông tin backend trả về sau khi tạo thanh toán payOS.
+ */
 public class PayOSCreateResponse {
     private final long orderCode;
     private final String checkoutUrl;
