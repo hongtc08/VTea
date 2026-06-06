@@ -38,6 +38,10 @@ public class CustomerDialogController {
     @FXML private Label lblVat;
     @FXML private Label lblTotal;
 
+    @FXML private Label lblTierName;
+    @FXML private Label lblTierDiscount;
+    @FXML private javafx.scene.layout.HBox tierDiscountBox;
+
     @FXML private RadioButton radioEarn;
     @FXML private RadioButton radioUse;
     @FXML private Button btnWalkIn;
@@ -50,6 +54,7 @@ public class CustomerDialogController {
 
     private BigDecimal orderSubtotal = BigDecimal.ZERO;
     private BigDecimal orderTotal = BigDecimal.ZERO;
+    private BigDecimal tierDiscountAmount = BigDecimal.ZERO;
     private int earnPoints = 0;
     private int pointsToUse = 0;
 
@@ -235,6 +240,19 @@ public class CustomerDialogController {
             lblAvatarInitials.setText(getInitial(customer.getFullName()));
         }
 
+        if (lblTierName != null && customer.getTierName() != null) {
+            lblTierName.setText(customer.getTierName());
+            if (customer.getTierId() == 2) {
+                lblTierName.setStyle("-fx-background-color: #E2E8F0; -fx-text-fill: #475569; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: bold;");
+            } else if (customer.getTierId() == 3) {
+                lblTierName.setStyle("-fx-background-color: #FEF3C7; -fx-text-fill: #B45309; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: bold;");
+            } else if (customer.getTierId() == 4) {
+                lblTierName.setStyle("-fx-background-color: #DBEAFE; -fx-text-fill: #1D4ED8; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: bold;");
+            } else {
+                lblTierName.setStyle("-fx-background-color: #F3F4F6; -fx-text-fill: #6B7280; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: bold;");
+            }
+        }
+
         updatePointActionPreview();
     }
 
@@ -284,7 +302,31 @@ public class CustomerDialogController {
         return pointsToUse;
     }
 
+    public BigDecimal getTierDiscountAmount() {
+        return tierDiscountAmount;
+    }
+
     private void updatePointActionPreview() {
+        // Tính tier discount trước
+        if (selectedCustomer != null && selectedCustomer.getDiscountPercent() > 0) {
+            BigDecimal discountPercent = BigDecimal.valueOf(selectedCustomer.getDiscountPercent());
+            tierDiscountAmount = orderSubtotal.multiply(discountPercent).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
+            
+            if (tierDiscountBox != null) {
+                tierDiscountBox.setVisible(true);
+                tierDiscountBox.setManaged(true);
+            }
+            if (lblTierDiscount != null) {
+                lblTierDiscount.setText("-" + formatPrice(tierDiscountAmount) + " (" + selectedCustomer.getDiscountPercent() + "%)");
+            }
+        } else {
+            tierDiscountAmount = BigDecimal.ZERO;
+            if (tierDiscountBox != null) {
+                tierDiscountBox.setVisible(false);
+                tierDiscountBox.setManaged(false);
+            }
+        }
+
         boolean canUsePoints = selectedCustomer != null && calculateMaxUsablePoints(selectedCustomer) > 0;
 
         if (radioUse != null) {
@@ -296,14 +338,20 @@ public class CustomerDialogController {
 
         if (selectedCustomer == null || radioUse == null || !radioUse.isSelected()) {
             pointsToUse = 0;
-            earnPoints = calculateEarnPoints(orderTotal);
+            
+            BigDecimal amountAfterTierDiscount = orderSubtotal.subtract(tierDiscountAmount);
+            if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) amountAfterTierDiscount = BigDecimal.ZERO;
+            
+            BigDecimal vatAfterDiscount = amountAfterTierDiscount.multiply(VAT_RATE);
+            BigDecimal totalAfterDiscount = amountAfterTierDiscount.add(vatAfterDiscount);
+            earnPoints = calculateEarnPoints(totalAfterDiscount);
 
             if (lblVat != null) {
-                lblVat.setText(formatPrice(orderSubtotal.multiply(VAT_RATE)));
+                lblVat.setText(formatPrice(vatAfterDiscount));
             }
 
             if (lblTotal != null) {
-                lblTotal.setText(formatPrice(orderTotal));
+                lblTotal.setText(formatPrice(totalAfterDiscount));
             }
 
             if (lblEarnPreview != null) {
@@ -321,7 +369,7 @@ public class CustomerDialogController {
 
         pointsToUse = calculateMaxUsablePoints(selectedCustomer);
         BigDecimal discount = POINT_CONVERSION_RATE.multiply(BigDecimal.valueOf(pointsToUse));
-        BigDecimal amountAfterDiscount = orderSubtotal.subtract(discount);
+        BigDecimal amountAfterDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(discount);
 
         if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
             amountAfterDiscount = BigDecimal.ZERO;
@@ -353,7 +401,10 @@ public class CustomerDialogController {
             return 0;
         }
 
-        int maxByOrder = orderSubtotal.divide(POINT_CONVERSION_RATE, 0, RoundingMode.DOWN).intValue();
+        BigDecimal subtotalAfterTier = orderSubtotal.subtract(tierDiscountAmount);
+        if (subtotalAfterTier.compareTo(BigDecimal.ZERO) <= 0) return 0;
+
+        int maxByOrder = subtotalAfterTier.divide(POINT_CONVERSION_RATE, 0, RoundingMode.DOWN).intValue();
         return Math.min(customer.getRewardPoints(), maxByOrder);
     }
 

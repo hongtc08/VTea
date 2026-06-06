@@ -7,15 +7,17 @@ public class ToppingDTO {
     private String name;
     private BigDecimal price;
     private boolean isAvailable;
+    private String imageUrl;
 
     public ToppingDTO() {
 
     }
-    public ToppingDTO(boolean isAvailable, String name, BigDecimal price, int toppingId) {
+    public ToppingDTO(boolean isAvailable, String name, BigDecimal price, int toppingId, String imageUrl) {
         this.isAvailable = isAvailable;
         this.name = name;
         this.price = price;
         this.toppingId = toppingId;
+        this.imageUrl = imageUrl;
     }
 
     public int getToppingId() {
@@ -48,5 +50,13 @@ public class ToppingDTO {
 
     public void setAvailable(boolean available) {
         isAvailable = available;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

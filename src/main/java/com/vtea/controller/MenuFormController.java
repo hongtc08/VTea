@@ -162,6 +162,24 @@ public class MenuFormController {
             if (topping.getPrice() != null) {
                 txtPrice.setText(String.valueOf(topping.getPrice().longValue()));
             }
+            
+            // Load image
+            if (topping.getImageUrl() != null && !topping.getImageUrl().isEmpty()) {
+                try {
+                    selectedImagePath = topping.getImageUrl();
+                    Image img;
+                    if (topping.getImageUrl().startsWith("http") || topping.getImageUrl().startsWith("file:")) {
+                        img = new Image(topping.getImageUrl());
+                    } else {
+                        img = new Image(getClass().getResourceAsStream(topping.getImageUrl()));
+                    }
+                    if (img != null && !img.isError()) {
+                        showPreviewImage(img);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         } else {
             lblFormTitle.setText("Thêm topping mới");
             btnSubmit.setText("Xác nhận thêm");
@@ -353,6 +371,12 @@ public class MenuFormController {
         currentTopping.setName(txtName.getText().trim());
         currentTopping.setPrice(price);
         currentTopping.setAvailable(true);
+
+        if (selectedImagePath != null) {
+            currentTopping.setImageUrl(selectedImagePath);
+        } else {
+            currentTopping.setImageUrl("");
+        }
 
         if (currentTopping.getToppingId() > 0) {
             toppingService.updateTopping(currentTopping);

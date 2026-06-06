@@ -76,6 +76,7 @@ public class ToppingService {
         Topping model = new Topping();
         model.setName(dto.getName().trim());
         model.setPrice(dto.getPrice());
+        model.setImageUrl(dto.getImageUrl());
 
         boolean isSuccess = toppingDAO.insertTopping(model);
         if(!isSuccess) {
@@ -101,6 +102,7 @@ public class ToppingService {
         model.setToppingId(dto.getToppingId());
         model.setName(dto.getName().trim());
         model.setPrice(dto.getPrice());
+        model.setImageUrl(dto.getImageUrl());
         model.setAvailable(dto.getAvailable());
 
         boolean isSuccess = toppingDAO.updateTopping(model);
@@ -135,6 +137,7 @@ public class ToppingService {
             dto.setToppingId(model.getToppingId());
             dto.setName(model.getName());
             dto.setPrice(model.getPrice());
+            dto.setImageUrl(model.getImageUrl());
             dto.setAvailable(model.getAvailable());
             dtoList.add(dto);
         }

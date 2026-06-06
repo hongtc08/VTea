@@ -107,11 +107,18 @@ public class BillPreviewController {
             }
         }
 
-        BigDecimal vat = subtotal.multiply(new BigDecimal("0.10"));
+        BigDecimal vat = subtotal.subtract(bill.getTierDiscountAmount()).subtract(bill.getPointDiscountAmount()).multiply(new BigDecimal("0.10"));
+        if (vat.compareTo(BigDecimal.ZERO) < 0) vat = BigDecimal.ZERO;
         BigDecimal total = bill.getTotalAmount();
 
         builder.append(line()).append("\n");
         builder.append(moneyLine("Tạm tính:", subtotal)).append("\n");
+        if (bill.getTierDiscountAmount() != null && bill.getTierDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            builder.append(moneyLine("Hạng " + bill.getTierName() + ":", bill.getTierDiscountAmount().negate())).append("\n");
+        }
+        if (bill.getPointDiscountAmount() != null && bill.getPointDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            builder.append(moneyLine("Trừ điểm:", bill.getPointDiscountAmount().negate())).append("\n");
+        }
         builder.append(moneyLine("VAT 10%:", vat)).append("\n");
         builder.append(moneyLine("Tổng cộng:", total)).append("\n");
         builder.append(line()).append("\n");
