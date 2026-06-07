@@ -10,6 +10,8 @@ import javafx.scene.layout.StackPane;
 import com.vtea.utils.DialogHelper;
 
 import java.net.URL;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
 
 public class MainLayoutController {
 
@@ -68,6 +70,13 @@ public class MainLayoutController {
             // 2. Tiến hành load giao diện
             FXMLLoader loader = new FXMLLoader(fileUrl);
             Parent view = loader.load();
+
+            // Thêm hiệu ứng Fade In để UX mượt mà hơn
+            view.setOpacity(0);
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), view);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            fadeIn.play();
 
             // 3. Đưa vào màn hình chính
             contentArea.getChildren().clear();

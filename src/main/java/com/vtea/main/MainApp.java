@@ -8,12 +8,15 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+import atlantafx.base.theme.PrimerLight;
+
 public class MainApp extends Application {
 
     private static Stage primaryStage;
 
     @Override
     public void start(Stage stage) throws IOException {
+        Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
         primaryStage = stage;
         primaryStage.setTitle("VTea - POS & Quản lý");
         setRoot("login");
