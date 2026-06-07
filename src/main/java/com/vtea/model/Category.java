@@ -1,9 +1,22 @@
 package com.vtea.model;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name="category")
 public class Category {
+    @Id //primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Tự động tăng (AUTO_INCREMENT)
+    @Column(name = "category_id")
     private int categoryId;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "is_available")
     private boolean isAvailable;
 
     public Category() {
