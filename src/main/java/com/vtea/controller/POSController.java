@@ -9,7 +9,11 @@ import com.vtea.model.Order;
 import com.vtea.service.BillService;
 import com.vtea.service.OrderService;
 import com.vtea.service.POSCacheService;
+import com.vtea.service.payment.PayOSCreateResponse;
+import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -17,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -28,6 +33,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -51,6 +57,9 @@ public class POSController {
 
     // Service lấy dữ liệu hóa đơn để preview hoặc in lại bill.
     private final BillService billService = new BillService();
+
+    // Client gọi payment-backend để tạo link QR payOS và kiểm tra trạng thái thanh toán.
+    private final PayOSPaymentClient payOSPaymentClient = new PayOSPaymentClient();
 
     // TODO: Sau này thay bằng user đang đăng nhập từ SessionManager.
     private int currentUserId = 1;
@@ -109,7 +118,7 @@ public class POSController {
     /**
      * Xử lý khi bấm nút thanh toán.
      * Luồng chính:
-     * kiểm tra giỏ hàng -> chọn khách hàng -> lưu order -> mở bill preview -> clear cart.
+     * kiểm tra giỏ hàng -> chọn khách hàng -> xử lý phương thức thanh toán -> lưu order -> mở bill preview -> clear cart.
      */
     @FXML
     private void handleCheckout(ActionEvent event) {
@@ -134,11 +143,6 @@ public class POSController {
 
             CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
 
-            Order order = orderService.getCurrentOrder();
-            order.setUserId(currentUserId);
-            order.setStatus("PAID");
-            order.setPaymentMethod(paymentMethod);
-
             if (selectedCustomer != null && selectedCustomer.getCustomerId() != null) {
                 orderService.setCustomer(selectedCustomer.getCustomerId());
                 if (customerDialog.getPointsToUse() > 0) {
@@ -148,36 +152,159 @@ public class POSController {
                 orderService.setCustomer(0);
             }
 
-            boolean success = orderService.checkoutCurrentOrder();
+            Order order = orderService.getCurrentOrder();
+            order.setUserId(currentUserId);
+            order.setStatus("PAID");
+            order.setPaymentMethod(resolvePaymentMethodForDatabase(paymentMethod));
 
-            if (success) {
-                int awardedPoints = selectedCustomer != null ? orderService.getLastEarnedPoints() : 0;
-                int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
+            int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
 
-                boolean exportBill = DialogHelper.showSuccessWithBillButton(
-                        "✓ Thanh toán thành công!",
-                        "Tổng tiền: " + formatPrice(order.getTotalAmount())
-                                + "\nKhách hàng: "
-                                + (selectedCustomer != null ? selectedCustomer.getFullName() : "Khách vãng lai")
-                                + "\nĐiểm đã dùng: "
-                                + usedPoints
-                                + "\nĐiểm cộng: "
-                                + awardedPoints
-                );
-
-                if (exportBill) {
-                    showBillPreviewAfterCheckout(order);
-                }
-
-                orderService.clearCart();
-                refreshCart();
-            } else {
-                showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
+            if (isPayOSPayment(paymentMethod)) {
+                handlePayOSPayment(order, selectedCustomer, usedPoints);
+                return;
             }
+
+            completeCheckout(order, selectedCustomer, usedPoints);
 
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra phương thức thanh toán hiện tại có phải QR payOS không.
+     */
+    private boolean isPayOSPayment(String paymentMethod) {
+        return paymentMethod != null
+                && paymentMethod.trim().equalsIgnoreCase("QR Pay");
+    }
+
+    /**
+     * Chuẩn hóa tên phương thức thanh toán trước khi lưu database.
+     * QR Pay được lưu là PAYOS để dễ lọc hóa đơn và thống kê.
+     */
+    private String resolvePaymentMethodForDatabase(String paymentMethod) {
+        if (isPayOSPayment(paymentMethod)) {
+            return "PAYOS";
+        }
+
+        return paymentMethod;
+    }
+
+    /**
+     * Tạo link thanh toán payOS thông qua payment-backend.
+     * Sau khi mở trang QR, app sẽ tự polling trạng thái thanh toán.
+     */
+    private void handlePayOSPayment(Order order, CustomerDTO selectedCustomer, int usedPoints) {
+        try {
+            String description = "VTEA" + System.currentTimeMillis() / 1000;
+
+            PayOSCreateResponse payment = payOSPaymentClient.createPayment(
+                    order.getTotalAmount(),
+                    description
+            );
+
+            payOSPaymentClient.openCheckoutUrl(payment.getCheckoutUrl());
+
+            Alert waitingAlert = new Alert(Alert.AlertType.INFORMATION);
+            waitingAlert.setTitle("Thanh toán payOS");
+            waitingAlert.setHeaderText("Đang chờ khách thanh toán");
+            waitingAlert.setContentText(
+                    "Mã giao dịch: " + payment.getOrderCode()
+                            + "\nSố tiền: " + formatPrice(order.getTotalAmount())
+                            + "\nVui lòng quét QR hoặc chuyển khoản trên trình duyệt."
+                            + "\nHệ thống sẽ tự kiểm tra trạng thái thanh toán."
+            );
+            waitingAlert.show();
+
+            startPayOSStatusPolling(payment, waitingAlert, order, selectedCustomer, usedPoints);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showErrorAlert("Lỗi payOS", "Không thể tạo thanh toán payOS: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Kiểm tra trạng thái giao dịch payOS mỗi 3 giây.
+     * Khi payment-backend trả PAID thì mới lưu order vào database.
+     */
+    private void startPayOSStatusPolling(
+            PayOSCreateResponse payment,
+            Alert waitingAlert,
+            Order order,
+            CustomerDTO selectedCustomer,
+            int usedPoints
+    ) {
+        Timeline timeline = new Timeline();
+
+        waitingAlert.setOnCloseRequest(event -> timeline.stop());
+
+        KeyFrame keyFrame = new KeyFrame(Duration.seconds(3), event ->
+                CompletableFuture
+                        .supplyAsync(() -> {
+                            try {
+                                return payOSPaymentClient.getStatus(payment.getOrderCode());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .thenAccept(status -> Platform.runLater(() -> {
+                            if ("PAID".equalsIgnoreCase(status)) {
+                                timeline.stop();
+                                waitingAlert.close();
+                                completeCheckout(order, selectedCustomer, usedPoints);
+                                return;
+                            }
+
+                            if ("CANCELLED".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
+                                timeline.stop();
+                                waitingAlert.close();
+                                showErrorAlert("Thanh toán thất bại", "Trạng thái payOS: " + status);
+                            }
+                        }))
+                        .exceptionally(ex -> {
+                            System.err.println("Không thể kiểm tra trạng thái payOS: " + ex.getMessage());
+                            return null;
+                        })
+        );
+
+        timeline.getKeyFrames().add(keyFrame);
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
+    /**
+     * Lưu đơn hàng sau khi phương thức thanh toán đã hoàn tất.
+     * Method này dùng chung cho tiền mặt và QR payOS.
+     */
+    private void completeCheckout(Order order, CustomerDTO selectedCustomer, int usedPoints) {
+        boolean success = orderService.checkoutCurrentOrder();
+
+        if (success) {
+            int awardedPoints = selectedCustomer != null ? orderService.getLastEarnedPoints() : 0;
+
+            boolean exportBill = DialogHelper.showSuccessWithBillButton(
+                    "✓ Thanh toán thành công!",
+                    "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                            + "\nKhách hàng: "
+                            + (selectedCustomer != null ? selectedCustomer.getFullName() : "Khách vãng lai")
+                            + "\nPhương thức: "
+                            + order.getPaymentMethod()
+                            + "\nĐiểm đã dùng: "
+                            + usedPoints
+                            + "\nĐiểm cộng: "
+                            + awardedPoints
+            );
+
+            if (exportBill) {
+                showBillPreviewAfterCheckout(order);
+            }
+
+            orderService.clearCart();
+            refreshCart();
+        } else {
+            showErrorAlert("Lỗi thanh toán", "Có lỗi xảy ra khi lưu đơn hàng!");
         }
     }
 
