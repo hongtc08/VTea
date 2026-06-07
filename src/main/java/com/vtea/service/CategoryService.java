@@ -1,6 +1,7 @@
 package com.vtea.service;
 
 import com.vtea.dao.CategoryDAO;
+import com.vtea.dao.CategoryHibernateDAO;
 import com.vtea.dao.ProductDAO;
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
@@ -10,12 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryService {
-    private CategoryDAO categoryDAO = new CategoryDAO();
+    //private CategoryDAO categoryDAO = new CategoryDAO();
+    private CategoryHibernateDAO categoryHibernateDAO = new CategoryHibernateDAO();
     private ProductDAO productDAO = new ProductDAO(); // Cần để check điều kiện xóa
 
     // 1. Lấy danh sách đang bán (Có Mapping từ Model -> DTO)
     public List<CategoryDTO> getAllActiveCategories() {
-        List<Category> modelList = categoryDAO.getActiveCategories();
+        List<Category> modelList = categoryHibernateDAO.getAllActiveCategories();
+        //List<Category> modelList = categoryDAO.getActiveCategories();
         List<CategoryDTO> dtoList = new ArrayList<>();
 
         for (Category model : modelList) {
@@ -31,7 +34,7 @@ public class CategoryService {
 
     // Lấy TOÀN BỘ (kể cả đã xóa mềm) để Admin quản lý
     public List<CategoryDTO> getAllCategories() {
-        List<Category> modelList = categoryDAO.getAllCategories();
+        List<Category> modelList = categoryHibernateDAO.getAllCategories();
         List<CategoryDTO> dtoList = new ArrayList<>();
 
         for (Category model : modelList) {
@@ -57,7 +60,7 @@ public class CategoryService {
         model.setName(dto.getName().trim());
         model.setDescription(dto.getDescription());
 
-        boolean isSuccess = categoryDAO.insertCategory(model);
+        boolean isSuccess = categoryHibernateDAO.insertCategory(model);
         if (!isSuccess) {
             throw new Exception("Lỗi hệ thống: Không thể thêm danh mục vào Database!");
         }
@@ -81,7 +84,7 @@ public class CategoryService {
         model.setAvailable(dto.getAvailable()); // Cho phép sếp sửa cả trạng thái (Ẩn/Hiện)
 
         // 3. Gọi DAO
-        boolean isSuccess = categoryDAO.updateCategory(model);
+        boolean isSuccess = categoryHibernateDAO.updateCategory(model);
         if (!isSuccess) {
             throw new Exception("Lỗi hệ thống: Không thể cập nhật danh mục!");
         }
@@ -96,7 +99,7 @@ public class CategoryService {
         }
 
         // Nếu qua được cửa ải trên thì mới gọi DAO để xóa mềm
-        boolean isSuccess = categoryDAO.softDeleteCategory(categoryId);
+        boolean isSuccess = categoryHibernateDAO.softDeleteCategory(categoryId);
         if (!isSuccess) {
             throw new Exception("Lỗi hệ thống: Không thể xóa danh mục!");
         }
