@@ -15,6 +15,9 @@ public class DashboardController {
     @FXML
     private VBox vboxTopProducts;
 
+    @FXML
+    private VBox vboxLowStock;
+
     //Hàm khởi tạo, t để mấy cái dữ liệu mẫu thôi
     @FXML
     public void initialize() {
@@ -27,6 +30,11 @@ public class DashboardController {
         // Thêm dữ liệu cho Item 2 (Sản phẩm bán chạy)
         vboxTopProducts.getChildren().add(loadTopProductItem("1", "Trà sữa trân châu", "45", "2,250,000đ"));
         vboxTopProducts.getChildren().add(loadTopProductItem("2", "Cafe sữa", "38", "1,520,000đ"));
+
+        // TODO: Backend - Gọi IngredientDAO.getLowStockAlerts() lấy danh sách nguyên liệu sắp hết
+        // TODO: Backend - Lặp qua danh sách và nạp vào vboxLowStock. Dữ liệu mẫu:
+        vboxLowStock.getChildren().add(loadLowStockItem("Trân châu đen", "0.5 kg", "5 kg"));
+        vboxLowStock.getChildren().add(loadLowStockItem("Đường đen", "1 kg", "2 kg"));
     }
 
     //Hàm load thông tin vào OrderItem
@@ -58,6 +66,22 @@ public class DashboardController {
             ((Label) itemNode.lookup("#lblProductName")).setText(productName);
             ((Label) itemNode.lookup("#lblSold")).setText(soldCount + " đã bán");
             ((Label) itemNode.lookup("#lblRevenue")).setText(totalRevenue);
+
+            return itemNode;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    //Hàm load thông tin vào LowStockItem
+    private HBox loadLowStockItem(String ingredientName, String currentStock, String minStock) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/LowStockItem.fxml"));
+            HBox itemNode = loader.load();
+
+            ((Label) itemNode.lookup("#lblIngredientName")).setText(ingredientName);
+            ((Label) itemNode.lookup("#lblStockInfo")).setText("Còn lại: " + currentStock + " (Tối thiểu: " + minStock + ")");
 
             return itemNode;
         } catch (IOException e) {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.InventoryStaffRowController"
+      styleClass="list-item-row" alignment="CENTER_LEFT" spacing="16">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <!-- Tên nguyên liệu -->
+    <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="250">
+        <StackPane styleClass="inventory-icon-box">
+            <FontIcon iconLiteral="fth-package" iconSize="20" iconColor="#523628"/>
+        </StackPane>
+        <Label fx:id="lblName" text="Trân châu" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+    </HBox>
+
+    <!-- Đơn vị tính -->
+    <Label fx:id="lblUnit" text="kg" style="-fx-text-fill: #666666;" prefWidth="120"/>
+
+    <!-- Tồn kho hệ thống -->
+    <Label fx:id="lblSystemQuantity" text="50" style="-fx-font-weight: bold;" prefWidth="150"/>
+
+    <!-- Tồn kho thực tế (Input) -->
+    <HBox prefWidth="200" alignment="CENTER_LEFT">
+        <TextField fx:id="txtActualQuantity" promptText="Nhập số lượng đếm được..." styleClass="input-field" prefWidth="180"/>
+    </HBox>
+
+    <!-- Thao tác -->
+    <HBox prefWidth="120" alignment="CENTER">
+        <Button fx:id="btnSave" text="Lưu chốt sổ" onAction="#handleSave" styleClass="btn-primary" style="-fx-font-size: 12px; -fx-padding: 6 12;"/>
+    </HBox>
+</HBox>
