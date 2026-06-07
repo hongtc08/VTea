@@ -57,6 +57,7 @@ public class POSCacheService {
                 pd.setName(t.getName());
                 pd.setPrice(t.getPrice());
                 pd.setCategoryName("Topping");
+                pd.setImageUrl(t.getImageUrl());
                 cachedToppings.add(pd);
             }
         }
