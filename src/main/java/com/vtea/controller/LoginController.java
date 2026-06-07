@@ -16,6 +16,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import com.vtea.service.POSCacheService;
 import javafx.application.Platform;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ProgressBar;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.scene.control.ProgressIndicator;
+import javafx.util.Duration;
+import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.concurrent.CompletableFuture;
 
 public class LoginController {
@@ -35,6 +46,21 @@ public class LoginController {
 
     @FXML
     private Button btnLogin; // Nút đăng nhập
+
+    @FXML
+    private StackPane loadingOverlay;
+
+    @FXML
+    private ProgressIndicator loadingSpinner;
+
+    @FXML
+    private FontIcon successIcon;
+
+    @FXML
+    private Label loadingLabel;
+
+    @FXML
+    private ProgressBar successProgressBar;
 
     @FXML
     public void initialize() {
@@ -78,21 +104,45 @@ public class LoginController {
             return; // Dừng lại, không chạy xuống dưới nữa
         }
 
-        try {
-            // Đóng gói dữ liệu gửi xuống Service
-            LoginRequestDTO request = new LoginRequestDTO(username, password);
-
-            // Service sẽ ném lỗi ra nếu sai, còn qua được dòng này là thành công!
-            UserSessionDTO sessionInfo = authService.login(request);
-
-            // Lưu thông tin người dùng vào SessionManager
-            SessionManager.login(sessionInfo);
-
-            preloadSystemDataThenOpenMain(sessionInfo.getFullName());
-        } catch (Exception e) {
-            // Nếu AuthService ném lỗi (sai pass, tài khoản khóa...), hiện Popup báo lỗi
-            DialogHelper.showInfo("Lỗi Đăng Nhập", e.getMessage());
+        // Hiển thị loading overlay
+        if (loadingOverlay != null) {
+            loadingOverlay.setVisible(true);
+            if (loadingSpinner != null) {
+                loadingSpinner.setVisible(true);
+            }
+            successIcon.setVisible(false);
+            loadingLabel.setText("Đang xử lý...");
+            loadingLabel.setStyle("-fx-text-fill: #5d4037;");
+            if (successProgressBar != null) {
+                successProgressBar.setVisible(false);
+                successProgressBar.setManaged(false);
+                successProgressBar.setProgress(0.0);
+            }
         }
+        btnLogin.setDisable(true);
+
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                // Đóng gói dữ liệu gửi xuống Service
+                LoginRequestDTO request = new LoginRequestDTO(username, password);
+                return authService.login(request);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }).thenAccept(sessionInfo -> {
+            Platform.runLater(() -> {
+                SessionManager.login(sessionInfo);
+                preloadSystemDataThenOpenMain(sessionInfo.getFullName());
+            });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> {
+                if (loadingOverlay != null) loadingOverlay.setVisible(false);
+                btnLogin.setDisable(false);
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                DialogHelper.showInfo("Lỗi Đăng Nhập", cause.getMessage());
+            });
+            return null;
+        });
     }
 
     @FXML
@@ -110,16 +160,41 @@ public class LoginController {
         CompletableFuture
                 .runAsync(() -> posCacheService.loadIfNeeded())
                 .thenRun(() -> Platform.runLater(() -> {
-                    DialogHelper.showInfo(
-                            "Thành công",
-                            "Đăng nhập thành công!\nXin chào: " + fullName
-                    );
-
-                    System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
-                    MainApp.setRoot("main-layout");
+                    // Hiệu ứng thành công
+                    if (loadingSpinner != null) {
+                        loadingSpinner.setVisible(false);
+                    }
+                    if (successIcon != null) successIcon.setVisible(true);
+                    if (loadingLabel != null) {
+                        loadingLabel.setText("Xin chào, " + fullName + "!");
+                        loadingLabel.setStyle("-fx-text-fill: #16a34a;");
+                    }
+                    
+                    if (successProgressBar != null) {
+                        successProgressBar.setVisible(true);
+                        successProgressBar.setManaged(true);
+                        
+                        Timeline timeline = new Timeline(
+                                new KeyFrame(Duration.ZERO, new KeyValue(successProgressBar.progressProperty(), 0.0)),
+                                new KeyFrame(Duration.millis(800), new KeyValue(successProgressBar.progressProperty(), 1.0))
+                        );
+                        timeline.setOnFinished(event -> {
+                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            MainApp.setRoot("main-layout");
+                        });
+                        timeline.play();
+                    } else {
+                        PauseTransition pause = new PauseTransition(Duration.millis(800));
+                        pause.setOnFinished(event -> {
+                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            MainApp.setRoot("main-layout");
+                        });
+                        pause.play();
+                    }
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
+                        if (loadingOverlay != null) loadingOverlay.setVisible(false);
                         btnLogin.setDisable(false);
                         btnLogin.setText("Đăng Nhập");
 

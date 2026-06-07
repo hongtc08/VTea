@@ -6,12 +6,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <?import org.kordamp.ikonli.javafx.*?>
+<?import javafx.scene.image.*?>
 
-<HBox prefHeight="800" prefWidth="1280" styleClass="login-root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.LoginController">
+<StackPane prefHeight="800" prefWidth="1280" styleClass="login-root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.LoginController">
 
     <stylesheets>
         <URL value="@../css/styles.css" />
     </stylesheets>
+
+    <!-- Main Content -->
+    <HBox prefHeight="800" prefWidth="1280" HBox.hgrow="ALWAYS">
 
 
     <!-- ===== LEFT PANEL: Branding ===== -->
@@ -104,4 +108,18 @@
         </VBox>
     </VBox>
 
-</HBox>
+    </HBox>
+
+    <!-- Overlay Loading -->
+    <StackPane fx:id="loadingOverlay" styleClass="loading-overlay" visible="false">
+        <VBox alignment="CENTER" spacing="16" styleClass="spinner-box" maxWidth="350" maxHeight="180">
+            <StackPane>
+                <ProgressIndicator fx:id="loadingSpinner" prefWidth="50" prefHeight="50" />
+                <FontIcon fx:id="successIcon" iconLiteral="fth-check-circle" iconSize="50" iconColor="#22c55e" visible="false" />
+            </StackPane>
+            <Label fx:id="loadingLabel" text="Đang xử lý..." styleClass="loading-text" wrapText="true" textAlignment="CENTER"/>
+            <ProgressBar fx:id="successProgressBar" prefWidth="200" progress="0.0" visible="false" managed="false"/>
+        </VBox>
+    </StackPane>
+
+</StackPane>

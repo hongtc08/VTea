@@ -1786,3 +1786,24 @@
     -fx-font-weight: bold;
     -fx-font-size: 13px;
 }
+
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+
+.loading-overlay {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+}
+
+.spinner-box {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 4);
+    -fx-padding: 24;
+}
+
+.loading-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5d4037;
+}
