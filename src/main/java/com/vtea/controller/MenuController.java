@@ -257,6 +257,7 @@ public class MenuController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuItem.fxml"));
             VBox card = loader.load();
 
+            ImageView imgProduct = (ImageView) loader.getNamespace().get("imgProduct");
             Label lblProductName = (Label) loader.getNamespace().get("lblProductName");
             Label lblCategory = (Label) loader.getNamespace().get("lblCategory");
             Label lblPrice = (Label) loader.getNamespace().get("lblPrice");
@@ -268,6 +269,22 @@ public class MenuController {
 
             NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
             lblPrice.setText(formatter.format(topping.getPrice()) + "đ");
+
+            try {
+                if (topping.getImageUrl() != null && !topping.getImageUrl().isEmpty()) {
+                    Image img;
+                    if (topping.getImageUrl().startsWith("http") || topping.getImageUrl().startsWith("file:")) {
+                        img = new Image(topping.getImageUrl());
+                    } else {
+                        img = new Image(getClass().getResourceAsStream(topping.getImageUrl()));
+                    }
+                    if (img != null && !img.isError()) {
+                        imgProduct.setImage(img);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Could not load image for: " + topping.getName());
+            }
 
             btnEdit.setOnAction(e -> handleEditTopping(topping));
             btnDelete.setOnAction(e -> handleDeleteTopping(topping));

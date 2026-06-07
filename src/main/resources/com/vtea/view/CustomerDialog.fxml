@@ -57,7 +57,10 @@
                             <Label fx:id="lblAvatarInitials" text="b" styleClass="avatar-text"/>
                         </StackPane>
                         <VBox alignment="CENTER_LEFT" spacing="2">
-                            <Label fx:id="lblExistingName" text="ba" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                            <HBox alignment="CENTER_LEFT" spacing="6">
+                                <Label fx:id="lblExistingName" text="ba" style="-fx-font-weight: bold; -fx-font-size: 15px;"/>
+                                <Label fx:id="lblTierName" text="Hạng" style="-fx-background-color: #FEF3C7; -fx-text-fill: #92400E; -fx-padding: 2 6; -fx-background-radius: 4; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                            </HBox>
                             <Label fx:id="lblExistingPhone" text="333" style="-fx-text-fill: #666666;"/>
                         </VBox>
                     </HBox>
@@ -96,6 +99,11 @@
                         <Label text="Tạm tính:" style="-fx-text-fill: #666666;"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="lblSubTotal" text="55.000đ" style="-fx-text-fill: #666666;"/>
+                    </HBox>
+                    <HBox fx:id="tierDiscountBox" managed="false" visible="false">
+                        <Label text="Giảm giá hạng:" style="-fx-text-fill: #666666;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblTierDiscount" text="-0đ" style="-fx-text-fill: #16A34A;"/>
                     </HBox>
                     <HBox>
                         <Label text="VAT (10%):" style="-fx-text-fill: #666666;"/>
