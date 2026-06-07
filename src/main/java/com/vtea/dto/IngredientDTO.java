@@ -5,7 +5,7 @@ import com.vtea.model.Ingredient;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class IngredientDTO extends Ingredient {
+public class IngredientDTO {
     private int ingredientId;
     private String name;
     private String unit;
