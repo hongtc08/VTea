@@ -5,10 +5,7 @@ import com.vtea.model.Ingredient;
 import com.vtea.utils.DBConnection;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,31 +14,18 @@ public class IngredientDAO {
      * Lấy danh sách nguyên liệu đang sử dụng.
      * Dành cho màn hình Kiểm kho cuối ngày của Staff.
      */
-    public List<Ingredient> getAllActiveIngredients(){
+    public List<Ingredient> getAllActiveIngredients() {
         List<Ingredient> list = new ArrayList<>();
         String sql = "SELECT * FROM ingredient WHERE is_available = true";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()){
-                Ingredient item = new Ingredient();
-                item.setIngredientId(rs.getInt("ingredient_id"));
-                item.setName(rs.getString("name"));
-                item.setUnit(rs.getString("unit"));
-                item.setStockQty(rs.getBigDecimal("stock_qty"));
-                item.setAvailable(rs.getBoolean("is_available"));
-                item.setMinStock(rs.getBigDecimal("min_stock"));
-                item.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
-                int updatedBy = rs.getInt("updated_by");
-                if (!rs.wasNull()) {
-                    item.setUpdatedBy(updatedBy);
-                }
-
-                list.add(item);
+            while (rs.next()) {
+                list.add(mapRowToIngredient(rs));
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             System.err.println("Lỗi lấy danh sách nguyên liệu: " + e.getMessage());
             e.printStackTrace();
         }
@@ -65,24 +49,7 @@ public class IngredientDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                IngredientDTO item = new IngredientDTO();
-
-                item.setIngredientId(rs.getInt("ingredient_id"));
-                item.setName(rs.getString("name"));
-                item.setUnit(rs.getString("unit"));
-                item.setStockQty(rs.getBigDecimal("stock_qty"));
-                item.setAvailable(rs.getBoolean("is_available"));
-                item.setMinStock(rs.getBigDecimal("min_stock"));
-                item.setLastUpdated(rs.getTimestamp("last_updated").toLocalDateTime());
-
-                int updatedBy = rs.getInt("updated_by");
-                if (!rs.wasNull()) {
-                    item.setUpdatedBy(updatedBy);
-                }
-
-                item.setStaffName(rs.getString("staff_name"));
-
-                list.add(item);
+                list.add(mapRowToIngredientDTO(rs));
             }
         } catch (SQLException e) {
             System.err.println("Lỗi lấy danh sách nguyên liệu: " + e.getMessage());
@@ -95,8 +62,8 @@ public class IngredientDAO {
      * Thêm nguyên liệu mới (Dành cho Admin).
      */
     public boolean insertIngredient(Ingredient item, int adminId) {
-        String sql = "INSERT INTO ingredient (name, unit, stock_qty, min_stock, is_available, updated_by, last_updated) " +
-                "VALUES (?, ?, ?, ?, true, ?, ?)";
+        String sql = "INSERT INTO ingredient (name, unit, stock_qty, min_stock, is_available, updated_by) " +
+                "VALUES (?, ?, ?, ?, true, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -106,7 +73,6 @@ public class IngredientDAO {
             ps.setBigDecimal(3, item.getStockQty());
             ps.setBigDecimal(4, item.getMinStock());
             ps.setInt(5, adminId);
-            ps.setObject(6, java.time.LocalDateTime.now());
 
             return ps.executeUpdate() > 0;
 
@@ -122,7 +88,7 @@ public class IngredientDAO {
      * Lưu ý: Không dùng hàm này để cập nhật số lượng tồn kho.
      */
     public boolean updateIngredientInfo(Ingredient item, int adminId) {
-        String sql = "UPDATE ingredient SET name = ?, unit = ?, min_stock = ?, stock_qty = ?, updated_by = ?, last_updated = ? " +
+        String sql = "UPDATE ingredient SET name = ?, unit = ?, min_stock = ?, updated_by = ? " +
                 "WHERE ingredient_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -131,10 +97,8 @@ public class IngredientDAO {
             ps.setString(1, item.getName());
             ps.setString(2, item.getUnit());
             ps.setBigDecimal(3, item.getMinStock());
-            ps.setBigDecimal(4, item.getStockQty());
-            ps.setInt(5, adminId);
-            ps.setObject(6, java.time.LocalDateTime.now());
-            ps.setInt(7, item.getIngredientId());
+            ps.setInt(4, adminId);
+            ps.setInt(5, item.getIngredientId());
 
             return ps.executeUpdate() > 0;
 
@@ -146,17 +110,20 @@ public class IngredientDAO {
     }
 
     /**
-     * XÓA nguyên liệu
+     * XÓA nguyên liệu (Xóa mềm / Ẩn khỏi hệ thống)
      */
-    public boolean deleteIngredient(int ingredientId){
-        String sql = "UPDATE ingredient SET is_available = false WHERE ingredient_id = ?";
+    public boolean deleteIngredient(int ingredientId, int adminId) {
+        String sql = "UPDATE ingredient SET is_available = false, updated_by = ? WHERE ingredient_id = ?";
 
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, ingredientId);
+            ps.setInt(1, adminId);
+            ps.setInt(2, ingredientId);
+
             return ps.executeUpdate() > 0;
-        } catch (SQLException e){
+
+        } catch (SQLException e) {
             System.err.println("Lỗi xóa nguyên liệu: " + e.getMessage());
             e.printStackTrace();
         }
@@ -165,19 +132,23 @@ public class IngredientDAO {
 
     /**
      * CẬP NHẬT TỒN KHO THỰC TẾ CUỐI NGÀY (Dành cho Staff/Quản lý).
-     * Cách dùng: Staff đếm trong kho còn bao nhiêu thì nhập số đó vào,
+     * Cách dùng: Staff đếm trong kho còn bao nhiêu thì nhập số đó vào.
      */
     public boolean updateActualQuantity(int ingredientId, BigDecimal quantity, int userId){
-        String sql = "UPDATE ingredient SET stock_qty = ?, last_updated = ?, updated_by = ? WHERE ingredient_id = ?";
+        String sql = "UPDATE ingredient SET stock_qty = ?, updated_by = ? WHERE ingredient_id = ?";
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
+            if (quantity.compareTo(BigDecimal.ZERO) < 0) {
+                quantity = BigDecimal.ZERO;
+            }
 
             ps.setBigDecimal(1, quantity);
-            ps.setObject(2, java.time.LocalDateTime.now());
-            ps.setInt(3, userId);
-            ps.setInt(4, ingredientId);
+            ps.setInt(2, userId);
+            ps.setInt(3, ingredientId);
+
             return ps.executeUpdate() > 0;
+
         } catch (SQLException e){
             System.err.println("Lỗi cập nhật số lượng tồn kho: " + e.getMessage());
             e.printStackTrace();
@@ -198,18 +169,66 @@ public class IngredientDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Ingredient item = new Ingredient();
-                item.setIngredientId(rs.getInt("ingredient_id"));
-                item.setName(rs.getString("name"));
-                item.setUnit(rs.getString("unit"));
-                item.setStockQty(rs.getBigDecimal("stock_qty"));
-                item.setMinStock(rs.getBigDecimal("min_stock"));
-
-                list.add(item);
+                list.add(mapRowToIngredient(rs));
             }
         } catch (SQLException e) {
+            System.err.println("Lỗi lấy danh sách cảnh báo tồn kho: " + e.getMessage());
             e.printStackTrace();
         }
         return list;
+    }
+
+    // ==================== HELPER METHODS ====================
+
+    /**
+     * Helper: Map dữ liệu chung cho đối tượng Ingredient (Model)
+     */
+    private Ingredient mapRowToIngredient(ResultSet rs) throws SQLException {
+        Ingredient item = new Ingredient();
+        item.setIngredientId(rs.getInt("ingredient_id"));
+        item.setName(rs.getString("name"));
+        item.setUnit(rs.getString("unit"));
+        item.setStockQty(rs.getBigDecimal("stock_qty"));
+        item.setAvailable(rs.getBoolean("is_available"));
+        item.setMinStock(rs.getBigDecimal("min_stock"));
+
+        Timestamp lastUpdated = rs.getTimestamp("last_updated");
+        if (lastUpdated != null) {
+            item.setLastUpdated(lastUpdated.toLocalDateTime());
+        }
+
+        int updatedBy = rs.getInt("updated_by");
+        if (!rs.wasNull()) {
+            item.setUpdatedBy(updatedBy);
+        }
+
+        return item;
+    }
+
+    /**
+     * Helper: Map dữ liệu chung cho đối tượng IngredientDTO (dành cho Admin có staff_name)
+     */
+    private IngredientDTO mapRowToIngredientDTO(ResultSet rs) throws SQLException {
+        IngredientDTO item = new IngredientDTO();
+        item.setIngredientId(rs.getInt("ingredient_id"));
+        item.setName(rs.getString("name"));
+        item.setUnit(rs.getString("unit"));
+        item.setStockQty(rs.getBigDecimal("stock_qty"));
+        item.setAvailable(rs.getBoolean("is_available"));
+        item.setMinStock(rs.getBigDecimal("min_stock"));
+
+        Timestamp lastUpdated = rs.getTimestamp("last_updated");
+        if (lastUpdated != null) {
+            item.setLastUpdated(lastUpdated.toLocalDateTime());
+        }
+
+        int updatedBy = rs.getInt("updated_by");
+        if (!rs.wasNull()) {
+            item.setUpdatedBy(updatedBy);
+        }
+
+        item.setStaffName(rs.getString("staff_name"));
+
+        return item;
     }
 }
