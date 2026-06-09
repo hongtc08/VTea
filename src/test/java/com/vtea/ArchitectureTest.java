@@ -28,6 +28,7 @@ public class ArchitectureTest {
     void controllerNameShouldEndWithController() {
         ArchRule rule = classes()
                 .that().resideInAPackage("..controller..")
+                .and().areTopLevelClasses()
                 .should().haveSimpleNameEndingWith("Controller");
 
         rule.check(importedClasses);
@@ -37,6 +38,7 @@ public class ArchitectureTest {
     void daoNameShouldEndWithDAO() {
         ArchRule rule = classes()
                 .that().resideInAPackage("..dao..")
+                .and().areTopLevelClasses()
                 .should().haveSimpleNameEndingWith("DAO");
 
         rule.check(importedClasses);

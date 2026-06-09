@@ -218,20 +218,20 @@
 .btn-primary {
     -fx-background-color: linear-gradient(to bottom right, #442a22, #5d4037);
     -fx-text-fill: white;
-    -fx-font-size: 14px;
+    -fx-font-size: 15px;
     -fx-font-weight: bold;
-    -fx-background-radius: 10;
+    -fx-background-radius: 12;
     -fx-cursor: hand;
     -fx-padding: 12 24;
-    -fx-pref-height: 46;
-    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.35), 10, 0, 0, 3);
+    -fx-pref-height: 48;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.25), 12, 0, 0, 4);
 }
 
 .btn-primary:hover {
     -fx-background-color: linear-gradient(to bottom right, #5d4037, #6d4c41);
-    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.5), 16, 0, 0, 4);
-    -fx-scale-x: 1.01;
-    -fx-scale-y: 1.01;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.4), 16, 0, 0, 6);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
 .btn-primary:disabled {
@@ -653,30 +653,24 @@
 
 .product-card {
     -fx-background-color: white;
-    -fx-background-radius: 14;
-    -fx-border-color: #e7e5e4;
-    -fx-border-radius: 14;
-    -fx-border-width: 1.5;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 8, 0, 0, 2);
+    -fx-background-radius: 16;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 10, 0, 0, 4);
 }
 
 .product-card:hover {
-    -fx-border-color: #5d4037;
-    -fx-background-color: #fffaf9;
-    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.2), 14, 0, 0, 4);
-    -fx-scale-x: 1.02;
-    -fx-scale-y: 1.02;
+    -fx-background-color: #fffcfb;
+    -fx-effect: dropshadow(gaussian, rgba(68, 42, 34, 0.15), 20, 0, 0, 8);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
 }
 
 /* Cart Panel */
 .cart-panel {
     -fx-background-color: white;
-    -fx-background-radius: 16;
-    -fx-border-color: #e7e5e4;
-    -fx-border-radius: 16;
-    -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 2);
+    -fx-background-radius: 20;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 24, 0, 0, 0);
 }
 
 .cart-header {
@@ -1791,4 +1785,25 @@
     -fx-text-fill: #333333;
     -fx-font-weight: bold;
     -fx-font-size: 13px;
+}
+
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+
+.loading-overlay {
+    -fx-background-color: rgba(255, 255, 255, 0.7);
+}
+
+.spinner-box {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 4);
+    -fx-padding: 24;
+}
+
+.loading-text {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #5d4037;
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 10; -fx-background-color: #fdf2f2; -fx-background-radius: 6; -fx-border-color: #f8dede; -fx-border-radius: 6;">
+    <VBox HBox.hgrow="ALWAYS" spacing="4">
+        <Label fx:id="lblIngredientName" text="Tên nguyên liệu" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c;"/>
+        <Label fx:id="lblStockInfo" text="Còn lại: 0 (Tối thiểu: 0)" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;"/>
+    </VBox>
+</HBox>

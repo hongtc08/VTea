@@ -14,7 +14,7 @@
     <HBox alignment="CENTER_LEFT">
         <Label text="Quản lý kho" styleClass="screen-title"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="+ Thêm mục mới" styleClass="btn-primary" onAction="#handleAddInventory"/>
+        <Button fx:id="btnAddInventory" text="+ Thêm mục mới" styleClass="btn-primary" onAction="#handleAddInventory"/>
     </HBox>
 
     <TextField fx:id="searchField" promptText="🔍 Tìm kiếm nguyên liệu..." styleClass="input-field"/>
@@ -30,14 +30,25 @@
 
     <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
 
-        <HBox styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16">
-            <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="250"/>
-            <Label text="Danh mục" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Số lượng" styleClass="list-header-label" prefWidth="100"/>
-            <Label text="Tồn kho tối thiểu" styleClass="list-header-label" prefWidth="140"/>
+        <!-- Header cho ADMIN -->
+        <HBox fx:id="adminHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
+            <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="200"/>
+            <Label text="Đơn vị" styleClass="list-header-label" prefWidth="80"/>
+            <Label text="Tồn kho" styleClass="list-header-label" prefWidth="100"/>
+            <Label text="Mức tối thiểu" styleClass="list-header-label" prefWidth="120"/>
             <Label text="Tình trạng" styleClass="list-header-label" prefWidth="120"/>
             <Label text="Cập nhật lần cuối" styleClass="list-header-label" prefWidth="140"/>
+            <Label text="Người kiểm kê" styleClass="list-header-label" prefWidth="150"/>
             <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="80"/>
+        </HBox>
+
+        <!-- Header cho STAFF -->
+        <HBox fx:id="staffHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
+            <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="250"/>
+            <Label text="Đơn vị tính" styleClass="list-header-label" prefWidth="120"/>
+            <Label text="Tồn kho hệ thống" styleClass="list-header-label" prefWidth="150"/>
+            <Label text="Tồn kho thực tế" styleClass="list-header-label" prefWidth="200"/>
+            <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="120"/>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">

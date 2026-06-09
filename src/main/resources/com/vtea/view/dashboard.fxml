@@ -108,5 +108,15 @@
             <!-- Các item sản phẩm sẽ được code Java tự động chèn vào đây -->
         </VBox>
 
+        <!-- Cảnh báo hết hàng -->
+        <VBox styleClass="card" fx:id="vboxLowStock" prefWidth="300" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-alert-triangle" iconSize="18" iconColor="#D93025"/>
+                <Label text="Cảnh báo hết hàng" styleClass="card-title" style="-fx-text-fill: #D93025;"/>
+            </HBox>
+            <!-- Các item cảnh báo sẽ được code Java tự động chèn vào đây -->
+        </VBox>
+
     </HBox>
 </VBox>
