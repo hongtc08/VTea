@@ -23,14 +23,22 @@ public class DashboardDAO {
         DashboardSummaryDTO summary = new DashboardSummaryDTO(BigDecimal.ZERO, 0, 0, 0);
 
         // Query 1: Tính tổng doanh thu và tổng số đơn hàng đã thanh toán (PAID)
-        String revenueSql = "SELECT SUM(total_amount) AS total_revenue, COUNT(order_id) AS total_orders " +
-                "FROM `order` WHERE status = 'PAID' AND DATE(created_at) BETWEEN ? AND ?";
+        String revenueSql = """
+        SELECT COALESCE(SUM(total_amount), 0) AS total_revenue,
+               COUNT(order_id) AS total_orders
+        FROM `order`
+        WHERE status = 'PAID'
+          AND created_at BETWEEN ? AND ?
+        """;
 
         // Query 2: Đếm lượng khách hàng định danh đến mua hàng (Loại bỏ trùng lặp)
-        String customerSql = "SELECT COUNT(DISTINCT customer_id) AS total_customer FROM `order` " +
-                "WHERE status = 'PAID' AND customer_id IS NOT NULL " +
-                "AND DATE(created_at) BETWEEN ? AND ?";
-
+        String customerSql = """
+        SELECT COUNT(DISTINCT customer_id) AS total_customer
+        FROM `order`
+        WHERE status = 'PAID'
+          AND customer_id IS NOT NULL
+          AND created_at BETWEEN ? AND ?
+        """;
         // Query 3: Đếm số lượng nguyên liệu chạm mốc cảnh báo đỏ (Không phụ thuộc thời gian)
         String stockSql = "SELECT COUNT(*) AS low_stock_count FROM ingredient WHERE is_available = true AND stock_qty <= min_stock";
 
