@@ -1,11 +1,26 @@
 package com.vtea.controller;
 
+import com.vtea.dto.IngredientDTO;
+import com.vtea.service.IngredientService;
+import com.vtea.utils.DialogHelper;
+import com.vtea.utils.SessionManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 
 public class InventoryAdminRowController {
 
@@ -21,22 +36,93 @@ public class InventoryAdminRowController {
     @FXML private Button btnEdit;
     @FXML private Button btnDelete;
 
-    // TODO: Backend - Khai báo biến lưu đối tượng IngredientDTO hiện tại
+    private IngredientDTO currentIngredient;
+    private InventoryController parentController;
+    private final IngredientService ingredientService = new IngredientService();
 
     public void initialize() {
-        // Khởi tạo nếu cần
     }
 
-    // TODO: Backend - Viết hàm setData(IngredientDTO ingredient) để đổ dữ liệu vào các Label
-    // public void setData(IngredientDTO ingredient) { ... }
+    public void setData(IngredientDTO ingredient, InventoryController parentController) {
+        this.currentIngredient = ingredient;
+        this.parentController = parentController;
+
+        lblName.setText(ingredient.getName());
+        lblUnit.setText(ingredient.getUnit());
+
+        DecimalFormat format = new DecimalFormat("0.##");
+        lblQuantity.setText(format.format(ingredient.getStockQty()));
+        lblMinStock.setText(format.format(ingredient.getMinStock()));
+
+        if (!ingredient.isAvailable()) {
+            lblStatus.setText("Đã xóa");
+            badgeStatus.getStyleClass().setAll("badge-error");
+            iconWarning.setVisible(true);
+            iconWarning.setManaged(true);
+        } else if (ingredient.getStockQty().compareTo(ingredient.getMinStock()) <= 0) {
+            lblStatus.setText("Sắp hết");
+            badgeStatus.getStyleClass().setAll("badge-warning");
+            iconWarning.setVisible(true);
+            iconWarning.setManaged(true);
+        } else {
+            lblStatus.setText("Đủ hàng");
+            badgeStatus.getStyleClass().setAll("badge-success");
+            iconWarning.setVisible(false);
+            iconWarning.setManaged(false);
+        }
+
+        if (ingredient.getLastUpdated() != null) {
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            lblLastUpdate.setText(ingredient.getLastUpdated().format(dtf));
+        } else {
+            lblLastUpdate.setText("Chưa cập nhật");
+        }
+
+        lblStaffName.setText(ingredient.getStaffName() != null ? ingredient.getStaffName() : "N/A");
+    }
 
     @FXML
     public void handleEdit(ActionEvent actionEvent) {
-        // TODO: Backend - Gọi logic mở form chỉnh sửa thông tin nguyên liệu (Name, Unit, MinStock)
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/InventoryForm.fxml"));
+            Parent root = loader.load();
+
+            InventoryFormController controller = loader.getController();
+            controller.setIngredient(currentIngredient, parentController);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form sửa nguyên liệu: " + e.getMessage());
+        }
     }
 
     @FXML
     public void handleDelete(ActionEvent actionEvent) {
-        // TODO: Backend - Gọi logic xóa (ẩn) nguyên liệu IngredientDAO.deleteIngredient(id)
+        if (currentIngredient == null) return;
+        boolean confirm = DialogHelper.showConfirm("Xóa nguyên liệu", "Bạn có chắc chắn muốn xóa/ẩn nguyên liệu '" + currentIngredient.getName() + "' không?");
+        if (confirm) {
+            try {
+                int adminId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
+                boolean success = ingredientService.deleteIngredient(currentIngredient.getIngredientId(), adminId);
+                if (success) {
+                    DialogHelper.showInfo("Thành công", "Đã xóa nguyên liệu.");
+                    if (parentController != null) {
+                        parentController.loadData();
+                    }
+                } else {
+                    DialogHelper.showInfo("Thất bại", "Không thể xóa nguyên liệu.");
+                }
+            } catch (Exception e) {
+                DialogHelper.showInfo("Lỗi", e.getMessage());
+            }
+        }
     }
 }

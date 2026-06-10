@@ -42,11 +42,6 @@
             <Label text="Tồn kho tối thiểu" styleClass="form-label"/>
             <TextField fx:id="txtMinStock" promptText="0" styleClass="form-input-field"/>
         </VBox>
-
-        <VBox spacing="6">
-            <Label text="Danh mục" styleClass="form-label"/>
-            <ComboBox fx:id="cbCategory" promptText="Chọn danh mục" maxWidth="Infinity" styleClass="form-input-field"/>
-        </VBox>
     </VBox>
 
     <HBox spacing="16" alignment="CENTER_RIGHT">

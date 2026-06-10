@@ -1807,3 +1807,49 @@
     -fx-font-weight: bold;
     -fx-text-fill: #5d4037;
 }
+/* ========================================= */
+/* CSS CHO SNACKBAR (THÔNG BÁO N?I)          */
+/* ========================================= */
+.snackbar-box {
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+
+.snackbar-content {
+    -fx-padding: 12 24 12 24;
+    -fx-spacing: 12;
+    -fx-alignment: center-left;
+}
+
+.snackbar-success { -fx-background-color: #16a34a; }
+.snackbar-error { -fx-background-color: #dc2626; }
+.snackbar-warning { -fx-background-color: #eab308; }
+.snackbar-info { -fx-background-color: #2563eb; }
+
+.snackbar-text {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+}
+
+.snackbar-icon {
+    -fx-icon-color: white;
+    -fx-icon-size: 20px;
+}
+
+.snackbar-progress {
+    -fx-accent: rgba(255, 255, 255, 0.8);
+    -fx-control-inner-background: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.snackbar-progress .track {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-background-radius: 0 0 8 8;
+}
+.snackbar-progress .bar {
+    -fx-background-color: white;
+    -fx-background-radius: 0 0 8 8;
+    -fx-padding: 2;
+}
