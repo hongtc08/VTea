@@ -54,10 +54,7 @@ public class DashboardController {
         vboxTopProducts.getChildren().clear();
         vboxLowStock.getChildren().clear();
 
-        // TODO: Backend - Gọi service lấy danh sách đơn hàng gần đây rồi load vào vboxRecentOrders
-        // Mock tạm thời
-        //vboxRecentOrders.getChildren().add(loadOrderItem("#001", "Nguyễn Văn A", "Trà sữa trân châu, Cafe sữa", "85,000đ", "10:30"));
-        //vboxRecentOrders.getChildren().add(loadOrderItem("#002", "Trần Thị B", "Matcha latte", "55,000đ", "10:45"));
+        // danh sách đơn hàng gần đây
         try {
             List<Map<String, Object>> recentOrders = dashboardService.getRecentOrders(5);
             for (Map<String, Object> order : recentOrders) {
@@ -84,11 +81,7 @@ public class DashboardController {
             e.printStackTrace();
         }
 
-        // TODO: Backend - Gọi service lấy top món bán chạy rồi load vào vboxTopProducts
-        // Mock tạm thời
-        //vboxTopProducts.getChildren().add(loadTopProductItem("1", "Trà sữa trân châu", "45", "2,250,000đ"));
-        //vboxTopProducts.getChildren().add(loadTopProductItem("2", "Cafe sữa", "38", "1,520,000đ"));
-
+        // top món bán chạy
         try {
             List<ProductSalesDTO> topProducts = dashboardService.getTopProductsForDashboard(5);
             int rank = 1;
@@ -114,10 +107,7 @@ public class DashboardController {
             e.printStackTrace();
         }
 
-        // TODO: Backend - Gọi service lấy danh sách nguyên liệu sắp hết rồi load vào vboxLowStock
-        // Mock tạm thời
-        //vboxLowStock.getChildren().add(loadLowStockItem("Trân châu đen", "0.5 kg", "5 kg"));
-        //vboxLowStock.getChildren().add(loadLowStockItem("Đường đen", "1 kg", "2 kg"));
+        // danh sách nguyên liệu sắp hết
         try {
             List<IngredientDTO> lowStockItems = dashboardService.getLowStockIngredients(5);
             for (IngredientDTO ingredient : lowStockItems) {
