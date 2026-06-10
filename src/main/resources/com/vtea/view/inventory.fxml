@@ -19,14 +19,7 @@
 
     <TextField fx:id="searchField" promptText="🔍 Tìm kiếm nguyên liệu..." styleClass="input-field"/>
 
-    <HBox spacing="10">
-        <Button text="Tất cả" styleClass="category-btn, category-btn-active"/>
-        <Button text="Nguyên liệu" styleClass="category-btn"/>
-        <Button text="Topping" styleClass="category-btn"/>
-        <Button text="Bột" styleClass="category-btn"/>
-        <Button text="Cafe" styleClass="category-btn"/>
-        <Button text="Bao bì" styleClass="category-btn"/>
-    </HBox>
+
 
     <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
 
