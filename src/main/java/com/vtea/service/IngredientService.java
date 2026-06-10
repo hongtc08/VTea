@@ -24,6 +24,18 @@ public class IngredientService {
     }
 
     /**
+     * Lay danh sach nguyen lieu theo tu khoa nhap vao (tim theo ten)
+     */
+    public List<Ingredient> searchIngredientsByName(String name) {
+        // Nếu ô tìm kiếm bị bỏ trống, trả về toàn bộ danh sách nguyên liệu
+        if (name == null || name.trim().isEmpty()) {
+            return ingredientDAO.getAllActiveIngredients();
+        }
+        // Nếu có chữ thì mới gọi hàm tìm kiếm
+        return ingredientDAO.searchIngredientsByName(name.trim());
+    }
+
+    /**
      * Lay toan bo danh sach nguyen lieu ke ca da an (kem ten nhan vien cap nhat).
      * Phu hop cho man hinh quan ly cua Admin.
      */

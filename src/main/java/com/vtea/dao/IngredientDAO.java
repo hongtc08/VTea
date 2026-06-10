@@ -33,6 +33,28 @@ public class IngredientDAO {
     }
 
     /**
+     * Tìm nguyên liệu theo tên
+     */
+    public List<Ingredient> searchIngredientsByName(String name) {
+        List<Ingredient> list = new ArrayList<>();
+        String query = "SELECT * FROM `ingredient` WHERE name LIKE ? AND is_available = true";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, "%" + name + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapRowToIngredient(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm danh sách nguyên liệu theo tên: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return list;
+    }
+    /**
      * Dành cho Màn hình Quản lý (Admin):
      * Lấy TOÀN BỘ danh sách nguyên liệu (kể cả đã xóa/ngưng sử dụng)
      * Kèm theo TÊN nhân viên đã chốt kho cuối cùng.
