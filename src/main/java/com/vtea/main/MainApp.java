@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.scene.layout.StackPane;
 
 import atlantafx.base.theme.PrimerLight;
 
@@ -23,18 +24,39 @@ public class MainApp extends Application {
         primaryStage.show();
     }
 
+    private static StackPane rootLayer;
+    private static StackPane mainContainer;
+    private static StackPane overlayContainer;
+
     public static void setRoot(String fxml) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("/com/vtea/view/" + fxml + ".fxml"));
             Parent root = fxmlLoader.load();
-            if (primaryStage.getScene() == null) {
-                primaryStage.setScene(new Scene(root, 1280, 800));
-            } else {
-                primaryStage.getScene().setRoot(root);
+            
+            if (rootLayer == null) {
+                mainContainer = new StackPane();
+                overlayContainer = new StackPane();
+                overlayContainer.setPickOnBounds(false); // Cho phép click xuyên qua lớp overlay nếu không click trúng thông báo
+                
+                rootLayer = new StackPane(mainContainer, overlayContainer);
+                rootLayer.getStylesheets().add(MainApp.class.getResource("/com/vtea/css/styles.css").toExternalForm());
+                
+                if (primaryStage.getScene() == null) {
+                    primaryStage.setScene(new Scene(rootLayer, 1280, 800));
+                } else {
+                    primaryStage.getScene().setRoot(rootLayer);
+                }
             }
+            
+            mainContainer.getChildren().clear();
+            mainContainer.getChildren().add(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static StackPane getOverlayContainer() {
+        return overlayContainer;
     }
 
     public static void main(String[] args) {

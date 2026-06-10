@@ -138,8 +138,15 @@ public class LoginController {
             Platform.runLater(() -> {
                 if (loadingOverlay != null) loadingOverlay.setVisible(false);
                 btnLogin.setDisable(false);
-                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-                DialogHelper.showInfo("Lỗi Đăng Nhập", cause.getMessage());
+                
+                // Lấy ra nguyên nhân gốc rễ (root cause) để không bị dính chữ Exception
+                Throwable rootCause = ex;
+                while (rootCause.getCause() != null) {
+                    rootCause = rootCause.getCause();
+                }
+                
+                String errorMessage = rootCause.getMessage() != null ? rootCause.getMessage() : "Lỗi không xác định!";
+                com.vtea.utils.SnackbarHelper.showSnackbar(com.vtea.utils.SnackbarHelper.ERROR, errorMessage);
             });
             return null;
         });
