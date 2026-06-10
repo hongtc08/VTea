@@ -146,7 +146,7 @@ public class LoginController {
                 }
                 
                 String errorMessage = rootCause.getMessage() != null ? rootCause.getMessage() : "Lỗi không xác định!";
-                DialogHelper.showInfo("Lỗi Đăng Nhập", errorMessage);
+                com.vtea.utils.SnackbarHelper.showSnackbar(com.vtea.utils.SnackbarHelper.ERROR, errorMessage);
             });
             return null;
         });

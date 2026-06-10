@@ -25,9 +25,21 @@ public class DialogHelper {
         return showDialog(title, message, true);
     }
 
-    // Gọi hàm này để tạo thông báo bình thường (Chỉ có nút Đóng)
+    // Gọi hàm này để tạo thông báo nổi (Snackbar) thay vì hộp thoại chèn ép màn hình
     public static void showInfo(String title, String message) {
-        showDialog(title, message, false);
+        String type = SnackbarHelper.INFO;
+        String lowerTitle = title.toLowerCase();
+        
+        // Tự động phân tích Title để gán màu sắc phù hợp cho Snackbar
+        if (lowerTitle.contains("lỗi") || lowerTitle.contains("thất bại")) {
+            type = SnackbarHelper.ERROR;
+        } else if (lowerTitle.contains("thành công")) {
+            type = SnackbarHelper.SUCCESS;
+        } else if (lowerTitle.contains("cảnh báo")) {
+            type = SnackbarHelper.WARNING;
+        }
+        
+        SnackbarHelper.showSnackbar(type, message);
     }
 
     private static boolean showDialog(String title, String message, boolean isConfirmType) {
