@@ -16,8 +16,6 @@ public class UserDAO {
      * Chỉ tìm User theo username, BE tự dùng thư viện mã hóa để kiểm tra password.
      */
     public User getUserByUsername(String username){
-        User user = null;
-
         String query = "SELECT * FROM `user` WHERE username=?";
 
         try(Connection conn = DBConnection.getConnection();
@@ -27,21 +25,37 @@ public class UserDAO {
 
             try(ResultSet rs = ps.executeQuery()) {
                 if(rs.next()){
-                    user = new User();
-                    user.setUserId(rs.getInt("user_id"));
-                    user.setUserName(rs.getString("username"));
-                    user.setPassWord(rs.getString("password"));
-                    user.setFullName(rs.getString("full_name"));
-                    user.setRole(rs.getString("role"));
-                    user.setStatus(rs.getString("status"));
-                    user.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
+                    return mapRowToUser(rs);
                 }
             }
         } catch (SQLException e) {
             System.err.println("Lỗi khi tìm User theo username: " + e.getMessage());
             e.printStackTrace();
         }
-        return user;
+        return null;
+    }
+
+    /**
+     * Tìm kiếm nhân viên theo Id (Dành cho Admin)
+     */
+    public User getUserById(int userId) {
+        String query = "SELECT * FROM `user` WHERE user_id=?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm User theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -56,16 +70,7 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery()) {
 
             while(rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("user_id"));
-                user.setUserName(rs.getString("username"));
-                user.setPassWord(rs.getString("password"));
-                user.setFullName(rs.getString("full_name"));
-                user.setRole(rs.getString("role"));
-                user.setStatus(rs.getString("status"));
-                user.setCreatedAt(rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toLocalDateTime() : null);
-
-                userList.add(user);
+                userList.add(mapRowToUser(rs));
             }
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy danh sách User: " + e.getMessage());
@@ -79,7 +84,7 @@ public class UserDAO {
      * Lưu ý: Mật khẩu truyền vào qua object User phải là mật khẩu đã được BE mã hóa.
      */
     public boolean insertUser(User user){
-        String sql = "INSERT INTO `user` (username, password, full_name, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (username, password, full_name, role, status) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -88,8 +93,7 @@ public class UserDAO {
             ps.setString(2, user.getPassWord());
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
-            ps.setString(5, "Active");
-            ps.setObject(6, java.time.LocalDateTime.now());
+            ps.setString(5, user.getStatus());
 
             return ps.executeUpdate() > 0;
 
@@ -165,5 +169,27 @@ public class UserDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // ==================== HELPER METHOD ====================
+
+    /**
+     * Hàm hỗ trợ map dữ liệu từ ResultSet sang User Object.
+     */
+    private User mapRowToUser(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserId(rs.getInt("user_id"));
+        user.setUserName(rs.getString("username"));
+        user.setPassWord(rs.getString("password"));
+        user.setFullName(rs.getString("full_name"));
+        user.setRole(rs.getString("role"));
+        user.setStatus(rs.getString("status"));
+
+        java.sql.Timestamp ts = rs.getTimestamp("created_at");
+        if (ts != null) {
+            user.setCreatedAt(ts.toLocalDateTime());
+        }
+
+        return user;
     }
 }

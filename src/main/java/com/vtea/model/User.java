@@ -11,6 +11,12 @@ public class User {
     private String status;
     private LocalDateTime createdAt;
 
+    public static final String ROLE_ADMIN = "ADMIN";
+    public static final String ROLE_STAFF = "STAFF";
+
+    public static final String STATUS_ACTIVE = "Active";
+    public static final String STATUS_LOCKED = "Locked";
+
     public User() {
 
     }
