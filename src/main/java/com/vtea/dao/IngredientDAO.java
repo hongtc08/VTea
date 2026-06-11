@@ -3,6 +3,7 @@ package com.vtea.dao;
 import com.vtea.dto.IngredientDTO;
 import com.vtea.model.Ingredient;
 import com.vtea.utils.DBConnection;
+import com.vtea.dto.InventoryTransactionDTO;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -176,6 +177,72 @@ public class IngredientDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    /**
+     * THỰC HIỆN GIAO DỊCH KHO (Nhập/Xuất kho và Ghi log)
+     * Đảm bảo tính toàn vẹn dữ liệu (Transaction: Commit/Rollback)
+     */
+    public boolean processInventoryTransaction(InventoryTransactionDTO transaction) {
+        String updateStockSql = "UPDATE ingredient SET stock_qty = stock_qty + ?, updated_by = ? WHERE ingredient_id = ?";
+        String insertLogSql = "INSERT INTO inventory_transaction (ingredient_id, admin_id, change_type, quantity_changed, note) VALUES (?, ?, ?, ?, ?)";
+
+        Connection conn = null;
+        PreparedStatement psUpdate = null;
+        PreparedStatement psInsert = null;
+
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+
+            // Bước 1: Cập nhật cộng/trừ số lượng tồn kho
+            psUpdate = conn.prepareStatement(updateStockSql);
+            psUpdate.setBigDecimal(1, transaction.getQuantityChanged());
+            psUpdate.setInt(2, transaction.getAdminId());
+            psUpdate.setInt(3, transaction.getIngredientId());
+            int rowsUpdated = psUpdate.executeUpdate();
+
+            // Bước 2: Ghi nhật ký vào bảng inventory_transaction
+            psInsert = conn.prepareStatement(insertLogSql);
+            psInsert.setInt(1, transaction.getIngredientId());
+            psInsert.setInt(2, transaction.getAdminId());
+            psInsert.setString(3, transaction.getChangeType());
+            psInsert.setBigDecimal(4, transaction.getQuantityChanged());
+            psInsert.setString(5, transaction.getNote());
+            int rowsInserted = psInsert.executeUpdate();
+
+            // Bước 3: Kiểm tra và chốt giao dịch
+            if (rowsUpdated > 0 && rowsInserted > 0) {
+                conn.commit(); // Thành công -> Lưu vào DB
+                return true;
+            } else {
+                conn.rollback(); // Có lỗi logic -> Trả lại như cũ
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi xử lý giao dịch kho: " + e.getMessage());
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Lỗi SQL -> Hủy bỏ giao dịch
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            // Bước 4: Đóng tài nguyên
+            try {
+                if (psUpdate != null) psUpdate.close();
+                if (psInsert != null) psInsert.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

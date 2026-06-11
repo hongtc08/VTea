@@ -105,6 +105,29 @@ public class InventoryAdminRowController {
     }
 
     @FXML
+    public void handleUpdateStock(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/StockUpdateForm.fxml"));
+            Parent root = loader.load();
+
+            StockUpdateController controller = loader.getController();
+            controller.setIngredient(currentIngredient, parentController);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form nhập xuất kho.");
+        }
+    }
+
+    @FXML
     public void handleDelete(ActionEvent actionEvent) {
         if (currentIngredient == null) return;
         boolean confirm = DialogHelper.showConfirm("Xóa nguyên liệu", "Bạn có chắc chắn muốn xóa/ẩn nguyên liệu '" + currentIngredient.getName() + "' không?");

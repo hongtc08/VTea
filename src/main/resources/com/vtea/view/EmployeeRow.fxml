@@ -5,6 +5,7 @@
 <?import java.net.URL?>
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.EmployeeRowController"
       styleClass="list-item-row" alignment="CENTER_LEFT" spacing="16">
 
     <stylesheets>
@@ -42,16 +43,26 @@
         </StackPane>
     </HBox>
 
-    <HBox prefWidth="80" alignment="CENTER" spacing="0">
-        <Button fx:id="btnEdit" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+    <HBox prefWidth="80" alignment="CENTER" spacing="4">
+        <Button fx:id="btnResetPass" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
+            <graphic>
+                <FontIcon iconLiteral="fth-key" iconSize="18" iconColor="#f59e0b"/>
+            </graphic>
+            <tooltip><Tooltip text="Đổi mật khẩu"/></tooltip>
+        </Button>
+
+        <Button fx:id="btnEdit" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
             <graphic>
                 <FontIcon iconLiteral="fth-edit-2" iconSize="18" iconColor="#1890ff"/>
             </graphic>
+            <tooltip><Tooltip text="Sửa thông tin"/></tooltip>
         </Button>
-        <Button fx:id="btnDelete" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+
+        <Button fx:id="btnToggleLock" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
             <graphic>
-                <FontIcon iconLiteral="fth-trash-2" iconSize="18" iconColor="#D93025"/>
+                <FontIcon fx:id="iconLock" iconLiteral="fth-lock" iconSize="18" iconColor="#D93025"/>
             </graphic>
+            <tooltip><Tooltip text="Khóa/Mở tài khoản"/></tooltip>
         </Button>
     </HBox>
 </HBox>

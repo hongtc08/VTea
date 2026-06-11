@@ -20,11 +20,9 @@
     <TextField fx:id="searchField" promptText="🔍 Tìm kiếm nhân viên (tên, email, SĐT)..." styleClass="input-field"/>
 
     <HBox spacing="10">
-        <Button text="Tất cả" styleClass="category-btn, category-btn-active"/>
-        <Button text="Quản lý" styleClass="category-btn"/>
-        <Button text="Thu ngân" styleClass="category-btn"/>
-        <Button text="Pha chế" styleClass="category-btn"/>
-        <Button text="Phục vụ" styleClass="category-btn"/>
+        <Button fx:id="btnFilterAll" text="Tất cả" styleClass="category-btn, category-btn-active"/>
+        <Button fx:id="btnFilterAdmin" text="Quản lý" styleClass="category-btn"/>
+        <Button fx:id="btnFilterStaff" text="Nhân viên" styleClass="category-btn"/>
     </HBox>
 
     <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
@@ -40,8 +38,8 @@
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
-            <VBox fx:id="employeeListContainer">
-                </VBox>
+            <VBox fx:id="vboxEmployeeList">
+            </VBox>
         </ScrollPane>
     </VBox>
 </VBox>

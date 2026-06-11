@@ -3,6 +3,7 @@ package com.vtea.service;
 import com.vtea.dao.IngredientDAO;
 import com.vtea.dto.IngredientDTO;
 import com.vtea.model.Ingredient;
+import com.vtea.dto.InventoryTransactionDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -91,6 +92,38 @@ public class IngredientService {
      */
     public List<Ingredient> getLowStockAlerts() {
         return ingredientDAO.getLowStockAlerts();
+    }
+
+    /**
+     * Nghiệp vụ điều chỉnh kho (Nhập/Xuất kho) và ghi nhật ký hệ thống.
+     * Dành cho Form Nhập/Xuất kho chuyên dụng.
+     */
+    public boolean adjustStock(int ingredientId, int adminId, String changeType, BigDecimal quantityChanged, String note) {
+        if (ingredientId <= 0) {
+            throw new IllegalArgumentException("ID nguyên liệu không hợp lệ.");
+        }
+        if (quantityChanged == null || quantityChanged.compareTo(BigDecimal.ZERO) == 0) {
+            throw new IllegalArgumentException("Số lượng thay đổi phải khác 0.");
+        }
+        if (changeType == null || changeType.trim().isEmpty()) {
+            throw new IllegalArgumentException("Loại giao dịch không được để trống.");
+        }
+
+        // Nếu là xuất kho (EXPORT) hoặc hư hỏng (DAMAGE), ép số lượng truyền xuống DB thành số âm
+        if (("EXPORT".equalsIgnoreCase(changeType) || "DAMAGE".equalsIgnoreCase(changeType))
+                && quantityChanged.compareTo(BigDecimal.ZERO) > 0) {
+            quantityChanged = quantityChanged.negate();
+        }
+
+        // 3. Đóng gói vào DTO và gọi DAO
+        InventoryTransactionDTO transaction = new InventoryTransactionDTO();
+        transaction.setIngredientId(ingredientId);
+        transaction.setAdminId(adminId);
+        transaction.setChangeType(changeType.toUpperCase());
+        transaction.setQuantityChanged(quantityChanged);
+        transaction.setNote(note);
+
+        return ingredientDAO.processInventoryTransaction(transaction);
     }
 
     // ==================== VALIDATION HELPER ====================

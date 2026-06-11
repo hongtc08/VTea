@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox spacing="20" styleClass="dialog-box" prefWidth="480" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.vtea.controller.EmployeeEditController">
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <Label text="Sửa thông tin nhân viên" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnClose" onAction="#handleCancel" style="-fx-background-color: transparent; -fx-cursor: hand;">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="24" iconColor="#999999"/></graphic>
+        </Button>
+    </HBox>
+    <Separator/>
+
+    <VBox spacing="16">
+        <VBox spacing="6">
+            <Label text="Họ và tên *" styleClass="form-label"/>
+            <TextField fx:id="txtName" promptText="Nhập họ và tên..." styleClass="form-input-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Vai trò *" styleClass="form-label"/>
+            <ComboBox fx:id="cbRole" promptText="Chọn phân quyền" maxWidth="Infinity" styleClass="form-input-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Email" styleClass="form-label"/>
+            <TextField fx:id="txtEmail" promptText="VD: an@vtea.vn" styleClass="form-input-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Số điện thoại" styleClass="form-label"/>
+            <TextField fx:id="txtPhone" promptText="VD: 0901234567" styleClass="form-input-field"/>
+        </VBox>
+
+        <VBox spacing="6">
+            <Label text="Lương (đ)" styleClass="form-label"/>
+            <TextField fx:id="txtSalary" promptText="VD: 7000000" styleClass="form-input-field"/>
+        </VBox>
+    </VBox>
+
+    <HBox spacing="16" alignment="CENTER_RIGHT">
+        <VBox.margin><Insets top="10"/></VBox.margin>
+        <Button text="Hủy" onAction="#handleCancel" styleClass="btn-dialog-cancel" prefWidth="120" prefHeight="40"/>
+        <Button text="Lưu thay đổi" onAction="#handleSave" styleClass="btn-primary" prefWidth="160" prefHeight="40"/>
+    </HBox>
+</VBox>
