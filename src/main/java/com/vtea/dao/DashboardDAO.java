@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class DashboardDAO {
     /**
-     * 1. Lấy dữ liệu tổng quan cho các thẻ số liệu (Cards)
+     * Lấy dữ liệu tổng quan cho các thẻ số liệu (Cards)
      */
     public DashboardSummaryDTO getDashBoardSummary(LocalDateTime startDate, LocalDateTime endDate){
         DashboardSummaryDTO summary = new DashboardSummaryDTO(BigDecimal.ZERO, 0, 0, 0);
@@ -88,42 +88,7 @@ public class DashboardDAO {
     }
 
     /**
-     * 2. Lấy dữ liệu Top 5 món bán chạy nhất (Dùng vẽ BarChart)
-     */
-    public List<ProductSalesDTO> getTopSellingProducts(LocalDate startDate, LocalDate endDate) {
-        List<ProductSalesDTO> list = new ArrayList<>();
-        String sql = "SELECT p.name AS product_name, SUM(od.quantity) AS total_sold " +
-                "FROM order_detail od " +
-                "JOIN product p ON od.product_id = p.product_id " +
-                "JOIN `order` o ON od.order_id = o.order_id " +
-                "WHERE o.status = 'PAID' AND DATE(o.created_at) BETWEEN ? AND ? " +
-                "GROUP BY p.product_id, p.name " +
-                "ORDER BY total_sold DESC " +
-                "LIMIT 5";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setObject(1, startDate);
-            ps.setObject(2, endDate);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    ProductSalesDTO dto = new ProductSalesDTO();
-                    dto.setProductName(rs.getString("product_name"));
-                    dto.setTotalQuantitySold(rs.getInt("total_sold"));
-                    list.add(dto);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy danh sách sản phẩm bán chạy: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
-
-    /**
-     * 4. Lấy danh sách đơn hàng gần đây nhất (Dùng hiển thị trên Dashboard)
+     *  Lấy danh sách đơn hàng gần đây nhất (Dùng hiển thị trên Dashboard)
      * Chỉ lấy các đơn hàng đã thanh toán (PAID)
      * Kèm danh sách sản phẩm trong mỗi đơn hàng
      */
@@ -174,7 +139,7 @@ public class DashboardDAO {
     }
 
     /**
-     * 5. Lấy danh sách sản phẩm bán chạy - Kèm doanh thu
+     * Lấy danh sách sản phẩm bán chạy - Kèm doanh thu
      * Hiển thị số lượng bán và tổng doanh thu từng sản phẩm
      */
     public List<ProductSalesDTO> getTopProductsForDashboard(int limit) {
@@ -216,7 +181,7 @@ public class DashboardDAO {
     }
 
     /**
-     * 6. Lấy danh sách nguyên liệu sắp hết
+     * Lấy danh sách nguyên liệu sắp hết
      */
     public List<IngredientDTO> getLowStockIngredients(int limit) {
         List<IngredientDTO> list = new ArrayList<>();
@@ -266,38 +231,4 @@ public class DashboardDAO {
         return list;
     }
 
-    /**
-     * 3. Lấy doanh thu theo từng Danh mục (Dùng vẽ PieChart)
-     */
-    public List<CategoryRevenueDTO> getRevenueByCategory(LocalDate startDate, LocalDate endDate) {
-        List<CategoryRevenueDTO> list = new ArrayList<>();
-        String sql = "SELECT c.name AS category_name, SUM(od.quantity * od.unit_price) AS total_revenue " +
-                "FROM order_detail od " +
-                "JOIN product p ON od.product_id = p.product_id " +
-                "JOIN category c ON p.category_id = c.category_id " +
-                "JOIN `order` o ON od.order_id = o.order_id " +
-                "WHERE o.status = 'PAID' AND DATE(o.created_at) BETWEEN ? AND ? " +
-                "GROUP BY c.category_id, c.name " +
-                "ORDER BY total_revenue DESC";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setObject(1, startDate);
-            ps.setObject(2, endDate);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    CategoryRevenueDTO dto = new CategoryRevenueDTO();
-                    dto.setCategoryName(rs.getString("category_name"));
-                    dto.setTotalRevenue(rs.getBigDecimal("total_revenue"));
-                    list.add(dto);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy doanh thu theo danh mục: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
 }
