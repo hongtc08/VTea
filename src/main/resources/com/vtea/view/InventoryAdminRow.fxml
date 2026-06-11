@@ -46,12 +46,19 @@
     <Label fx:id="lblStaffName" text="Nguyễn Văn A" style="-fx-text-fill: #666666;" prefWidth="150"/>
 
     <!-- Thao tác -->
-    <HBox prefWidth="80" alignment="CENTER" spacing="0">
+    <HBox prefWidth="120" alignment="CENTER" spacing="0">
+        <Button fx:id="btnUpdateStock" onAction="#handleUpdateStock" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+            <graphic>
+                <FontIcon iconLiteral="fth-plus-square" iconSize="18" iconColor="#10b981"/>
+            </graphic>
+        </Button>
+
         <Button fx:id="btnEdit" onAction="#handleEdit" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
             <graphic>
                 <FontIcon iconLiteral="fth-edit-2" iconSize="18" iconColor="#1890ff"/>
             </graphic>
         </Button>
+
         <Button fx:id="btnDelete" onAction="#handleDelete" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
             <graphic>
                 <FontIcon iconLiteral="fth-trash-2" iconSize="18" iconColor="#D93025"/>

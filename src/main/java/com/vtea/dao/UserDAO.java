@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDAO {
+
     /**
      * Dùng cho chức năng Đăng nhập
-     * Chỉ tìm User theo username, BE tự dùng thư viện mã hóa để kiểm tra password.
      */
     public User getUserByUsername(String username){
         String query = "SELECT * FROM `user` WHERE username=?";
@@ -36,7 +36,7 @@ public class UserDAO {
     }
 
     /**
-     * Tìm kiếm nhân viên theo Id (Dành cho Admin)
+     * Tìm kiếm nhân viên theo Id
      */
     public User getUserById(int userId) {
         String query = "SELECT * FROM `user` WHERE user_id=?";
@@ -53,6 +53,76 @@ public class UserDAO {
             }
         } catch (SQLException e) {
             System.err.println("Lỗi khi tìm User theo ID: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Tìm danh sách nhân viên theo họ và tên (Tìm kiếm gần đúng)
+     */
+    public List<User> getUsersByName(String name) {
+        List<User> userList = new ArrayList<>();
+        String query = "SELECT * FROM `user` WHERE full_name LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, "%" + name + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    userList.add(mapRowToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm User theo tên: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return userList;
+    }
+
+    /**
+     * Tìm nhân viên theo Email
+     */
+    public User getUserByEmail(String email) {
+        String query = "SELECT * FROM `user` WHERE email = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, email);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm User theo email: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Tìm nhân viên theo Số điện thoại
+     */
+    public User getUserByPhone(String phone) {
+        String query = "SELECT * FROM `user` WHERE phone = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, phone);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi tìm User theo SĐT: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -81,10 +151,10 @@ public class UserDAO {
 
     /**
      * Thêm nhân viên mới
-     * Lưu ý: Mật khẩu truyền vào qua object User phải là mật khẩu đã được BE mã hóa.
      */
     public boolean insertUser(User user){
-        String sql = "INSERT INTO `user` (username, password, full_name, role, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (username, password, full_name, role, status, email, phone, salary, start_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -94,6 +164,15 @@ public class UserDAO {
             ps.setString(3, user.getFullName());
             ps.setString(4, user.getRole());
             ps.setString(5, user.getStatus());
+            ps.setString(6, user.getEmail());
+            ps.setString(7, user.getPhone());
+            ps.setBigDecimal(8, user.getSalary());
+
+            if (user.getStartDate() != null) {
+                ps.setDate(9, java.sql.Date.valueOf(user.getStartDate()));
+            } else {
+                ps.setNull(9, java.sql.Types.DATE);
+            }
 
             return ps.executeUpdate() > 0;
 
@@ -105,8 +184,39 @@ public class UserDAO {
     }
 
     /**
+     * Cập nhật thông tin nhân viên (Chỉ cập nhật thông tin cơ bản)
+     */
+    public boolean updateUser(User user) {
+        String sql = "UPDATE `user` SET full_name = ?, role = ?, email = ?, phone = ?, salary = ?, start_date = ? WHERE user_id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, user.getFullName());
+            ps.setString(2, user.getRole());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getPhone());
+            ps.setBigDecimal(5, user.getSalary());
+
+            if (user.getStartDate() != null) {
+                ps.setDate(6, java.sql.Date.valueOf(user.getStartDate()));
+            } else {
+                ps.setNull(6, java.sql.Types.DATE);
+            }
+
+            ps.setInt(7, user.getUserId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi cập nhật User: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
      * Dùng cho chức năng Khóa/Mở khóa tài khoản nhân viên của Admin.
-     * Cập nhật cột status thành 'Active' hoặc 'Locked'.
      */
     public boolean updateStatus(int userId, String newStatus){
         String sql = "UPDATE `user` SET status = ? WHERE user_id = ?";
@@ -126,32 +236,7 @@ public class UserDAO {
     }
 
     /**
-     * Cập nhật thông tin nhân viên (Chỉ cập nhật Tên và Quyền)
-     * Đổi mật khẩu hoặc đổi status tách thành hàm riêng để dễ quản lý.
-     */
-    public boolean updateUser(User user) {
-        String sql = "UPDATE `user` SET full_name = ?, role = ? WHERE user_id = ?";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, user.getFullName());
-            ps.setString(2, user.getRole());
-            ps.setInt(3, user.getUserId());
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi cập nhật User: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
      * Cập nhật mật khẩu mới cho nhân viên.
-     * Lưu ý cho BE: Chuỗi newPassword truyền vào hàm này BẮT BUỘC
-     * phải là chuỗi đã được mã hóa, không truyền mật khẩu thô.
      */
     public boolean updatePassword(int userId, String newPassword) {
         String sql = "UPDATE `user` SET password = ? WHERE user_id = ?";
@@ -184,6 +269,15 @@ public class UserDAO {
         user.setFullName(rs.getString("full_name"));
         user.setRole(rs.getString("role"));
         user.setStatus(rs.getString("status"));
+
+        user.setEmail(rs.getString("email"));
+        user.setPhone(rs.getString("phone"));
+        user.setSalary(rs.getBigDecimal("salary"));
+
+        java.sql.Date sDate = rs.getDate("start_date");
+        if (sDate != null) {
+            user.setStartDate(sDate.toLocalDate());
+        }
 
         java.sql.Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) {

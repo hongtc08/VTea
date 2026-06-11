@@ -30,7 +30,7 @@
         <HBox spacing="16">
             <VBox spacing="6" HBox.hgrow="ALWAYS">
                 <Label text="Số lượng" styleClass="form-label"/>
-                <TextField fx:id="txtQuantity" promptText="0" styleClass="form-input-field"/>
+                <TextField fx:id="txtQuantity" promptText="0" styleClass="form-input-field" disable="true"/>
             </VBox>
             <VBox spacing="6" prefWidth="120">
                 <Label text="Đơn vị" styleClass="form-label"/>
