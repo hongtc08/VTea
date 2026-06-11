@@ -2,13 +2,12 @@ package com.vtea.service;
 
 import com.vtea.dao.DashboardDAO;
 import com.vtea.dto.DashboardSummaryDTO;
-import com.vtea.dto.IngredientDTO;
 import com.vtea.dto.ProductSalesDTO;
+import com.vtea.dto.IngredientDTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -25,52 +24,24 @@ public class DashboardService {
         return dashboardDAO.getDashBoardSummary(startOfDay, endOfDay);
     }
 
-    // Lấy danh sách đơn hàng gần đây trên dashboard
+    /**
+     * Lấy danh sách đơn hàng gần đây nhất
+     * @param limit Số lượng đơn hàng cần lấy
+     */
     public List<Map<String, Object>> getRecentOrders(int limit) {
+
         return dashboardDAO.getRecentOrders(limit);
     }
 
-    // Lấy top món bán chạy trên dashboard
+    // Lấy danh sách sản phẩm bán chạy
     public List<ProductSalesDTO> getTopProductsForDashboard(int limit) {
         return dashboardDAO.getTopProductsForDashboard(limit);
     }
 
-    // Lấy top món bán chạy trong hôm nay
-    public List<ProductSalesDTO> getTodayTopSellingProducts() {
-        LocalDate today = LocalDate.now();
-        return dashboardDAO.getTopSellingProducts(today, today);
-    }
-
-    // Lấy danh sách nguyên liệu sắp hết
+    /**
+     * Lấy danh sách nguyên liệu sắp hết tồn kho
+     */
     public List<IngredientDTO> getLowStockIngredients(int limit) {
         return dashboardDAO.getLowStockIngredients(limit);
-    }
-
-    // Đếm số hóa đơn đã thanh toán trong hôm nay
-    public int getTodayOrderCount() {
-        return dashboardDAO.countPaidOrdersByDate(LocalDate.now());
-    }
-
-    // Đếm số hóa đơn đã thanh toán theo ngày được chọn
-    public int getOrderCountByDate(LocalDate date) {
-        return dashboardDAO.countPaidOrdersByDate(date);
-    }
-
-    // Đếm số hóa đơn đã thanh toán trong tháng hiện tại
-    public int getCurrentMonthOrderCount() {
-        YearMonth currentMonth = YearMonth.now();
-
-        return dashboardDAO.countPaidOrdersByMonth(
-                currentMonth.getYear(),
-                currentMonth.getMonthValue()
-        );
-    }
-
-    // Đếm số hóa đơn đã thanh toán theo tháng được chọn
-    public int getOrderCountByMonth(YearMonth yearMonth) {
-        return dashboardDAO.countPaidOrdersByMonth(
-                yearMonth.getYear(),
-                yearMonth.getMonthValue()
-        );
     }
 }
