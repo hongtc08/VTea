@@ -55,6 +55,7 @@ public class IngredientDAO {
         }
         return list;
     }
+
     /**
      * Dành cho Màn hình Quản lý (Admin):
      * Lấy TOÀN BỘ danh sách nguyên liệu (kể cả đã xóa/ngưng sử dụng)
@@ -154,98 +155,6 @@ public class IngredientDAO {
     }
 
     /**
-     * CẬP NHẬT TỒN KHO THỰC TẾ CUỐI NGÀY (Dành cho Staff/Quản lý).
-     * Cách dùng: Staff đếm trong kho còn bao nhiêu thì nhập số đó vào.
-     */
-    public boolean updateActualQuantity(int ingredientId, BigDecimal quantity, int userId){
-        String sql = "UPDATE ingredient SET stock_qty = ?, updated_by = ? WHERE ingredient_id = ?";
-
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
-            if (quantity.compareTo(BigDecimal.ZERO) < 0) {
-                quantity = BigDecimal.ZERO;
-            }
-
-            ps.setBigDecimal(1, quantity);
-            ps.setInt(2, userId);
-            ps.setInt(3, ingredientId);
-
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e){
-            System.err.println("Lỗi cập nhật số lượng tồn kho: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    /**
-     * THỰC HIỆN GIAO DỊCH KHO (Nhập/Xuất kho và Ghi log)
-     * Đảm bảo tính toàn vẹn dữ liệu (Transaction: Commit/Rollback)
-     */
-    public boolean processInventoryTransaction(InventoryTransactionDTO transaction) {
-        String updateStockSql = "UPDATE ingredient SET stock_qty = stock_qty + ?, updated_by = ? WHERE ingredient_id = ?";
-        String insertLogSql = "INSERT INTO inventory_transaction (ingredient_id, admin_id, change_type, quantity_changed, note) VALUES (?, ?, ?, ?, ?)";
-
-        Connection conn = null;
-        PreparedStatement psUpdate = null;
-        PreparedStatement psInsert = null;
-
-        try {
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false);
-
-            // Bước 1: Cập nhật cộng/trừ số lượng tồn kho
-            psUpdate = conn.prepareStatement(updateStockSql);
-            psUpdate.setBigDecimal(1, transaction.getQuantityChanged());
-            psUpdate.setInt(2, transaction.getAdminId());
-            psUpdate.setInt(3, transaction.getIngredientId());
-            int rowsUpdated = psUpdate.executeUpdate();
-
-            // Bước 2: Ghi nhật ký vào bảng inventory_transaction
-            psInsert = conn.prepareStatement(insertLogSql);
-            psInsert.setInt(1, transaction.getIngredientId());
-            psInsert.setInt(2, transaction.getAdminId());
-            psInsert.setString(3, transaction.getChangeType());
-            psInsert.setBigDecimal(4, transaction.getQuantityChanged());
-            psInsert.setString(5, transaction.getNote());
-            int rowsInserted = psInsert.executeUpdate();
-
-            // Bước 3: Kiểm tra và chốt giao dịch
-            if (rowsUpdated > 0 && rowsInserted > 0) {
-                conn.commit(); // Thành công -> Lưu vào DB
-                return true;
-            } else {
-                conn.rollback(); // Có lỗi logic -> Trả lại như cũ
-                return false;
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi xử lý giao dịch kho: " + e.getMessage());
-            if (conn != null) {
-                try {
-                    conn.rollback(); // Lỗi SQL -> Hủy bỏ giao dịch
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            return false;
-        } finally {
-            // Bước 4: Đóng tài nguyên
-            try {
-                if (psUpdate != null) psUpdate.close();
-                if (psInsert != null) psInsert.close();
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * Lấy danh sách nguyên liệu sắp hết
      * Dùng để hiển thị chuông thông báo cho Quản lý.
      */
@@ -265,6 +174,19 @@ public class IngredientDAO {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * Cập nhật số lượng tồn kho (Cộng dồn số lượng thay đổi)
+     * Yêu cầu nhận Connection từ Service để đảm bảo đồng bộ Transaction
+     */
+    public boolean updateStockQuantity(int ingredientId, BigDecimal quantityChange, Connection conn) throws SQLException {
+        String sql = "UPDATE `ingredient` SET stock_qty = stock_qty + ? WHERE ingredient_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBigDecimal(1, quantityChange);
+            ps.setInt(2, ingredientId);
+            return ps.executeUpdate() > 0;
+        }
     }
 
     // ==================== HELPER METHODS ====================

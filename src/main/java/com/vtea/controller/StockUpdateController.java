@@ -1,7 +1,7 @@
 package com.vtea.controller;
 
 import com.vtea.dto.IngredientDTO;
-import com.vtea.service.IngredientService;
+import com.vtea.service.InventoryService;
 import com.vtea.utils.DialogHelper;
 import com.vtea.utils.SessionManager;
 import javafx.collections.FXCollections;
@@ -28,11 +28,11 @@ public class StockUpdateController {
 
     private IngredientDTO currentIngredient;
     private InventoryController parentController;
-    private final IngredientService ingredientService = new IngredientService();
+
+    private final InventoryService inventoryService = new InventoryService();
 
     @FXML
     public void initialize() {
-        // Nạp danh sách cho ComboBox
         cboChangeType.setItems(FXCollections.observableArrayList(
                 "Nhập kho (Cộng thêm)",
                 "Xuất kho (Trừ đi)",
@@ -60,7 +60,6 @@ public class StockUpdateController {
         String quantityStr = txtQuantity.getText().trim();
         String note = txtNote.getText().trim();
 
-        // 1. Validate cơ bản trên UI
         if (selectedType == null || quantityStr.isEmpty()) {
             DialogHelper.showInfo("Lỗi", "Vui lòng chọn loại giao dịch và nhập số lượng!");
             return;
@@ -73,23 +72,20 @@ public class StockUpdateController {
                 return;
             }
 
-            // 2. Chuyển đổi lựa chọn tiếng Việt sang mã Code (IMPORT, EXPORT, DAMAGE)
             String typeCode = "IMPORT";
             if (selectedType.contains("Xuất kho")) typeCode = "EXPORT";
             else if (selectedType.contains("Hư hỏng")) typeCode = "DAMAGE";
 
-            // 3. Lấy ID người dùng hiện tại và gọi Service
             int adminId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
+            boolean success = false;
 
-            boolean success = ingredientService.adjustStock(
-                    currentIngredient.getIngredientId(),
-                    adminId,
-                    typeCode,
-                    qty,
-                    note
-            );
+            if ("IMPORT".equals(typeCode)) {
+                success = inventoryService.importStock(adminId, currentIngredient.getIngredientId(), qty, note);
+            } else {
+                String finalNote = (note.isEmpty()) ? typeCode : typeCode + " - " + note;
+                success = inventoryService.exportStock(adminId, currentIngredient.getIngredientId(), qty, finalNote);
+            }
 
-            // 4. Xử lý kết quả
             if (success) {
                 DialogHelper.showInfo("Thành công", "Đã lưu lịch sử và cập nhật kho!");
                 if (parentController != null) {

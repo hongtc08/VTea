@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+
+<HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.PendingCheckRowController"
+      styleClass="list-item-row" alignment="CENTER_LEFT" spacing="16">
+
+    <padding><Insets left="16" right="16"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <Label fx:id="lblTime" text="11/06/2026 05:06" style="-fx-text-fill: #666666;" prefWidth="140"/>
+
+    <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="180">
+        <StackPane styleClass="inventory-icon-box">
+            <FontIcon iconLiteral="fth-package" iconSize="16" iconColor="#523628"/>
+        </StackPane>
+        <Label fx:id="lblIngredient" text="Đường" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+    </HBox>
+
+    <Label fx:id="lblStaff" text="Nguyễn Văn A" style="-fx-text-fill: #666666;" prefWidth="160"/>
+
+    <Label fx:id="lblSystemQty" text="100" style="-fx-text-fill: #666666;" prefWidth="80"/>
+
+    <Label fx:id="lblActualQty" text="80" style="-fx-font-weight: bold;" prefWidth="80"/>
+
+    <Label fx:id="lblDifference" text="-20" style="-fx-font-weight: bold; -fx-text-fill: #D93025;" prefWidth="80"/>
+
+    <HBox prefWidth="220" alignment="CENTER_LEFT" spacing="8">
+        <Button fx:id="btnApprove" onAction="#handleApprove" text="Duyệt" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 12;">
+            <graphic>
+                <FontIcon iconLiteral="fth-check" iconSize="14" iconColor="white"/>
+            </graphic>
+        </Button>
+
+        <Button fx:id="btnReject" onAction="#handleReject" text="Từ chối" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 6 12;">
+            <graphic>
+                <FontIcon iconLiteral="fth-x" iconSize="14" iconColor="white"/>
+            </graphic>
+        </Button>
+    </HBox>
+</HBox>

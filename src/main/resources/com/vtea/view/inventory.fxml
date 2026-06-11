@@ -19,34 +19,79 @@
 
     <TextField fx:id="searchField" promptText="🔍 Tìm kiếm nguyên liệu..." styleClass="input-field"/>
 
+    <TabPane fx:id="mainTabPane" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" styleClass="custom-tab-pane">
 
+        <Tab text="Danh sách tồn kho" fx:id="tabStock" styleClass="list-header-label">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 0 0 12 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
+                <padding><Insets top="10"/></padding>
 
-    <VBox style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);" VBox.vgrow="ALWAYS">
+                <HBox fx:id="adminHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
+                    <padding><Insets left="16" right="16"/></padding>
+                    <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="200"/>
+                    <Label text="Đơn vị" styleClass="list-header-label" prefWidth="80"/>
+                    <Label text="Tồn kho" styleClass="list-header-label" prefWidth="100"/>
+                    <Label text="Mức tối thiểu" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Tình trạng" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Cập nhật lần cuối" styleClass="list-header-label" prefWidth="140"/>
+                    <Label text="Người cập nhật" styleClass="list-header-label" prefWidth="150"/>
+                    <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="120"/>
+                </HBox>
 
-        <!-- Header cho ADMIN -->
-        <HBox fx:id="adminHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
-            <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="200"/>
-            <Label text="Đơn vị" styleClass="list-header-label" prefWidth="80"/>
-            <Label text="Tồn kho" styleClass="list-header-label" prefWidth="100"/>
-            <Label text="Mức tối thiểu" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Tình trạng" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Cập nhật lần cuối" styleClass="list-header-label" prefWidth="140"/>
-            <Label text="Người kiểm kê" styleClass="list-header-label" prefWidth="150"/>
-            <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="80"/>
-        </HBox>
+                <HBox fx:id="staffHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
+                    <padding><Insets left="16" right="16"/></padding>
+                    <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="250"/>
+                    <Label text="Đơn vị tính" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Tồn kho hệ thống" styleClass="list-header-label" prefWidth="150"/>
+                    <Label text="Tồn kho thực tế" styleClass="list-header-label" prefWidth="200"/>
+                    <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="120"/>
+                </HBox>
 
-        <!-- Header cho STAFF -->
-        <HBox fx:id="staffHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
-            <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="250"/>
-            <Label text="Đơn vị tính" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Tồn kho hệ thống" styleClass="list-header-label" prefWidth="150"/>
-            <Label text="Tồn kho thực tế" styleClass="list-header-label" prefWidth="200"/>
-            <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="120"/>
-        </HBox>
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                    <VBox fx:id="inventoryListContainer"/>
+                </ScrollPane>
+            </VBox>
+        </Tab>
 
-        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
-            <VBox fx:id="inventoryListContainer">
-                </VBox>
-        </ScrollPane>
-    </VBox>
+        <Tab text="Duyệt kiểm kho" fx:id="tabApproval" styleClass="list-header-label">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 0 0 12 12;" VBox.vgrow="ALWAYS">
+                <padding><Insets top="10"/></padding>
+
+                <HBox styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16">
+                    <padding><Insets left="16" right="16"/></padding>
+                    <Label text="Thời gian" styleClass="list-header-label" prefWidth="140"/>
+                    <Label text="Nguyên liệu" styleClass="list-header-label" prefWidth="180"/>
+                    <Label text="Người đếm" styleClass="list-header-label" prefWidth="160"/>
+                    <Label text="Hệ thống" styleClass="list-header-label" prefWidth="80"/>
+                    <Label text="Thực tế" styleClass="list-header-label" prefWidth="80"/>
+                    <Label text="Chênh lệch" styleClass="list-header-label" prefWidth="80"/>
+                    <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="220"/>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                    <VBox fx:id="pendingCheckListContainer"/>
+                </ScrollPane>
+            </VBox>
+        </Tab>
+
+        <Tab text="Lịch sử giao dịch" fx:id="tabHistory" styleClass="list-header-label">
+            <VBox style="-fx-background-color: white; -fx-background-radius: 0 0 12 12;" VBox.vgrow="ALWAYS">
+                <padding><Insets top="10"/></padding>
+
+                <HBox styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16">
+                    <padding><Insets left="16" right="16"/></padding>
+                    <Label text="Thời gian" styleClass="list-header-label" prefWidth="140"/>
+                    <Label text="Loại giao dịch" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Nguyên liệu" styleClass="list-header-label" prefWidth="180"/>
+                    <Label text="Số lượng" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Người thực hiện" styleClass="list-header-label" prefWidth="160"/>
+                    <Label text="Ghi chú" styleClass="list-header-label" prefWidth="300" minWidth="300" maxWidth="300"/>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">
+                    <VBox fx:id="transactionListContainer"/>
+                </ScrollPane>
+            </VBox>
+        </Tab>
+
+    </TabPane>
 </VBox>

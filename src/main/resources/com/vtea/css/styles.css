@@ -1808,7 +1808,7 @@
     -fx-text-fill: #5d4037;
 }
 /* ========================================= */
-/* CSS CHO SNACKBAR (TH�NG B�O N?I)          */
+/* CSS CHO SNACKBAR (TH�NG B�O N?I)          */
 /* ========================================= */
 .snackbar-box {
     -fx-background-radius: 8;
@@ -1853,3 +1853,61 @@
     -fx-background-radius: 0 0 8 8;
     -fx-padding: 2;
 }
+
+/*!* ================= THIẾT KẾ TAB CHUẨN HIỆN ĐẠI (PILL STYLE) ================= *!*/
+
+/*!* Tạo khoảng trống mỏng giữa thanh Tab và phần bảng trắng ở dưới *!*/
+/*.custom-tab-pane .tab-header-area {*/
+/*    -fx-padding: 0 0 12 0;*/
+/*}*/
+
+/*!* Xóa cái vạch kẻ ngang xám xịt mặc định của JavaFX kéo dài dưới các tab *!*/
+/*.custom-tab-pane .tab-header-background {*/
+/*    -fx-background-color: transparent;*/
+/*}*/
+
+/*!* 1. TRẠNG THÁI BÌNH THƯỜNG (TAB CHƯA CHỌN) *!*/
+/*.custom-tab-pane .tab {*/
+/*    -fx-background-color: transparent;*/
+/*    -fx-background-radius: 20px; !* Thông số này quyết định độ bo tròn (như viên thuốc) *!*/
+/*    -fx-padding: 8 24 8 24;*/
+/*    -fx-cursor: hand;*/
+/*    -fx-border-width: 0; !* Đảm bảo không có viền thừa *!*/
+/*}*/
+
+/*!* Màu chữ của tab bình thường *!*/
+/*.custom-tab-pane .tab .tab-label {*/
+/*    -fx-font-size: 14px;*/
+/*    -fx-font-weight: bold;*/
+/*    -fx-text-fill: #64748b; !* Xám tro nhạt *!*/
+/*}*/
+
+/*!* 2. TRẠNG THÁI HOVER (ĐƯA CHUỘT VÀO NHƯNG CHƯA BẤM) *!*/
+/*.custom-tab-pane .tab:hover {*/
+/*    -fx-background-color: #f1f5f9; !* Nổi nền xám cực nhạt lên *!*/
+/*}*/
+
+/*!* 3. TRẠNG THÁI ACTIVE (TAB ĐANG ĐƯỢC CHỌN) *!*/
+/*.custom-tab-pane .tab:selected {*/
+/*    -fx-background-color: #eff6ff; !* Nền xanh lam cực nhạt, sang trọng *!*/
+/*    -fx-border-width: 0; !* Chắc chắn xóa bỏ cái gạch chân cũ *!*/
+/*}*/
+
+/*!* Màu chữ của tab đang được chọn *!*/
+/*.custom-tab-pane .tab:selected .tab-label {*/
+/*    -fx-text-fill: #2563eb; !* Xanh lam đậm, làm nổi bật hẳn lên *!*/
+/*}*/
+
+/*!* ================= BO TRÒN TOÀN BỘ KHUNG TABPANE ================= *!*/
+/*.custom-tab-pane {*/
+/*    -fx-background-color: white;*/
+/*    -fx-background-radius: 16px;*/
+/*    -fx-border-radius: 16px;*/
+/*    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 4);*/
+/*}*/
+
+/*!* Ép các lớp nền bên trong trở nên trong suốt để lộ nền trắng bo góc của TabPane ra *!*/
+/*.custom-tab-pane .tab-header-background,*/
+/*.custom-tab-pane .tab-content-area {*/
+/*    -fx-background-color: transparent;*/
+/*}*/
