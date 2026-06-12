@@ -1,7 +1,7 @@
 package com.vtea.controller;
 
 import com.vtea.model.Ingredient;
-import com.vtea.service.IngredientService;
+import com.vtea.service.InventoryService;
 import com.vtea.utils.DialogHelper;
 import com.vtea.utils.SessionManager;
 import javafx.event.ActionEvent;
@@ -23,10 +23,10 @@ public class InventoryStaffRowController {
 
     private Ingredient currentIngredient;
     private InventoryController parentController;
-    private final IngredientService ingredientService = new IngredientService();
+
+    private final InventoryService inventoryService = new InventoryService();
 
     public void initialize() {
-        // Chi cho phep nhap so va dau cham
         txtActualQuantity.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*(\\.\\d*)?")) {
                 txtActualQuantity.setText(oldValue);
@@ -43,6 +43,8 @@ public class InventoryStaffRowController {
 
         DecimalFormat format = new DecimalFormat("0.##");
         lblSystemQuantity.setText(format.format(ingredient.getStockQty()));
+
+        txtActualQuantity.clear();
     }
 
     @FXML
@@ -57,12 +59,18 @@ public class InventoryStaffRowController {
 
         try {
             BigDecimal actualQty = new BigDecimal(inputStr.trim());
-            int userId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
-            
-            boolean success = ingredientService.updateActualQuantity(currentIngredient.getIngredientId(), actualQty, userId);
-            
+            BigDecimal systemQty = currentIngredient.getStockQty();
+            int staffId = SessionManager.getCurrentUser() != null ? SessionManager.getCurrentUser().getId() : 0;
+
+            boolean success = inventoryService.submitCount(staffId, currentIngredient.getIngredientId(), systemQty, actualQty);
+
             if (success) {
-                DialogHelper.showInfo("Thành công", "Đã chốt tồn kho cho " + currentIngredient.getName() + " thành công!");
+                if (actualQty.compareTo(systemQty) == 0) {
+                    DialogHelper.showInfo("Thành công", "Số lượng khớp 100%. Đã chốt sổ!");
+                } else {
+                    DialogHelper.showInfo("Thành công", "Đã gửi phiếu báo cáo chênh lệch cho Quản lý duyệt!");
+                }
+
                 // Refresh list
                 if (parentController != null) {
                     parentController.loadData();
