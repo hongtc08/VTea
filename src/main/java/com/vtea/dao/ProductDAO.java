@@ -164,27 +164,6 @@ public class ProductDAO {
         return false;
     }
 
-    /**
-     * Công tắc gạt còn/hết hàng (in_stock)
-     * @param productId
-     * @param inStock
-     * @return
-     */
-    public boolean updateStockStatus(int productId, boolean inStock) {
-        String sql = "UPDATE product SET in_stock = ? WHERE product_id = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setBoolean(1, inStock);
-            ps.setInt(2, productId);
-            return ps.executeUpdate() > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Lỗi cập nhật trạng thái kho: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
-    }
 
     // Hàm dùng chung để đúc ResultSet ra ProductDTO
     private ProductDTO mapResultSetToDTO(ResultSet rs) throws SQLException {
