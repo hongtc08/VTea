@@ -1911,3 +1911,11 @@
 /*.custom-tab-pane .tab-content-area {*/
 /*    -fx-background-color: transparent;*/
 /*}*/
+/* === Custom Tab Pane cho Inventory === */
+.custom-tab-pane {
+    -color-accent-emphasis: #523628;
+}
+.custom-tab-pane .tab:selected .tab-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #523628;
+}

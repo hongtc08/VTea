@@ -38,21 +38,47 @@ public class EmployeeRowController {
     @FXML private StackPane badgeStatus;
     @FXML private Label lblStatus;
 
-    @FXML private Button btnEdit;
-    @FXML private Button btnResetPass;
-    @FXML private Button btnToggleLock;
-    @FXML private FontIcon iconLock;
+    @FXML private Button btnActions;
 
     // --- Biến cục bộ ---
     private User currentUser;
     private EmployeeController parentController;
     private final UserService userService = new UserService();
+    
+    private javafx.scene.control.ContextMenu actionMenu;
+    private javafx.scene.control.MenuItem miEdit;
+    private javafx.scene.control.MenuItem miResetPass;
+    private javafx.scene.control.MenuItem miToggleLock;
+    private FontIcon iconLock;
 
     @FXML
     public void initialize() {
-        btnToggleLock.setOnAction(this::handleToggleLock);
-        btnEdit.setOnAction(this::handleEdit);
-        btnResetPass.setOnAction(this::handleResetPass);
+        actionMenu = new javafx.scene.control.ContextMenu();
+        
+        miEdit = new javafx.scene.control.MenuItem("Sửa thông tin");
+        FontIcon editIcon = new FontIcon("fth-edit-2");
+        editIcon.setIconColor(javafx.scene.paint.Color.valueOf("#1890ff"));
+        miEdit.setGraphic(editIcon);
+
+        miResetPass = new javafx.scene.control.MenuItem("Đổi mật khẩu");
+        FontIcon keyIcon = new FontIcon("fth-key");
+        keyIcon.setIconColor(javafx.scene.paint.Color.valueOf("#f59e0b"));
+        miResetPass.setGraphic(keyIcon);
+
+        miToggleLock = new javafx.scene.control.MenuItem("Khóa tài khoản");
+        iconLock = new FontIcon("fth-lock");
+        iconLock.setIconColor(javafx.scene.paint.Color.valueOf("#D93025"));
+        miToggleLock.setGraphic(iconLock);
+
+        actionMenu.getItems().addAll(miEdit, miResetPass, miToggleLock);
+
+        miEdit.setOnAction(this::handleEdit);
+        miResetPass.setOnAction(this::handleResetPass);
+        miToggleLock.setOnAction(this::handleToggleLock);
+
+        btnActions.setOnMouseClicked(e -> {
+            actionMenu.show(btnActions, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
     }
 
     /**
@@ -68,8 +94,21 @@ public class EmployeeRowController {
         lblRole.setText("ADMIN".equalsIgnoreCase(user.getRole()) ? "Quản lý" : "Nhân viên");
 
         // 2. Dữ liệu thật từ DB (Email, Phone, Salary, StartDate)
-        lblEmail.setText(user.getEmail() != null && !user.getEmail().isEmpty() ? user.getEmail() : "Chưa cập nhật email");
-        lblPhone.setText(user.getPhone() != null && !user.getPhone().isEmpty() ? user.getPhone() : "Chưa cập nhật");
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            lblEmail.setText(user.getEmail());
+            lblEmail.setStyle("-fx-text-fill: #888888; -fx-font-size: 12px;");
+        } else {
+            lblEmail.setText("(Trống)");
+            lblEmail.setStyle("-fx-text-fill: #b3b3b3; -fx-font-size: 12px; -fx-font-style: italic;");
+        }
+
+        if (user.getPhone() != null && !user.getPhone().isEmpty()) {
+            lblPhone.setText(user.getPhone());
+            lblPhone.setStyle("-fx-text-fill: #444444;");
+        } else {
+            lblPhone.setText("(Trống)");
+            lblPhone.setStyle("-fx-text-fill: #b3b3b3; -fx-font-style: italic;");
+        }
 
         if (user.getSalary() != null) {
             DecimalFormat df = new DecimalFormat("#,###đ");
@@ -82,7 +121,7 @@ public class EmployeeRowController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             lblStartDate.setText(user.getStartDate().format(formatter));
         } else {
-            lblStartDate.setText("Chưa rõ");
+            lblStartDate.setText("—");
         }
 
         // 3. Cập nhật giao diện Status và đổi Icon nút Khóa/Mở Khóa
@@ -93,6 +132,7 @@ public class EmployeeRowController {
             lblStatus.setStyle("-fx-text-fill: #b91c1c;");
 
             // Đổi nút thành "Mở khóa" (Màu xanh)
+            miToggleLock.setText("Mở khóa tài khoản");
             iconLock.setIconLiteral("fth-unlock");
             iconLock.setIconColor(javafx.scene.paint.Color.valueOf("#10b981"));
         } else {
@@ -102,6 +142,7 @@ public class EmployeeRowController {
             lblStatus.setStyle("-fx-text-fill: #047857;");
 
             // Đổi nút thành "Khóa" (Màu đỏ)
+            miToggleLock.setText("Khóa tài khoản");
             iconLock.setIconLiteral("fth-lock");
             iconLock.setIconColor(javafx.scene.paint.Color.valueOf("#D93025"));
         }

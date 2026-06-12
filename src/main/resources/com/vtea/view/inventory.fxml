@@ -27,14 +27,14 @@
 
                 <HBox fx:id="adminHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
                     <padding><Insets left="16" right="16"/></padding>
-                    <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="200"/>
+                    <Label text="Tên nguyên liệu" styleClass="list-header-label" prefWidth="260"/>
                     <Label text="Đơn vị" styleClass="list-header-label" prefWidth="80"/>
-                    <Label text="Tồn kho" styleClass="list-header-label" prefWidth="100"/>
-                    <Label text="Mức tối thiểu" styleClass="list-header-label" prefWidth="120"/>
+                    <Label text="Tồn kho" styleClass="list-header-label" prefWidth="100" alignment="CENTER"/>
+                    <Label text="Mức tối thiểu" styleClass="list-header-label" prefWidth="120" alignment="CENTER"/>
                     <Label text="Tình trạng" styleClass="list-header-label" prefWidth="120"/>
                     <Label text="Cập nhật lần cuối" styleClass="list-header-label" prefWidth="140"/>
                     <Label text="Người cập nhật" styleClass="list-header-label" prefWidth="150"/>
-                    <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="120"/>
+                    <Label text="" styleClass="list-header-label" alignment="CENTER" prefWidth="60"/>
                 </HBox>
 
                 <HBox fx:id="staffHeaderRow" styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16" managed="false" visible="false">
