@@ -7,6 +7,7 @@ import com.vtea.service.CategoryService;
 import com.vtea.service.ProductService;
 import com.vtea.service.ToppingService;
 import com.vtea.utils.DialogHelper;
+import com.vtea.utils.FormatUtils;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,6 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * MenuController chịu trách nhiệm quản lý màn hình Quản lý Thực đơn (Admin).
+ * Hỗ trợ hiển thị, lọc, thêm, sửa, xóa Món ăn (Product) và Topping.
+ * Sử dụng POSCacheService để tối ưu việc tải dữ liệu.
+ */
 public class MenuController {
 
     // ===== ĐỊNH NGHĨA ID DANH MỤC CỐ ĐỊNH (Khớp với Database và POSController) =====
@@ -61,6 +67,10 @@ public class MenuController {
         setupSearch();
     }
 
+    /**
+     * Tải toàn bộ dữ liệu món ăn và danh mục từ Cache/Database,
+     * thiết lập giao diện danh mục và hiển thị sản phẩm.
+     */
     public void loadData() {
         try {
             posCacheService.loadIfNeeded();
@@ -208,94 +218,82 @@ public class MenuController {
         }
     }
 
+    /**
+     * Tạo giao diện thẻ (card) dùng chung cho cả Món ăn và Topping.
+     */
+    private VBox createMenuItemCard(String name, String categoryName, java.math.BigDecimal price, String imageUrl, Runnable onEdit, Runnable onDelete) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuItem.fxml"));
+            VBox card = loader.load();
+
+            ImageView imgProduct = (ImageView) loader.getNamespace().get("imgProduct");
+            Label lblProductName = (Label) loader.getNamespace().get("lblProductName");
+            Label lblCategory = (Label) loader.getNamespace().get("lblCategory");
+            Label lblPrice = (Label) loader.getNamespace().get("lblPrice");
+            Button btnEdit = (Button) loader.getNamespace().get("btnEdit");
+            Button btnDelete = (Button) loader.getNamespace().get("btnDelete");
+
+            lblProductName.setText(name);
+            lblCategory.setText(categoryName);
+            lblPrice.setText(FormatUtils.formatPrice(price));
+
+            try {
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Image img;
+                    if (imageUrl.startsWith("http") || imageUrl.startsWith("file:")) {
+                        img = new Image(imageUrl);
+                    } else {
+                        img = new Image(getClass().getResourceAsStream(imageUrl));
+                    }
+                    if (img != null && !img.isError()) {
+                        imgProduct.setImage(img);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("Could not load image for: " + name);
+            }
+
+            btnEdit.setOnAction(e -> onEdit.run());
+            btnDelete.setOnAction(e -> onDelete.run());
+
+            return card;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox();
+        }
+    }
+
+    /**
+     * Tạo thẻ hiển thị cho một món ăn.
+     */
     private VBox createProductCard(ProductDTO product) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuItem.fxml"));
-            VBox card = loader.load();
-
-            ImageView imgProduct = (ImageView) loader.getNamespace().get("imgProduct");
-            Label lblProductName = (Label) loader.getNamespace().get("lblProductName");
-            Label lblCategory = (Label) loader.getNamespace().get("lblCategory");
-            Label lblPrice = (Label) loader.getNamespace().get("lblPrice");
-            Button btnEdit = (Button) loader.getNamespace().get("btnEdit");
-            Button btnDelete = (Button) loader.getNamespace().get("btnDelete");
-
-            lblProductName.setText(product.getName());
-            lblCategory.setText(product.getCategoryName());
-
-            NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-            lblPrice.setText(formatter.format(product.getPrice()) + "đ");
-
-            try {
-                if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
-                    Image img;
-                    if (product.getImageUrl().startsWith("http") || product.getImageUrl().startsWith("file:")) {
-                        img = new Image(product.getImageUrl());
-                    } else {
-                        img = new Image(getClass().getResourceAsStream(product.getImageUrl()));
-                    }
-                    if (img != null && !img.isError()) {
-                        imgProduct.setImage(img);
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Could not load image for: " + product.getName());
-            }
-
-            btnEdit.setOnAction(e -> handleEditProduct(product));
-            btnDelete.setOnAction(e -> handleDeleteProduct(product));
-
-            return card;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new VBox();
-        }
+        return createMenuItemCard(
+            product.getName(), 
+            product.getCategoryName(), 
+            product.getPrice(), 
+            product.getImageUrl(), 
+            () -> handleEditProduct(product), 
+            () -> handleDeleteProduct(product)
+        );
     }
 
+    /**
+     * Tạo thẻ hiển thị cho một topping.
+     */
     private VBox createToppingCard(ToppingDTO topping) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuItem.fxml"));
-            VBox card = loader.load();
-
-            ImageView imgProduct = (ImageView) loader.getNamespace().get("imgProduct");
-            Label lblProductName = (Label) loader.getNamespace().get("lblProductName");
-            Label lblCategory = (Label) loader.getNamespace().get("lblCategory");
-            Label lblPrice = (Label) loader.getNamespace().get("lblPrice");
-            Button btnEdit = (Button) loader.getNamespace().get("btnEdit");
-            Button btnDelete = (Button) loader.getNamespace().get("btnDelete");
-
-            lblProductName.setText(topping.getName());
-            lblCategory.setText(topping.getAvailable() ? "Topping" : "Topping (ngừng bán)");
-
-            NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
-            lblPrice.setText(formatter.format(topping.getPrice()) + "đ");
-
-            try {
-                if (topping.getImageUrl() != null && !topping.getImageUrl().isEmpty()) {
-                    Image img;
-                    if (topping.getImageUrl().startsWith("http") || topping.getImageUrl().startsWith("file:")) {
-                        img = new Image(topping.getImageUrl());
-                    } else {
-                        img = new Image(getClass().getResourceAsStream(topping.getImageUrl()));
-                    }
-                    if (img != null && !img.isError()) {
-                        imgProduct.setImage(img);
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("Could not load image for: " + topping.getName());
-            }
-
-            btnEdit.setOnAction(e -> handleEditTopping(topping));
-            btnDelete.setOnAction(e -> handleDeleteTopping(topping));
-
-            return card;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new VBox();
-        }
+        return createMenuItemCard(
+            topping.getName(), 
+            topping.getAvailable() ? "Topping" : "Topping (ngừng bán)", 
+            topping.getPrice(), 
+            topping.getImageUrl(), 
+            () -> handleEditTopping(topping), 
+            () -> handleDeleteTopping(topping)
+        );
     }
 
+    /**
+     * Mở form để sửa một món ăn đã chọn.
+     */
     private void handleEditProduct(ProductDTO product) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/MenuForm.fxml"));
@@ -304,14 +302,7 @@ public class MenuController {
             MenuFormController controller = loader.getController();
             controller.setProduct(product, this);
 
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.TRANSPARENT);
-
-            Scene scene = new Scene(root);
-            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.showAndWait();
+            showFormStage(root);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở form sửa món: " + e.getMessage());
@@ -333,6 +324,9 @@ public class MenuController {
         }
     }
 
+    /**
+     * Xử lý thêm món ăn hoặc topping mới.
+     */
     public void handleAddNewDish(ActionEvent actionEvent) {
         if (toppingMode) {
             handleAddNewTopping();
@@ -346,14 +340,7 @@ public class MenuController {
             MenuFormController controller = loader.getController();
             controller.setProduct(null, this);
 
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.initStyle(StageStyle.TRANSPARENT);
-
-            Scene scene = new Scene(root);
-            scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
-            stage.setScene(scene);
-            stage.showAndWait();
+            showFormStage(root);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở form thêm món: " + e.getMessage());
@@ -446,5 +433,5 @@ public class MenuController {
         activeButton.getStyleClass().add("category-btn-active");
     }
 
-    // ===== SỰ KIỆN CLICK CÁC NÚT BỘ LỌC =====
+
 }

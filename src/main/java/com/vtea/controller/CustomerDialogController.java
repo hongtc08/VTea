@@ -4,6 +4,7 @@ import com.vtea.dto.CustomerDTO;
 import com.vtea.utils.DialogHelper;
 import com.vtea.service.CustomerService;
 import com.vtea.model.Customer;
+import com.vtea.utils.FormatUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -123,15 +124,15 @@ public class CustomerDialogController {
         this.earnPoints = calculateEarnPoints(this.orderTotal);
 
         if (lblSubTotal != null) {
-            lblSubTotal.setText(formatPrice(subtotal));
+            lblSubTotal.setText(FormatUtils.formatPrice(subtotal));
         }
 
         if (lblVat != null) {
-            lblVat.setText(formatPrice(vat));
+            lblVat.setText(FormatUtils.formatPrice(vat));
         }
 
         if (lblTotal != null) {
-            lblTotal.setText(formatPrice(total));
+            lblTotal.setText(FormatUtils.formatPrice(total));
         }
 
         if (lblNewPointPreview != null) {
@@ -233,7 +234,7 @@ public class CustomerDialogController {
         }
 
         if (lblEquivalentValue != null) {
-            lblEquivalentValue.setText("(" + formatPrice(BigDecimal.valueOf(customer.getRewardPoints() * 1000L)) + ")");
+            lblEquivalentValue.setText("(" + FormatUtils.formatPrice(BigDecimal.valueOf(customer.getRewardPoints() * 1000L)) + ")");
         }
 
         if (lblAvatarInitials != null) {
@@ -307,7 +308,19 @@ public class CustomerDialogController {
     }
 
     private void updatePointActionPreview() {
-        // Tính tier discount trước
+        calculateTierDiscount();
+        
+        boolean canUsePoints = selectedCustomer != null && calculateMaxUsablePoints(selectedCustomer) > 0;
+        updateRadioUseState(canUsePoints);
+
+        if (selectedCustomer == null || radioUse == null || !radioUse.isSelected()) {
+            updatePreviewForEarningOnly(canUsePoints);
+        } else {
+            updatePreviewForUsingPoints();
+        }
+    }
+
+    private void calculateTierDiscount() {
         if (selectedCustomer != null && selectedCustomer.getDiscountPercent() > 0) {
             BigDecimal discountPercent = BigDecimal.valueOf(selectedCustomer.getDiscountPercent());
             tierDiscountAmount = orderSubtotal.multiply(discountPercent).divide(new BigDecimal("100"), 0, RoundingMode.HALF_UP);
@@ -317,7 +330,7 @@ public class CustomerDialogController {
                 tierDiscountBox.setManaged(true);
             }
             if (lblTierDiscount != null) {
-                lblTierDiscount.setText("-" + formatPrice(tierDiscountAmount) + " (" + selectedCustomer.getDiscountPercent() + "%)");
+                lblTierDiscount.setText("-" + FormatUtils.formatPrice(tierDiscountAmount) + " (" + selectedCustomer.getDiscountPercent() + "%)");
             }
         } else {
             tierDiscountAmount = BigDecimal.ZERO;
@@ -326,47 +339,33 @@ public class CustomerDialogController {
                 tierDiscountBox.setManaged(false);
             }
         }
+    }
 
-        boolean canUsePoints = selectedCustomer != null && calculateMaxUsablePoints(selectedCustomer) > 0;
-
+    private void updateRadioUseState(boolean canUsePoints) {
         if (radioUse != null) {
             radioUse.setDisable(!canUsePoints);
             if (!canUsePoints && radioUse.isSelected() && radioEarn != null) {
                 radioEarn.setSelected(true);
             }
         }
+    }
 
-        if (selectedCustomer == null || radioUse == null || !radioUse.isSelected()) {
-            pointsToUse = 0;
-            
-            BigDecimal amountAfterTierDiscount = orderSubtotal.subtract(tierDiscountAmount);
-            if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) amountAfterTierDiscount = BigDecimal.ZERO;
-            
-            BigDecimal vatAfterDiscount = amountAfterTierDiscount.multiply(VAT_RATE);
-            BigDecimal totalAfterDiscount = amountAfterTierDiscount.add(vatAfterDiscount);
-            earnPoints = calculateEarnPoints(totalAfterDiscount);
+    private void updatePreviewForEarningOnly(boolean canUsePoints) {
+        pointsToUse = 0;
+        
+        BigDecimal amountAfterTierDiscount = orderSubtotal.subtract(tierDiscountAmount);
+        if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) amountAfterTierDiscount = BigDecimal.ZERO;
+        
+        BigDecimal vatAfterDiscount = amountAfterTierDiscount.multiply(VAT_RATE);
+        BigDecimal totalAfterDiscount = amountAfterTierDiscount.add(vatAfterDiscount);
+        earnPoints = calculateEarnPoints(totalAfterDiscount);
 
-            if (lblVat != null) {
-                lblVat.setText(formatPrice(vatAfterDiscount));
-            }
+        updateLabels(vatAfterDiscount, totalAfterDiscount, 
+                "Nhận thêm " + earnPoints + " điểm", 
+                canUsePoints ? "Có thể dùng tối đa " + calculateMaxUsablePoints(selectedCustomer) + " điểm" : "Không có điểm khả dụng cho đơn này");
+    }
 
-            if (lblTotal != null) {
-                lblTotal.setText(formatPrice(totalAfterDiscount));
-            }
-
-            if (lblEarnPreview != null) {
-                lblEarnPreview.setText("Nhận thêm " + earnPoints + " điểm");
-            }
-
-            if (lblUsePreview != null) {
-                lblUsePreview.setText(canUsePoints
-                        ? "Có thể dùng tối đa " + calculateMaxUsablePoints(selectedCustomer) + " điểm"
-                        : "Không có điểm khả dụng cho đơn này");
-            }
-
-            return;
-        }
-
+    private void updatePreviewForUsingPoints() {
         pointsToUse = calculateMaxUsablePoints(selectedCustomer);
         BigDecimal discount = POINT_CONVERSION_RATE.multiply(BigDecimal.valueOf(pointsToUse));
         BigDecimal amountAfterDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(discount);
@@ -379,20 +378,26 @@ public class CustomerDialogController {
         BigDecimal totalAfterDiscount = amountAfterDiscount.add(vatAfterDiscount);
         earnPoints = calculateEarnPoints(totalAfterDiscount);
 
+        updateLabels(vatAfterDiscount, totalAfterDiscount, 
+                "Sau khi trừ điểm sẽ nhận " + earnPoints + " điểm", 
+                "Dùng " + pointsToUse + " điểm, giảm " + FormatUtils.formatPrice(discount));
+    }
+
+    private void updateLabels(BigDecimal vat, BigDecimal total, String earnText, String useText) {
         if (lblVat != null) {
-            lblVat.setText(formatPrice(vatAfterDiscount));
+            lblVat.setText(FormatUtils.formatPrice(vat));
         }
 
         if (lblTotal != null) {
-            lblTotal.setText(formatPrice(totalAfterDiscount));
+            lblTotal.setText(FormatUtils.formatPrice(total));
         }
 
         if (lblEarnPreview != null) {
-            lblEarnPreview.setText("Sau khi trừ điểm sẽ nhận " + earnPoints + " điểm");
+            lblEarnPreview.setText(earnText);
         }
 
         if (lblUsePreview != null) {
-            lblUsePreview.setText("Dùng " + pointsToUse + " điểm, giảm " + formatPrice(discount));
+            lblUsePreview.setText(useText);
         }
     }
 
@@ -437,13 +442,7 @@ public class CustomerDialogController {
         return name.trim().substring(0, 1).toUpperCase();
     }
 
-    private String formatPrice(BigDecimal price) {
-        if (price == null) {
-            return "0 đ";
-        }
 
-        return String.format("%,.0f đ", price);
-    }
 
     private void closeDialog() {
         Stage stage = (Stage) btnSubmit.getScene().getWindow();

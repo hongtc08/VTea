@@ -123,22 +123,7 @@ public class MenuFormController {
             }
 
             // Load image
-            if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
-                try {
-                    selectedImagePath = product.getImageUrl();
-                    Image img;
-                    if (product.getImageUrl().startsWith("http") || product.getImageUrl().startsWith("file:")) {
-                        img = new Image(product.getImageUrl());
-                    } else {
-                        img = new Image(getClass().getResourceAsStream(product.getImageUrl()));
-                    }
-                    if (img != null && !img.isError()) {
-                        showPreviewImage(img);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            loadAndPreviewImage(product.getImageUrl());
         } else {
             lblFormTitle.setText("Thêm món mới");
             btnSubmit.setText("Xác nhận thêm");
@@ -164,22 +149,7 @@ public class MenuFormController {
             }
             
             // Load image
-            if (topping.getImageUrl() != null && !topping.getImageUrl().isEmpty()) {
-                try {
-                    selectedImagePath = topping.getImageUrl();
-                    Image img;
-                    if (topping.getImageUrl().startsWith("http") || topping.getImageUrl().startsWith("file:")) {
-                        img = new Image(topping.getImageUrl());
-                    } else {
-                        img = new Image(getClass().getResourceAsStream(topping.getImageUrl()));
-                    }
-                    if (img != null && !img.isError()) {
-                        showPreviewImage(img);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+            loadAndPreviewImage(topping.getImageUrl());
         } else {
             lblFormTitle.setText("Thêm topping mới");
             btnSubmit.setText("Xác nhận thêm");
@@ -223,6 +193,25 @@ public class MenuFormController {
         if (imageSection != null) {
             imageSection.setVisible(true);
             imageSection.setManaged(true);
+        }
+    }
+
+    private void loadAndPreviewImage(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                selectedImagePath = imageUrl;
+                Image img;
+                if (imageUrl.startsWith("http") || imageUrl.startsWith("file:")) {
+                    img = new Image(imageUrl);
+                } else {
+                    img = new Image(getClass().getResourceAsStream(imageUrl));
+                }
+                if (img != null && !img.isError()) {
+                    showPreviewImage(img);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

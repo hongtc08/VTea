@@ -4,6 +4,7 @@ import com.vtea.dto.BillDTO;
 import com.vtea.dto.OrderHistoryDTO;
 import com.vtea.service.BillService;
 import com.vtea.utils.DialogHelper;
+import com.vtea.utils.FormatUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -199,7 +200,7 @@ public class InvoiceHistoryController {
         }
 
         if (lblTotalAmount != null) {
-            lblTotalAmount.setText(formatPrice(invoice.getTotalAmount()));
+            lblTotalAmount.setText(FormatUtils.formatPrice(invoice.getTotalAmount()));
         }
 
         if (btnDetails != null) {
@@ -280,13 +281,7 @@ public class InvoiceHistoryController {
         return dateTime.format(dateFormatter);
     }
 
-    private String formatPrice(BigDecimal price) {
-        if (price == null) {
-            return "0 đ";
-        }
 
-        return String.format("%,.0f đ", price);
-    }
 
     private String nullToDefault(String value, String defaultValue) {
         if (value == null || value.isBlank()) {
