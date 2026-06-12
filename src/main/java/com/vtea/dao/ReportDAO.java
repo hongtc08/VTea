@@ -161,7 +161,7 @@ public class ReportDAO {
     /**
      * doanh thu trong một khoảng thời gian
      */
-    public List<TimeRevenueDTO> getRevenueByDate(LocalDateTime startDate, LocalDateTime endDate){
+    public List<TimeRevenueDTO> getRevenueByDate(LocalDate startDate, LocalDate endDate){
         List<TimeRevenueDTO> list = new ArrayList<>();
 
         String sql = """
