@@ -12,6 +12,7 @@ import com.vtea.service.POSCacheService;
 import com.vtea.service.payment.PayOSCreateResponse;
 import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
+import com.vtea.utils.FormatUtils;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -123,18 +124,9 @@ public class POSController {
     @FXML
     private void handleCheckout(ActionEvent event) {
         try {
-            if (orderService.isCartEmpty()) {
-                showErrorAlert("Lỗi", "Giỏ hàng trống! Vui lòng thêm sản phẩm.");
-                return;
-            }
+            if (!validateCheckoutCondition()) return;
 
             String paymentMethod = cmbPaymentMethod.getValue();
-
-            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
-                showErrorAlert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
-                return;
-            }
-
             CustomerDialogController customerDialog = showCustomerDialog();
 
             if (customerDialog == null || !customerDialog.isSubmitted()) {
@@ -142,33 +134,52 @@ public class POSController {
             }
 
             CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
-
-            if (selectedCustomer != null && selectedCustomer.getCustomerId() != null) {
-                orderService.setCustomer(selectedCustomer.getCustomerId());
-                if (customerDialog.getPointsToUse() > 0) {
-                    orderService.applyRewardPoints(customerDialog.getPointsToUse());
-                }
-            } else {
-                orderService.setCustomer(0);
-            }
-
-            Order order = orderService.getCurrentOrder();
-            order.setUserId(currentUserId);
-            order.setStatus("PAID");
-            order.setPaymentMethod(resolvePaymentMethodForDatabase(paymentMethod));
+            processCustomerSelection(customerDialog, selectedCustomer);
 
             int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
-
-            if (isPayOSPayment(paymentMethod)) {
-                handlePayOSPayment(order, selectedCustomer, usedPoints);
-                return;
-            }
-
-            completeCheckout(order, selectedCustomer, usedPoints);
+            buildAndSaveOrder(paymentMethod, selectedCustomer, usedPoints);
 
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Có lỗi xảy ra: " + e.getMessage());
+        }
+    }
+
+    private boolean validateCheckoutCondition() {
+        if (orderService.isCartEmpty()) {
+            showErrorAlert("Lỗi", "Giỏ hàng trống! Vui lòng thêm sản phẩm.");
+            return false;
+        }
+
+        String paymentMethod = cmbPaymentMethod.getValue();
+        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+            showErrorAlert("Lỗi", "Vui lòng chọn phương thức thanh toán!");
+            return false;
+        }
+        return true;
+    }
+
+    private void processCustomerSelection(CustomerDialogController dialog, CustomerDTO customer) throws Exception {
+        if (customer != null && customer.getCustomerId() != null) {
+            orderService.setCustomer(customer.getCustomerId());
+            if (dialog.getPointsToUse() > 0) {
+                orderService.applyRewardPoints(dialog.getPointsToUse());
+            }
+        } else {
+            orderService.setCustomer(0);
+        }
+    }
+
+    private void buildAndSaveOrder(String paymentMethod, CustomerDTO customer, int usedPoints) {
+        Order order = orderService.getCurrentOrder();
+        order.setUserId(currentUserId);
+        order.setStatus("PAID");
+        order.setPaymentMethod(resolvePaymentMethodForDatabase(paymentMethod));
+
+        if (isPayOSPayment(paymentMethod)) {
+            handlePayOSPayment(order, customer, usedPoints);
+        } else {
+            completeCheckout(order, customer, usedPoints);
         }
     }
 
@@ -212,7 +223,7 @@ public class POSController {
             waitingAlert.setHeaderText("Đang chờ khách thanh toán");
             waitingAlert.setContentText(
                     "Mã giao dịch: " + payment.getOrderCode()
-                            + "\nSố tiền: " + formatPrice(order.getTotalAmount())
+                            + "\nSố tiền: " + FormatUtils.formatPrice(order.getTotalAmount())
                             + "\nVui lòng quét QR hoặc chuyển khoản trên trình duyệt."
                             + "\nHệ thống sẽ tự kiểm tra trạng thái thanh toán."
             );
@@ -286,7 +297,7 @@ public class POSController {
 
             boolean exportBill = DialogHelper.showSuccessWithBillButton(
                     "✓ Thanh toán thành công!",
-                    "Tổng tiền: " + formatPrice(order.getTotalAmount())
+                    "Tổng tiền: " + FormatUtils.formatPrice(order.getTotalAmount())
                             + "\nKhách hàng: "
                             + (selectedCustomer != null ? selectedCustomer.getFullName() : "Khách vãng lai")
                             + "\nPhương thức: "
@@ -422,14 +433,14 @@ public class POSController {
     /**
      * Xử lý thêm sản phẩm vào giỏ hàng.
      */
-    public void handleAddToCart(int productId, String productName, BigDecimal price) {
+    private void handleAddToCart(int productId, String productName, BigDecimal price) {
         try {
             orderService.addToCart(productId, productName, price, 1);
             refreshCart();
 
             showSuccessAlert(
                     "Thêm vào giỏ",
-                    productName + " ✓\nGiá: " + formatPrice(price)
+                    productName + " ✓\nGiá: " + FormatUtils.formatPrice(price)
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -481,7 +492,7 @@ public class POSController {
             }
 
             if (lblPrice != null) {
-                lblPrice.setText(formatPrice(product.getPrice()));
+                lblPrice.setText(FormatUtils.formatPrice(product.getPrice()));
             }
 
             cardNode.setOnMouseClicked(event -> {
@@ -671,11 +682,11 @@ public class POSController {
         }
 
         if (lblCartPrice != null) {
-            lblCartPrice.setText(formatPrice(item.getUnitPrice()));
+            lblCartPrice.setText(FormatUtils.formatPrice(item.getUnitPrice()));
         }
 
         if (lblSubTotal != null) {
-            lblSubTotal.setText(formatPrice(item.getSubTotal()));
+            lblSubTotal.setText(FormatUtils.formatPrice(item.getSubTotal()));
         }
 
         bindToppingDisplay(cartNode, item);
@@ -877,15 +888,15 @@ public class POSController {
         BigDecimal total = orderService.getCurrentOrder().getTotalAmount();
 
         if (subtotalLabel != null) {
-            subtotalLabel.setText(formatPrice(subtotal));
+            subtotalLabel.setText(FormatUtils.formatPrice(subtotal));
         }
 
         if (taxLabel != null) {
-            taxLabel.setText(formatPrice(tax));
+            taxLabel.setText(FormatUtils.formatPrice(tax));
         }
 
         if (lblTotalAmount != null) {
-            lblTotalAmount.setText(formatPrice(total));
+            lblTotalAmount.setText(FormatUtils.formatPrice(total));
         }
     }
 
@@ -1003,16 +1014,7 @@ public class POSController {
         }
     }
 
-    /**
-     * Format tiền Việt Nam để hiển thị trên POS.
-     */
-    private String formatPrice(BigDecimal price) {
-        if (price == null) {
-            return "0 đ";
-        }
 
-        return String.format("%,.0f đ", price);
-    }
 
     // ==================== ALERT HELPERS ====================
 

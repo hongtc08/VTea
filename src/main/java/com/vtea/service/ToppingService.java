@@ -24,37 +24,6 @@ public class ToppingService {
         return mapListToDTO(models);
     }
 
-    /**
-     * 2. Lấy toàn bộ topping (kể cả đã xóa/ tạm ngưng) cho màn hình Admin
-     */
-    public List<ToppingDTO> getAllToppingsForAdmin() {
-        List<Topping> models = toppingDAO.getAllToppingsForAdmin();
-        return mapListToDTO(models);
-    }
-
-    /**
-     * 3. Tính tổng tiền topping
-     */
-    public BigDecimal calculateTotalToppingPrice(List<Integer> toppingIds) throws Exception {
-        BigDecimal total = BigDecimal.ZERO;
-
-        // Nếu khách không gọi Topping thì trả về 0.
-        if(toppingIds == null || toppingIds.isEmpty()) {
-            return total;
-        }
-        for(Integer id : toppingIds) {
-            Topping topping = toppingDAO.getToppingById(id);
-
-            if(topping == null) {
-                throw new Exception("Lỗi: Không tìm thấy topping với ID: " + id);
-            }
-            if(!topping.getAvailable()) {
-                throw new Exception("Lỗi: Topping" + topping.getName() + "hiện đang hết!");
-            }
-            total = total.add(topping.getPrice());
-        }
-        return total;
-    }
 
     // =========================================
     // NHÓM 2: THÊM, XÓA, SỬA TOPPING
