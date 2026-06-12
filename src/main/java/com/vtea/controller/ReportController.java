@@ -1,7 +1,7 @@
 package com.vtea.controller;
 
-import com.vtea.dao.ReportDAO;
 import com.vtea.dto.*;
+import com.vtea.service.ReportService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -31,8 +31,7 @@ public class ReportController implements Initializable {
     @FXML private TableColumn<StaffSalesDTO, Integer> colStaffOrders;
     @FXML private TableColumn<StaffSalesDTO, BigDecimal> colStaffRevenue;
 
-    private final ReportDAO reportDAO = new ReportDAO();
-
+    private ReportService reportService = new ReportService();
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Cài đặt thời gian mặc định (Từ đầu tháng đến hôm nay)
@@ -88,7 +87,7 @@ public class ReportController implements Initializable {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Doanh thu");
 
-        List<TimeRevenueDTO> dataList = reportDAO.getRevenueByDate(start, end);
+        List<TimeRevenueDTO> dataList = reportService.getRevenueByDate(start, end);
         for (TimeRevenueDTO data : dataList) {
             series.getData().add(new XYChart.Data<>(data.getTimeLabel(), data.getTotalRevenue()));
         }
@@ -99,7 +98,7 @@ public class ReportController implements Initializable {
     private void loadCategoryRevenue(LocalDate start, LocalDate end) {
         pieChartCategory.getData().clear();
 
-        List<CategoryRevenueDTO> dataList = reportDAO.getRevenueByCategory(start, end);
+        List<CategoryRevenueDTO> dataList = reportService.getRevenueByCategory(start, end);
         for (CategoryRevenueDTO data : dataList) {
             // PieChart yêu cầu giá trị double
             PieChart.Data slice = new PieChart.Data(data.getCategoryName(), data.getTotalRevenue().doubleValue());
@@ -111,7 +110,7 @@ public class ReportController implements Initializable {
         barChartTopProducts.getData().clear();
 
         XYChart.Series<Number, String> series = new XYChart.Series<>();
-        List<ProductSalesDTO> dataList = reportDAO.getTopSellingProducts(start, end);
+        List<ProductSalesDTO> dataList = reportService.getTopSellingProducts(start, end);
 
         for (int i = dataList.size() - 1; i >= 0; i--) {
             ProductSalesDTO data = dataList.get(i);
@@ -122,7 +121,7 @@ public class ReportController implements Initializable {
     }
 
     private void loadStaffPerformance(LocalDate start, LocalDate end) {
-        List<StaffSalesDTO> dataList = reportDAO.getRevenueByStaff(start, end);
+        List<StaffSalesDTO> dataList = reportService.getRevenueByStaff(start, end);
         // Đổ List vào ObservableList để TableView nhận diện được
         ObservableList<StaffSalesDTO> observableList = FXCollections.observableArrayList(dataList);
         tableStaff.setItems(observableList);
