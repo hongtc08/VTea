@@ -56,16 +56,12 @@ public class PendingCheckRowController {
 
     @FXML
     public void handleApprove(ActionEvent event) {
-        TextInputDialog dialog = new TextInputDialog("Duyệt chênh lệch kiểm kho");
-        dialog.setTitle("Xác nhận duyệt");
-        dialog.setHeaderText("Duyệt phiếu kiểm kê của nhân viên: " + currentCheck.getStaffName());
-        dialog.setContentText("Ghi chú (Tùy chọn):");
-
-        Optional<String> result = dialog.showAndWait();
+        java.util.Optional<String> result = DialogHelper.showInputConfirm("Xác nhận duyệt", "Duyệt phiếu kiểm kê của nhân viên: " + currentCheck.getStaffName() + "?\nBạn có thể nhập thêm ghi chú (Không bắt buộc):");
         if (result.isPresent()) {
             try {
                 int adminId = SessionManager.getCurrentUser().getId();
-                if (inventoryService.approveCheck(currentCheck.getLogId(), adminId, result.get())) {
+                String note = result.get().isEmpty() ? "Đã duyệt" : result.get();
+                if (inventoryService.approveCheck(currentCheck.getLogId(), adminId, note)) {
                     DialogHelper.showInfo("Thành công", "Đã duyệt và cập nhật kho chính thức!");
                     if (parentController != null) {
                         parentController.loadData();
@@ -80,17 +76,20 @@ public class PendingCheckRowController {
 
     @FXML
     public void handleReject(ActionEvent event) {
-        try {
-            int adminId = SessionManager.getCurrentUser().getId();
-            if (inventoryService.rejectCheck(currentCheck.getLogId(), adminId)) {
-                DialogHelper.showInfo("Thành công", "Đã từ chối phiếu kiểm kê này!");
-                if (parentController != null) {
-                    parentController.loadData();
-                    parentController.loadPendingChecks();
+        boolean confirm = DialogHelper.showConfirm("Xác nhận từ chối", "Từ chối phiếu kiểm kê của nhân viên: " + currentCheck.getStaffName() + "?");
+        if (confirm) {
+            try {
+                int adminId = SessionManager.getCurrentUser().getId();
+                if (inventoryService.rejectCheck(currentCheck.getLogId(), adminId)) {
+                    DialogHelper.showInfo("Thành công", "Đã từ chối phiếu kiểm kê này!");
+                    if (parentController != null) {
+                        parentController.loadData();
+                        parentController.loadPendingChecks();
+                    }
                 }
+            } catch (Exception e) {
+                DialogHelper.showInfo("Lỗi", e.getMessage());
             }
-        } catch (Exception e) {
-            DialogHelper.showInfo("Lỗi", e.getMessage());
         }
     }
 }

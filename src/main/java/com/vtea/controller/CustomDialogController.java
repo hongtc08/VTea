@@ -14,13 +14,23 @@ public class CustomDialogController {
     @FXML private Button btnCancel;
     @FXML private Button btnConfirm;
     @FXML private FontIcon iconDialog;
+    @FXML private javafx.scene.control.TextField txtInput;
 
     private boolean isConfirmed = false;
+    private String inputResult = null;
 
     // Hàm thiết lập dữ liệu trước khi hộp thoại hiện lên
-    public void setDialogData(String title, String message, boolean isConfirmType) {
+    public void setDialogData(String title, String message, boolean isConfirmType, boolean hasInput) {
         lblTitle.setText(title);
         lblMessage.setText(message);
+
+        if (hasInput) {
+            txtInput.setVisible(true);
+            txtInput.setManaged(true);
+        } else {
+            txtInput.setVisible(false);
+            txtInput.setManaged(false);
+        }
 
         if (isConfirmType) {
             // Nếu là dạng câu hỏi (Xác nhận/Hủy)
@@ -39,6 +49,9 @@ public class CustomDialogController {
     @FXML
     private void handleConfirm(ActionEvent event) {
         isConfirmed = true;
+        if (txtInput.isVisible()) {
+            inputResult = txtInput.getText();
+        }
         closeDialog();
     }
 
@@ -55,5 +68,9 @@ public class CustomDialogController {
 
     public boolean isConfirmed() {
         return isConfirmed;
+    }
+
+    public String getInputResult() {
+        return inputResult;
     }
 }

@@ -48,7 +48,7 @@ public class DialogHelper {
             Parent root = loader.load();
 
             CustomDialogController controller = loader.getController();
-            controller.setDialogData(title, message, isConfirmType);
+            controller.setDialogData(title, message, isConfirmType, false);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL); // Khóa màn hình chính khi popup hiện lên
@@ -64,6 +64,36 @@ public class DialogHelper {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // Gọi hàm này khi cần nhập liệu trong hộp thoại xác nhận (Trả về Optional chứa nội dung nhập, hoặc empty nếu Hủy)
+    public static java.util.Optional<String> showInputConfirm(String title, String message) {
+        try {
+            FXMLLoader loader = new FXMLLoader(DialogHelper.class.getResource("/com/vtea/view/CustomDialog.fxml"));
+            Parent root = loader.load();
+
+            CustomDialogController controller = loader.getController();
+            controller.setDialogData(title, message, true, true);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                String input = controller.getInputResult() != null ? controller.getInputResult().trim() : "";
+                return java.util.Optional.of(input);
+            }
+            return java.util.Optional.empty();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return java.util.Optional.empty();
         }
     }
     public static boolean showSuccessWithBillButton(String title, String message) {
