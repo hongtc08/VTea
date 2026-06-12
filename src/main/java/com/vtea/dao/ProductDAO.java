@@ -174,7 +174,6 @@ public class ProductDAO {
         product.setPrice(rs.getBigDecimal("price"));
         product.setImageUrl(rs.getString("image_url"));
         product.setAvailable(rs.getBoolean("is_available"));
-        product.setInStock(rs.getBoolean("in_stock"));
         product.setCategoryName(rs.getString("category_name"));
         return product;
     }
