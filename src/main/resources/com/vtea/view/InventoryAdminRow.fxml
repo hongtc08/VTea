@@ -13,7 +13,7 @@
     </stylesheets>
 
     <!-- Tên nguyên liệu -->
-    <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="200">
+    <HBox alignment="CENTER_LEFT" spacing="12" prefWidth="260">
         <StackPane styleClass="inventory-icon-box">
             <FontIcon iconLiteral="fth-package" iconSize="20" iconColor="#523628"/>
         </StackPane>
@@ -24,17 +24,17 @@
     <Label fx:id="lblUnit" text="kg" style="-fx-text-fill: #666666;" prefWidth="80"/>
 
     <!-- Tồn kho -->
-    <Label fx:id="lblQuantity" text="50" style="-fx-font-weight: bold;" prefWidth="100"/>
+    <Label fx:id="lblQuantity" text="50" style="-fx-font-weight: bold;" prefWidth="100" alignment="CENTER"/>
 
     <!-- Mức tối thiểu -->
-    <Label fx:id="lblMinStock" text="10" style="-fx-text-fill: #666666;" prefWidth="120"/>
+    <Label fx:id="lblMinStock" text="10" style="-fx-text-fill: #666666;" prefWidth="120" alignment="CENTER"/>
 
     <!-- Tình trạng -->
     <HBox prefWidth="120" alignment="CENTER_LEFT">
         <StackPane fx:id="badgeStatus" styleClass="badge-success">
             <HBox alignment="CENTER" spacing="4">
                 <FontIcon fx:id="iconWarning" iconLiteral="fth-alert-triangle" iconSize="14" iconColor="#D93025" visible="false" managed="false"/>
-                <Label fx:id="lblStatus" text="Đủ hàng"/>
+                <Label fx:id="lblStatus" text="Đủ hàng" minWidth="-Infinity"/>
             </HBox>
         </StackPane>
     </HBox>
@@ -46,23 +46,12 @@
     <Label fx:id="lblStaffName" text="Nguyễn Văn A" style="-fx-text-fill: #666666;" prefWidth="150"/>
 
     <!-- Thao tác -->
-    <HBox prefWidth="120" alignment="CENTER" spacing="0">
-        <Button fx:id="btnUpdateStock" onAction="#handleUpdateStock" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
+    <HBox prefWidth="60" alignment="CENTER">
+        <Button fx:id="btnActions" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
             <graphic>
-                <FontIcon iconLiteral="fth-plus-square" iconSize="18" iconColor="#10b981"/>
+                <FontIcon iconLiteral="fth-more-vertical" iconSize="20" iconColor="#666666"/>
             </graphic>
-        </Button>
-
-        <Button fx:id="btnEdit" onAction="#handleEdit" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
-            <graphic>
-                <FontIcon iconLiteral="fth-edit-2" iconSize="18" iconColor="#1890ff"/>
-            </graphic>
-        </Button>
-
-        <Button fx:id="btnDelete" onAction="#handleDelete" style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4 8;">
-            <graphic>
-                <FontIcon iconLiteral="fth-trash-2" iconSize="18" iconColor="#D93025"/>
-            </graphic>
+            <tooltip><Tooltip text="Thao tác"/></tooltip>
         </Button>
     </HBox>
 </HBox>

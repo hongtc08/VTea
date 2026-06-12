@@ -29,12 +29,12 @@
 
         <HBox styleClass="list-header-row" alignment="CENTER_LEFT" spacing="16">
             <Label text="Nhân viên" styleClass="list-header-label" prefWidth="280"/>
-            <Label text="Vị trí" styleClass="list-header-label" prefWidth="100"/>
+            <Label text="Vị trí" styleClass="list-header-label" prefWidth="120"/>
             <Label text="Liên hệ" styleClass="list-header-label" prefWidth="160"/>
             <Label text="Lương" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Ngày vào làm" styleClass="list-header-label" prefWidth="100"/>
-            <Label text="Trạng thái" styleClass="list-header-label" prefWidth="120"/>
-            <Label text="Thao tác" styleClass="list-header-label" alignment="CENTER" prefWidth="80"/>
+            <Label text="Ngày vào làm" styleClass="list-header-label" prefWidth="120"/>
+            <Label text="Trạng thái" styleClass="list-header-label" prefWidth="140"/>
+            <Label text="" styleClass="list-header-label" alignment="CENTER" prefWidth="60"/>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;">

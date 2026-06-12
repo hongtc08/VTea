@@ -33,14 +33,44 @@ public class InventoryAdminRowController {
     @FXML private Label lblStaffName;
     @FXML private StackPane badgeStatus;
     @FXML private FontIcon iconWarning;
-    @FXML private Button btnEdit;
-    @FXML private Button btnDelete;
+    @FXML private Button btnActions;
 
     private IngredientDTO currentIngredient;
     private InventoryController parentController;
     private final IngredientService ingredientService = new IngredientService();
 
+    private javafx.scene.control.ContextMenu actionMenu;
+    private javafx.scene.control.MenuItem miUpdateStock;
+    private javafx.scene.control.MenuItem miEdit;
+    private javafx.scene.control.MenuItem miDelete;
+
     public void initialize() {
+        actionMenu = new javafx.scene.control.ContextMenu();
+        
+        miUpdateStock = new javafx.scene.control.MenuItem("Nhập/Xuất kho");
+        FontIcon updateIcon = new FontIcon("fth-plus-square");
+        updateIcon.setIconColor(javafx.scene.paint.Color.valueOf("#10b981"));
+        miUpdateStock.setGraphic(updateIcon);
+
+        miEdit = new javafx.scene.control.MenuItem("Chỉnh sửa");
+        FontIcon editIcon = new FontIcon("fth-edit-2");
+        editIcon.setIconColor(javafx.scene.paint.Color.valueOf("#1890ff"));
+        miEdit.setGraphic(editIcon);
+
+        miDelete = new javafx.scene.control.MenuItem("Xóa");
+        FontIcon deleteIcon = new FontIcon("fth-trash-2");
+        deleteIcon.setIconColor(javafx.scene.paint.Color.valueOf("#D93025"));
+        miDelete.setGraphic(deleteIcon);
+
+        actionMenu.getItems().addAll(miUpdateStock, miEdit, miDelete);
+
+        miUpdateStock.setOnAction(this::handleUpdateStock);
+        miEdit.setOnAction(this::handleEdit);
+        miDelete.setOnAction(this::handleDelete);
+
+        btnActions.setOnMouseClicked(e -> {
+            actionMenu.show(btnActions, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
     }
 
     public void setData(IngredientDTO ingredient, InventoryController parentController) {

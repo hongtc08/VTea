@@ -21,7 +21,9 @@
             <Label fx:id="lblTitle" text="Thông báo" styleClass="dialog-title"/>
         </HBox>
 
-        <Label fx:id="lblMessage" text="Nội dung thông báo ở đây..." styleClass="dialog-message"/>
+        <Label fx:id="lblMessage" text="Nội dung thông báo ở đây..." styleClass="dialog-message" wrapText="true"/>
+
+        <TextField fx:id="txtInput" promptText="Nhập ghi chú (Tùy chọn)" styleClass="input-field" visible="false" managed="false"/>
 
         <HBox fx:id="buttonBox" alignment="CENTER_RIGHT" spacing="12">
             <VBox.margin><Insets top="8"/></VBox.margin>
