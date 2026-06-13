@@ -441,6 +441,7 @@ public class MenuController {
         stage.setScene(scene);
         
         com.vtea.utils.DialogHelper.applyBlurBackground(true);
+        com.vtea.utils.DialogHelper.animateDialog(root);
         stage.showAndWait();
         com.vtea.utils.DialogHelper.applyBlurBackground(false);
     }

@@ -111,10 +111,16 @@ public class MainLayoutController {
                 Parent view = loadTask.getValue();
                 // Thêm hiệu ứng Fade In để UX mượt mà hơn
                 view.setOpacity(0);
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(250), view);
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(350), view);
                 fadeIn.setFromValue(0);
                 fadeIn.setToValue(1);
-                fadeIn.play();
+                
+                javafx.animation.TranslateTransition slideUp = new javafx.animation.TranslateTransition(Duration.millis(350), view);
+                slideUp.setFromY(20);
+                slideUp.setToY(0);
+                
+                javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fadeIn, slideUp);
+                pt.play();
 
                 // Đưa vào màn hình chính
                 contentArea.getChildren().clear();

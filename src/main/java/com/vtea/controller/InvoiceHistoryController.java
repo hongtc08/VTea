@@ -255,6 +255,7 @@ public class InvoiceHistoryController {
             stage.setResizable(false);
             
             com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
             com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (Exception e) {

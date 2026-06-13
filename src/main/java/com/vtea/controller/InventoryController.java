@@ -174,6 +174,7 @@ public class InventoryController {
             stage.setScene(scene);
             
             com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
             com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {

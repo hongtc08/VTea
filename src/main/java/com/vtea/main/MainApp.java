@@ -64,6 +64,18 @@ public class MainApp extends Application {
             
             mainContainer.getChildren().clear();
             mainContainer.getChildren().add(root);
+            
+            root.setOpacity(0);
+            javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(javafx.util.Duration.millis(350), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            
+            javafx.animation.TranslateTransition slideUp = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(350), root);
+            slideUp.setFromY(20);
+            slideUp.setToY(0);
+            
+            javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fadeIn, slideUp);
+            pt.play();
         } catch (IOException e) {
             e.printStackTrace();
         }

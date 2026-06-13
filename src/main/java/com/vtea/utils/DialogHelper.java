@@ -60,8 +60,12 @@ public class DialogHelper {
             stage.setScene(scene);
             
             applyBlurBackground(true);
-            stage.showAndWait(); // Dừng luồng chạy ở đây cho đến khi tắt popup
-            applyBlurBackground(false);
+            animateDialog(root);
+            try {
+                stage.showAndWait();
+            } finally {
+                applyBlurBackground(false);
+            }
 
             return controller.isConfirmed();
         } catch (Exception e) {
@@ -89,8 +93,12 @@ public class DialogHelper {
             stage.setScene(scene);
             
             applyBlurBackground(true);
-            stage.showAndWait();
-            applyBlurBackground(false);
+            animateDialog(root);
+            try {
+                stage.showAndWait();
+            } finally {
+                applyBlurBackground(false);
+            }
 
             if (controller.isConfirmed()) {
                 String input = controller.getInputResult() != null ? controller.getInputResult().trim() : "";
@@ -190,7 +198,13 @@ public class DialogHelper {
         scene.setFill(null);
 
         stage.setScene(scene);
-        stage.showAndWait();
+        applyBlurBackground(true);
+        animateDialog(root);
+        try {
+            stage.showAndWait();
+        } finally {
+            applyBlurBackground(false);
+        }
 
         return exportBill[0];
     }
@@ -207,5 +221,27 @@ public class DialogHelper {
                 com.vtea.main.MainApp.getRootLayer().setEffect(null);
             }
         }
+    }
+
+    public static void animateDialog(javafx.scene.Node root) {
+        if (root == null) return;
+        
+        root.setOpacity(0);
+        root.setScaleX(0.8);
+        root.setScaleY(0.8);
+
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(javafx.util.Duration.millis(250), root);
+        fade.setFromValue(0);
+        fade.setToValue(1);
+
+        javafx.animation.ScaleTransition scale = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(250), root);
+        scale.setFromX(0.8);
+        scale.setFromY(0.8);
+        scale.setToX(1.0);
+        scale.setToY(1.0);
+        scale.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+
+        javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fade, scale);
+        pt.play();
     }
 }

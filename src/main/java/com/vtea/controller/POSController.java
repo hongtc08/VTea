@@ -438,13 +438,25 @@ public class POSController {
             orderService.addToCart(productId, productName, price, 1);
             refreshCart();
 
+            // Hiệu ứng "Ting" và nảy giỏ hàng
+            com.vtea.utils.SoundHelper.playTingSound();
+            if (lblTotalAmount != null) {
+                javafx.animation.ScaleTransition bounce = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), lblTotalAmount);
+                bounce.setFromX(1.0);
+                bounce.setFromY(1.0);
+                bounce.setToX(1.3);
+                bounce.setToY(1.3);
+                bounce.setAutoReverse(true);
+                bounce.setCycleCount(2);
+                bounce.play();
+            }
+
             showSuccessAlert(
-                    "Thêm vào giỏ",
-                    productName + " ✓\nGiá: " + FormatUtils.formatPrice(price)
+                    "Thêm món thành công",
+                    "Đã thêm " + productName + " vào giỏ hàng."
             );
         } catch (Exception e) {
-            e.printStackTrace();
-            showErrorAlert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng!");
+            showErrorAlert("Lỗi", e.getMessage());
         }
     }
 
@@ -524,7 +536,20 @@ public class POSController {
         try {
             orderService.addToppingToItem(toppingTargetItem, product.getProductId());
             refreshCart();
-            showSuccessAlert("Thêm topping", product.getName() + " ✓");
+
+            com.vtea.utils.SoundHelper.playTingSound();
+            if (lblTotalAmount != null) {
+                javafx.animation.ScaleTransition bounce = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), lblTotalAmount);
+                bounce.setFromX(1.0);
+                bounce.setFromY(1.0);
+                bounce.setToX(1.2);
+                bounce.setToY(1.2);
+                bounce.setAutoReverse(true);
+                bounce.setCycleCount(2);
+                bounce.play();
+            }
+
+            showSuccessAlert("Thêm topping", product.getName() + " đã được thêm làm topping.");
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể thêm topping: " + e.getMessage());
@@ -950,9 +975,7 @@ public class POSController {
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             
-            com.vtea.utils.DialogHelper.applyBlurBackground(true);
-            stage.showAndWait();
-            com.vtea.utils.DialogHelper.applyBlurBackground(false);
+            com.vtea.utils.DialogHelper.applyBlurBackground(true); com.vtea.utils.DialogHelper.animateDialog(root); try { stage.showAndWait(); } finally { com.vtea.utils.DialogHelper.applyBlurBackground(false); }
 
             return controller;
         } catch (Exception e) {
@@ -985,9 +1008,7 @@ public class POSController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
             
-            com.vtea.utils.DialogHelper.applyBlurBackground(true);
-            stage.showAndWait();
-            com.vtea.utils.DialogHelper.applyBlurBackground(false);
+            com.vtea.utils.DialogHelper.applyBlurBackground(true); com.vtea.utils.DialogHelper.animateDialog(root); try { stage.showAndWait(); } finally { com.vtea.utils.DialogHelper.applyBlurBackground(false); }
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể mở bill preview: " + e.getMessage());
@@ -1050,3 +1071,4 @@ public class POSController {
         return DialogHelper.showConfirm(title, message);
     }
 }
+
