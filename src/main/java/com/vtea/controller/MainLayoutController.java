@@ -73,6 +73,11 @@ public class MainLayoutController {
         MainApp.setRoot("login");
     }
 
+    @FXML
+    public void handleReport(ActionEvent event) {
+        loadView("report");
+    }
+
     // Hàm load màn hình con siêu "xịn" giúp bạn phát hiện mọi lỗi
     private void loadView(String fxml) {
         try {

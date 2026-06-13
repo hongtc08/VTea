@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.ReportController"
+      spacing="24" styleClass="screen-root">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <HBox alignment="CENTER_LEFT">
+        <VBox spacing="4">
+            <Label text="Báo cáo &amp; Thống kê" styleClass="screen-title"/>
+            <Label text="Phân tích doanh thu và hiệu suất hoạt động" styleClass="screen-subtitle"/>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <HBox spacing="12" alignment="CENTER_RIGHT" styleClass="card">
+            <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
+            <Label text="Lọc theo:" style="-fx-text-fill: #6b7280;"/>
+            <DatePicker fx:id="dpStartDate" promptText="Từ ngày" prefWidth="140"/>
+            <Label text="-" style="-fx-text-fill: #6b7280;"/>
+            <DatePicker fx:id="dpEndDate" promptText="Đến ngày" prefWidth="140"/>
+            <Button fx:id="btnFilter" text="Áp dụng" styleClass="btn-primary" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
+    </HBox>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS" prefHeight="350">
+
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-trending-up" iconSize="18" iconColor="#3b82f6"/>
+                <Label text="Xu hướng doanh thu" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+
+            <LineChart fx:id="lineChartRevenue" VBox.vgrow="ALWAYS" createSymbols="true" legendVisible="false">
+                <xAxis>
+                    <CategoryAxis label="Thời gian" side="BOTTOM"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Doanh thu (VNĐ)" side="LEFT"/>
+                </yAxis>
+            </LineChart>
+        </VBox>
+
+        <VBox styleClass="card" prefWidth="400" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-pie-chart" iconSize="18" iconColor="#a855f7"/>
+                <Label text="Tỷ trọng danh mục" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+
+            <PieChart fx:id="pieChartCategory" VBox.vgrow="ALWAYS" legendSide="BOTTOM" labelsVisible="true"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS" prefHeight="300">
+
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-star" iconSize="18" iconColor="#f59e0b"/>
+                <Label text="Top món bán chạy" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+
+            <BarChart fx:id="barChartTopProducts" VBox.vgrow="ALWAYS" legendVisible="false">
+                <xAxis>
+                    <NumberAxis label="Số lượng bán" side="BOTTOM"/>
+                </xAxis>
+                <yAxis>
+                    <CategoryAxis side="LEFT"/>
+                </yAxis>
+            </BarChart>
+        </VBox>
+
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-users" iconSize="18" iconColor="#10b981"/>
+                <Label text="Hiệu suất nhân viên" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+
+            <TableView fx:id="tableStaff" VBox.vgrow="ALWAYS" styleClass="table-view">
+                <columns>
+                    <TableColumn fx:id="colStaffName" text="Nhân viên" prefWidth="120"/>
+                    <TableColumn fx:id="colStaffOrders" text="Số đơn" prefWidth="80" style="-fx-alignment: CENTER;"/>
+                    <TableColumn fx:id="colStaffRevenue" text="Doanh thu" prefWidth="120" style="-fx-alignment: CENTER-RIGHT;"/>
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                </columnResizePolicy>
+            </TableView>
+        </VBox>
+
+    </HBox>
+</VBox>

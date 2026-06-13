@@ -116,20 +116,4 @@ public class ProductService {
         }
     }
 
-    /**
-     *  7. Cập nhật trạng thái còn/ hết hàng (in_stock)
-     * @param productId
-     * @param inStock
-     * @throws Exception
-     */
-    public void changeStockStatus(int productId, boolean inStock) throws Exception {
-        if (productId <= 0) {
-            throw new Exception("Lỗi: Không xác định được ID của món nước!");
-        }
-
-        boolean isSuccess = productDAO.updateStockStatus(productId, inStock);
-        if (!isSuccess) {
-            throw new Exception("Lỗi hệ thống: Không thể cập nhật trạng thái kho!");
-        }
-    }
 }

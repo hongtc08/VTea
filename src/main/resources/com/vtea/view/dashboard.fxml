@@ -26,10 +26,9 @@
     <!-- ===== Stats Grid (4 cards) ===== -->
     <GridPane hgap="16" vgap="16">
         <columnConstraints>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
-            <ColumnConstraints hgrow="ALWAYS" percentWidth="25"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33"/>
+            <ColumnConstraints hgrow="ALWAYS" percentWidth="33.33"/>
         </columnConstraints>
 
         <!-- Doanh thu -->
@@ -40,7 +39,6 @@
                     <FontIcon iconLiteral="fth-dollar-sign" iconSize="22" iconColor="#10b981"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label text="+12.5%" styleClass="stat-change-pos"/>
             </HBox>
             <Label text="Doanh thu hôm nay" styleClass="stat-label"/>
             <Label fx:id="revenueTodayLabel" text="—" styleClass="stat-value"/>
@@ -54,7 +52,6 @@
                     <FontIcon iconLiteral="fth-shopping-bag" iconSize="22" iconColor="#3b82f6"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label text="+8.2%" styleClass="stat-change-pos"/>
             </HBox>
             <Label text="Đơn hàng" styleClass="stat-label"/>
             <Label fx:id="ordersTodayLabel" text="—" styleClass="stat-value"/>
@@ -68,54 +65,44 @@
                     <FontIcon iconLiteral="fth-users" iconSize="22" iconColor="#a855f7"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label text="+5.1%" styleClass="stat-change-pos"/>
             </HBox>
             <Label text="Khách hàng" styleClass="stat-label"/>
             <Label fx:id="customersTodayLabel" text="—" styleClass="stat-value"/>
         </VBox>
 
-        <!-- Tăng trưởng -->
-        <VBox GridPane.columnIndex="3" styleClass="stat-card" spacing="8">
-            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <HBox alignment="CENTER_LEFT">
-                <StackPane styleClass="stat-icon-box stat-icon-orange">
-                    <FontIcon iconLiteral="fth-trending-up" iconSize="22" iconColor="#f97316"/>
-                </StackPane>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="+3.2%" styleClass="stat-change-pos"/>
-            </HBox>
-            <Label text="Tăng trưởng" styleClass="stat-label"/>
-            <Label fx:id="growthLabel" text="—" styleClass="stat-value"/>
-        </VBox>
     </GridPane>
 
     <!-- ===== Bottom 2 Panels ===== -->
     <HBox spacing="16" VBox.vgrow="ALWAYS">
 
         <!-- Recent Orders (Đơn hàng gần đây) -->
-        <!-- Đã sửa fx:id thành vboxRecentOrders -->
-        <VBox styleClass="card" fx:id="vboxRecentOrders" HBox.hgrow="ALWAYS" spacing="12">
+        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Đơn hàng gần đây" styleClass="card-title"/>
-            <!-- Các item đơn hàng sẽ được code Java tự động chèn vào đây -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-clock" iconSize="18" iconColor="#4b5563"/>
+                <Label text="Đơn hàng gần đây" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+            <VBox fx:id="vboxRecentOrders" spacing="8" VBox.vgrow="ALWAYS"/>
         </VBox>
 
         <!-- Top Products (Sản phẩm bán chạy) -->
-        <!-- Đã sửa fx:id thành vboxTopProducts và xóa thẻ ListView -->
-        <VBox styleClass="card" fx:id="vboxTopProducts" prefWidth="320" spacing="12">
+        <VBox styleClass="card" prefWidth="320" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
-            <Label text="Sản phẩm bán chạy" styleClass="card-title"/>
-            <!-- Các item sản phẩm sẽ được code Java tự động chèn vào đây -->
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fth-star" iconSize="18" iconColor="#eab308"/>
+                <Label text="Sản phẩm bán chạy" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+            </HBox>
+            <VBox fx:id="vboxTopProducts" spacing="8" VBox.vgrow="ALWAYS"/>
         </VBox>
 
         <!-- Cảnh báo hết hàng -->
-        <VBox styleClass="card" fx:id="vboxLowStock" prefWidth="300" spacing="12">
+        <VBox styleClass="card" prefWidth="300" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <FontIcon iconLiteral="fth-alert-triangle" iconSize="18" iconColor="#D93025"/>
-                <Label text="Cảnh báo hết hàng" styleClass="card-title" style="-fx-text-fill: #D93025;"/>
+                <Label text="Cảnh báo tồn kho" styleClass="card-title" style="-fx-text-fill: #D93025; -fx-font-weight: bold; -fx-font-size: 16px;"/>
             </HBox>
-            <!-- Các item cảnh báo sẽ được code Java tự động chèn vào đây -->
+            <VBox fx:id="vboxLowStock" spacing="8" VBox.vgrow="ALWAYS"/>
         </VBox>
 
     </HBox>

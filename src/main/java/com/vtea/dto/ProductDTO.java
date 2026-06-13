@@ -10,7 +10,6 @@ public class ProductDTO {
     private BigDecimal price;
     private String imageUrl;
     private boolean isAvailable;
-    private boolean inStock;
 
     public ProductDTO() {
 
@@ -54,10 +53,6 @@ public class ProductDTO {
         return productId;
     }
 
-    public boolean isInStock() {
-        return inStock;
-    }
-
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
     }
@@ -86,7 +81,4 @@ public class ProductDTO {
         this.productId = productId;
     }
 
-    public void setInStock(boolean inStock) {
-        this.inStock = inStock;
-    }
 }
