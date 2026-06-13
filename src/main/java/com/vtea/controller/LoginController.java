@@ -5,7 +5,6 @@ import com.vtea.main.MainApp;
 import com.vtea.service.AuthService;
 import com.vtea.utils.SessionManager;
 import com.vtea.utils.DialogHelper;
-import com.vtea.dao.UserDAO;
 import com.vtea.utils.EmailService;
 
 import javafx.event.ActionEvent;
@@ -165,8 +164,7 @@ public class LoginController {
         String username = showCustomDialog("Khôi phục mật khẩu", "Nhập tên đăng nhập của bạn:", true, true);
 
         if (username != null && !username.trim().isEmpty()) {
-            UserDAO userDAO = new UserDAO();
-            String email = userDAO.getEmailByUsername(username.trim());
+            String email = authService.getEmailByUsername(username.trim());
 
             if (email != null) {
                 // 2. Tao OTP va gui Email
@@ -182,7 +180,7 @@ public class LoginController {
                         String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
 
                         if (newPassword != null && !newPassword.trim().isEmpty()) {
-                            if (userDAO.updatePassword(username.trim(), newPassword.trim())) {
+                            if (authService.updatePassword(username.trim(), newPassword.trim())) {
                                 showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
                             } else {
                                 showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);

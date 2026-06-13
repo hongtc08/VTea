@@ -42,4 +42,21 @@ public class AuthService {
                 user.getRole()
         );
     }
+
+    /**
+     * Hàm lấy email theo username để gửi mã OTP khôi phục mật khẩu
+     */
+    public String getEmailByUsername(String username) {
+        UserDAO userDAO = new com.vtea.dao.UserDAO();
+        return userDAO.getEmailByUsername(username);
+    }
+
+    /**
+     * Hàm cập nhật mật khẩu mới sau khi người dùng đã xác thực mã OTP thành công
+     */
+
+    public boolean updatePassword(String username, String newPassword) {
+        UserDAO userDAO = new com.vtea.dao.UserDAO();
+        return userDAO.updatePassword(username, newPassword);
+    }
 }
