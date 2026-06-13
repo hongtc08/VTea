@@ -144,7 +144,7 @@
                     maxWidth="Infinity"
                     onAction="#handleReport">
                 <graphic>
-                    <FontIcon iconLiteral="fth-file-text" styleClass="sidebar-icon" iconSize="18"/>
+                    <FontIcon iconLiteral="fth-pie-chart" styleClass="sidebar-icon" iconSize="18"/>
                 </graphic>
             </Button>
         </VBox>
