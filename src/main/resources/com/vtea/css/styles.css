@@ -479,7 +479,32 @@
     -fx-font-size: 14px;
 }
 
-.stat-card {
+.stat-card-1 {
+    -fx-background-color: linear-gradient(to bottom right, #10b981, #059669);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 14, 0, 0, 4);
+}
+.stat-card-2 {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #2563eb);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 14, 0, 0, 4);
+}
+.stat-card-3 {
+    -fx-background-color: linear-gradient(to bottom right, #a855f7, #7e22ce);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.4), 14, 0, 0, 4);
+}
+.stat-card-1 .stat-label, .stat-card-1 .stat-value,
+.stat-card-2 .stat-label, .stat-card-2 .stat-value,
+.stat-card-3 .stat-label, .stat-card-3 .stat-value {
+    -fx-text-fill: white;
+}
+.stat-card-1 .stat-icon-box, .stat-card-2 .stat-icon-box, .stat-card-3 .stat-icon-box {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+.stat-card-1 .font-icon, .stat-card-2 .font-icon, .stat-card-3 .font-icon {
+    -fx-icon-color: white;
+}
     -fx-background-color: white;
     -fx-background-radius: 14;
     -fx-border-color: #e7e5e4;

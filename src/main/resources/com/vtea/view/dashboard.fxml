@@ -32,11 +32,11 @@
         </columnConstraints>
 
         <!-- Doanh thu -->
-        <VBox GridPane.columnIndex="0" styleClass="stat-card" spacing="8">
+        <VBox GridPane.columnIndex="0" styleClass="stat-card-1" spacing="8">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT">
-                <StackPane styleClass="stat-icon-box stat-icon-green">
-                    <FontIcon iconLiteral="fth-dollar-sign" iconSize="22" iconColor="#10b981"/>
+                <StackPane styleClass="stat-icon-box">
+                    <FontIcon iconLiteral="fth-dollar-sign" iconSize="26"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
@@ -45,11 +45,11 @@
         </VBox>
 
         <!-- Đơn hàng -->
-        <VBox GridPane.columnIndex="1" styleClass="stat-card" spacing="8">
+        <VBox GridPane.columnIndex="1" styleClass="stat-card-2" spacing="8">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT">
-                <StackPane styleClass="stat-icon-box stat-icon-blue">
-                    <FontIcon iconLiteral="fth-shopping-bag" iconSize="22" iconColor="#3b82f6"/>
+                <StackPane styleClass="stat-icon-box">
+                    <FontIcon iconLiteral="fth-shopping-bag" iconSize="26"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
@@ -58,11 +58,11 @@
         </VBox>
 
         <!-- Khách hàng -->
-        <VBox GridPane.columnIndex="2" styleClass="stat-card" spacing="8">
+        <VBox GridPane.columnIndex="2" styleClass="stat-card-3" spacing="8">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT">
-                <StackPane styleClass="stat-icon-box stat-icon-purple">
-                    <FontIcon iconLiteral="fth-users" iconSize="22" iconColor="#a855f7"/>
+                <StackPane styleClass="stat-icon-box">
+                    <FontIcon iconLiteral="fth-users" iconSize="26"/>
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
