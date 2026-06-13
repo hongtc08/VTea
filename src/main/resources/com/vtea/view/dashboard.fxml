@@ -40,7 +40,7 @@
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
-            <Label text="Doanh thu hôm nay" styleClass="stat-label"/>
+            <Label text="Doanh thu tháng này" styleClass="stat-label"/>
             <Label fx:id="revenueTodayLabel" text="—" styleClass="stat-value"/>
         </VBox>
 
@@ -53,7 +53,7 @@
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
-            <Label text="Đơn hàng" styleClass="stat-label"/>
+            <Label text="Đơn hàng (tháng)" styleClass="stat-label"/>
             <Label fx:id="ordersTodayLabel" text="—" styleClass="stat-value"/>
         </VBox>
 
@@ -66,7 +66,7 @@
                 </StackPane>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
-            <Label text="Khách hàng" styleClass="stat-label"/>
+            <Label text="Khách hàng (tháng)" styleClass="stat-label"/>
             <Label fx:id="customersTodayLabel" text="—" styleClass="stat-value"/>
         </VBox>
 

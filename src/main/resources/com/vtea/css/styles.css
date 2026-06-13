@@ -10,8 +10,8 @@
 
 /* ---------- ROOT FONT ---------- */
 .root {
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+    -fx-font-size: 14px;
     -fx-background-color: #f5efed;
 }
 
@@ -33,7 +33,7 @@
 .dialog-title {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #222222;
+    -fx-text-fill: #78350f;
 }
 
 .dialog-message {
@@ -894,25 +894,31 @@
 /* ============================================================
    SCROLLBAR (minimal style)
    ============================================================ */
-
-.scroll-bar:vertical .thumb {
-    -fx-background-color: #d6d3d1;
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 8;
+}
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-background-radius: 4;
 }
-
-.scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #a8a29e;
+.scroll-bar:vertical .thumb:hover, .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
 }
-
 .scroll-bar .track {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
-
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
     -fx-background-color: transparent;
     -fx-pref-height: 0;
     -fx-pref-width: 0;
+    -fx-padding: 0;
 }
 
 /* ========================================= */

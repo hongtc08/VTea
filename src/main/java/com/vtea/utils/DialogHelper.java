@@ -58,7 +58,10 @@ public class DialogHelper {
             scene.setFill(Color.TRANSPARENT); // Xóa nền trắng mặc định của Scene
 
             stage.setScene(scene);
+            
+            applyBlurBackground(true);
             stage.showAndWait(); // Dừng luồng chạy ở đây cho đến khi tắt popup
+            applyBlurBackground(false);
 
             return controller.isConfirmed();
         } catch (Exception e) {
@@ -84,7 +87,10 @@ public class DialogHelper {
             scene.setFill(Color.TRANSPARENT);
 
             stage.setScene(scene);
+            
+            applyBlurBackground(true);
             stage.showAndWait();
+            applyBlurBackground(false);
 
             if (controller.isConfirmed()) {
                 String input = controller.getInputResult() != null ? controller.getInputResult().trim() : "";
@@ -187,5 +193,19 @@ public class DialogHelper {
         stage.showAndWait();
 
         return exportBill[0];
+    }
+
+    private static void applyBlurBackground(boolean apply) {
+        if (com.vtea.main.MainApp.getRootLayer() != null) {
+            if (apply) {
+                javafx.scene.effect.GaussianBlur blur = new javafx.scene.effect.GaussianBlur(12);
+                javafx.scene.effect.ColorAdjust dim = new javafx.scene.effect.ColorAdjust();
+                dim.setBrightness(-0.3);
+                blur.setInput(dim);
+                com.vtea.main.MainApp.getRootLayer().setEffect(blur);
+            } else {
+                com.vtea.main.MainApp.getRootLayer().setEffect(null);
+            }
+        }
     }
 }
