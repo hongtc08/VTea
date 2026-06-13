@@ -30,7 +30,7 @@
             <DatePicker fx:id="dpStartDate" promptText="Từ ngày" prefWidth="140"/>
             <Label text="-" style="-fx-text-fill: #6b7280;"/>
             <DatePicker fx:id="dpEndDate" promptText="Đến ngày" prefWidth="140"/>
-            <Button fx:id="btnFilter" text="Áp dụng" styleClass="btn-primary" style="-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button fx:id="btnFilter" text="Áp dụng" styleClass="btn-primary" style="-fx-font-weight: bold;"/>
         </HBox>
     </HBox>
 
@@ -39,7 +39,7 @@
         <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fth-trending-up" iconSize="18" iconColor="#3b82f6"/>
+                <FontIcon iconLiteral="fth-trending-up" iconSize="18" iconColor="#523628"/>
                 <Label text="Xu hướng doanh thu" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
             </HBox>
 
@@ -56,7 +56,7 @@
         <VBox styleClass="card" prefWidth="400" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fth-pie-chart" iconSize="18" iconColor="#a855f7"/>
+                <FontIcon iconLiteral="fth-pie-chart" iconSize="18" iconColor="#8B5A2B"/>
                 <Label text="Tỷ trọng danh mục" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
             </HBox>
 
@@ -69,11 +69,11 @@
         <VBox styleClass="card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fth-star" iconSize="18" iconColor="#f59e0b"/>
+                <FontIcon iconLiteral="fth-star" iconSize="18" iconColor="#CD853F"/>
                 <Label text="Top món bán chạy" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
             </HBox>
 
-            <BarChart fx:id="barChartTopProducts" VBox.vgrow="ALWAYS" legendVisible="false">
+            <BarChart fx:id="barChartTopProducts" VBox.vgrow="ALWAYS" legendVisible="false" categoryGap="10" barGap="0">
                 <xAxis>
                     <NumberAxis label="Số lượng bán" side="BOTTOM"/>
                 </xAxis>
@@ -86,11 +86,11 @@
         <VBox styleClass="card" HBox.hgrow="ALWAYS" maxWidth="Infinity" spacing="12">
             <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fth-users" iconSize="18" iconColor="#10b981"/>
+                <FontIcon iconLiteral="fth-users" iconSize="18" iconColor="#523628"/>
                 <Label text="Hiệu suất nhân viên" styleClass="card-title" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
             </HBox>
 
-            <TableView fx:id="tableStaff" VBox.vgrow="ALWAYS" styleClass="table-view">
+            <TableView fx:id="tableStaff" VBox.vgrow="ALWAYS" styleClass="table-view, report-table">
                 <columns>
                     <TableColumn fx:id="colStaffName" text="Nhân viên" prefWidth="120"/>
                     <TableColumn fx:id="colStaffOrders" text="Số đơn" prefWidth="80" style="-fx-alignment: CENTER;"/>

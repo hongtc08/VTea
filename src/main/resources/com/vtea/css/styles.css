@@ -1919,3 +1919,78 @@
     -fx-font-weight: bold;
     -fx-text-fill: #523628;
 }
+
+
+/* =========================================
+   CHART & REPORT STYLES
+   ========================================= */
+
+.default-color0.chart-pie { -fx-pie-color: #523628; }
+.default-color1.chart-pie { -fx-pie-color: #8B5A2B; }
+.default-color2.chart-pie { -fx-pie-color: #CD853F; }
+.default-color3.chart-pie { -fx-pie-color: #D2B48C; }
+.default-color4.chart-pie { -fx-pie-color: #FDF1ED; }
+
+.default-color0.chart-bar { -fx-bar-fill: #CD853F; }
+
+.default-color0.chart-series-line { -fx-stroke: #523628; -fx-stroke-width: 3px; }
+.default-color0.chart-line-symbol { -fx-background-color: #523628, white; }
+
+/* Report Table Staff */
+.report-table {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.report-table .column-header-background {
+    -fx-background-color: #FDF1ED;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.report-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-border-color: transparent;
+}
+.report-table .column-header .label {
+    -fx-text-fill: #523628;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+.report-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #f3f4f6 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 44px;
+}
+.report-table .table-row-cell:hover {
+    -fx-background-color: #fdf1ed;
+}
+.report-table .table-cell {
+    -fx-text-fill: #111827;
+    -fx-font-size: 14px;
+    -fx-border-color: transparent;
+}
+
+/* Chart Fonts */
+.axis {
+    -fx-tick-label-font: bold 11px "System";
+    -fx-tick-label-fill: #523628;
+}
+.axis-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #523628;
+}
+.chart-pie-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-fill: #523628;
+}
+.chart-legend-item {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #523628;
+}
