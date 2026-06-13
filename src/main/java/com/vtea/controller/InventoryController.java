@@ -172,7 +172,10 @@ public class InventoryController {
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             DialogHelper.showInfo("Lỗi", "Không thể mở form thêm nguyên liệu: " + e.getMessage());
         }

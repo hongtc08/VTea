@@ -195,7 +195,7 @@ public class DialogHelper {
         return exportBill[0];
     }
 
-    private static void applyBlurBackground(boolean apply) {
+    public static void applyBlurBackground(boolean apply) {
         if (com.vtea.main.MainApp.getRootLayer() != null) {
             if (apply) {
                 javafx.scene.effect.GaussianBlur blur = new javafx.scene.effect.GaussianBlur(12);

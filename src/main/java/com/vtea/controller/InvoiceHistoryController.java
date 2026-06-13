@@ -253,7 +253,10 @@ public class InvoiceHistoryController {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (Exception e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở chi tiết hóa đơn: " + e.getMessage());

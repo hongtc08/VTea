@@ -58,6 +58,22 @@ public class EmployeeController {
                 // Thêm hàng vào danh sách hiển thị
                 vboxEmployeeList.getChildren().add(row);
             }
+            
+            if (vboxEmployeeList.getChildren().isEmpty()) {
+                javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+                emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+                emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+                
+                org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-users");
+                icon.setIconSize(64);
+                icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+                
+                javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không có nhân viên nào");
+                lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+                
+                emptyState.getChildren().addAll(icon, lbl);
+                vboxEmployeeList.getChildren().add(emptyState);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể tải danh sách nhân viên: " + e.getMessage());
@@ -80,7 +96,10 @@ public class EmployeeController {
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
 
         } catch (IOException e) {
             e.printStackTrace();

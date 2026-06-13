@@ -870,12 +870,22 @@ public class POSController {
      * Hiển thị thông báo giỏ hàng trống.
      */
     private void showEmptyCartMessage() {
-        if (cartItemsBox == null || cartEmptyLabel == null) {
-            return;
-        }
-
-        if (!cartItemsBox.getChildren().contains(cartEmptyLabel)) {
-            cartItemsBox.getChildren().add(cartEmptyLabel);
+        if (cartItemsBox != null) {
+            cartItemsBox.getChildren().clear();
+            
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(80, 0, 0, 0));
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-shopping-cart");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Chưa có món nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 16px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            cartItemsBox.getChildren().add(emptyState);
         }
     }
 
@@ -939,7 +949,10 @@ public class POSController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
 
             return controller;
         } catch (Exception e) {
@@ -971,7 +984,10 @@ public class POSController {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể mở bill preview: " + e.getMessage());

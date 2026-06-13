@@ -202,6 +202,23 @@ public class MenuController {
                 menuGrid.getChildren().add(createProductCard(product));
             }
         }
+        
+        if (menuGrid.getChildren().isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            emptyState.setPrefWidth(800);
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-coffee");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không tìm thấy món nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            menuGrid.getChildren().add(emptyState);
+        }
     }
 
     private void filterToppings() {
@@ -215,6 +232,23 @@ public class MenuController {
             if (matchesSearch) {
                 menuGrid.getChildren().add(createToppingCard(topping));
             }
+        }
+        
+        if (menuGrid.getChildren().isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            emptyState.setPrefWidth(800);
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-grid");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không tìm thấy topping nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            menuGrid.getChildren().add(emptyState);
         }
     }
 
@@ -405,7 +439,10 @@ public class MenuController {
         Scene scene = new Scene(root);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         stage.setScene(scene);
+        
+        com.vtea.utils.DialogHelper.applyBlurBackground(true);
         stage.showAndWait();
+        com.vtea.utils.DialogHelper.applyBlurBackground(false);
     }
 
     private void setCategoryVisible(boolean visible) {

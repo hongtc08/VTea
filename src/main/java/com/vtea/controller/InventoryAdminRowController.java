@@ -127,7 +127,10 @@ public class InventoryAdminRowController {
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở form sửa nguyên liệu: " + e.getMessage());
@@ -150,7 +153,10 @@ public class InventoryAdminRowController {
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở form nhập xuất kho.");
