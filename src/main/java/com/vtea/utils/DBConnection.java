@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnection {
 
     // 1. ĐỊA CHỈ DATABASE:
-    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/fnb_management?sslMode=REQUIRED";
+    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/fnb_management?sslMode=REQUIRED&serverTimezone=Asia/Ho_Chi_Minh&sessionVariables=time_zone='%2B07:00'";
     // 2. TÀI KHOẢN:
     private static final String USER = "avnadmin";
     // 3. MẬT KHẨU

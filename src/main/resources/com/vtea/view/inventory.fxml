@@ -73,7 +73,7 @@
             </VBox>
         </Tab>
 
-        <Tab text="Lịch sử giao dịch" fx:id="tabHistory" styleClass="list-header-label">
+        <Tab text="Lịch sử duyệt" fx:id="tabHistory" styleClass="list-header-label">
             <VBox style="-fx-background-color: white; -fx-background-radius: 0 0 12 12;" VBox.vgrow="ALWAYS">
                 <padding><Insets top="10"/></padding>
 
