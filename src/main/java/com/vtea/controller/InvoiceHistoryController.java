@@ -91,6 +91,23 @@ public class InvoiceHistoryController {
     private void renderInvoiceGroups(List<OrderHistoryDTO> invoices) {
         invoiceGroupsContainer.getChildren().clear();
 
+        if (invoices == null || invoices.isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-inbox");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không có hóa đơn nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            invoiceGroupsContainer.getChildren().add(emptyState);
+            return;
+        }
+
         Map<String, List<OrderHistoryDTO>> groupedInvoices = groupInvoices(invoices);
 
         for (Map.Entry<String, List<OrderHistoryDTO>> entry : groupedInvoices.entrySet()) {
@@ -236,7 +253,11 @@ public class InvoiceHistoryController {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (Exception e) {
             e.printStackTrace();
             DialogHelper.showInfo("Lỗi", "Không thể mở chi tiết hóa đơn: " + e.getMessage());

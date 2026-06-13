@@ -198,7 +198,11 @@ public class EmployeeRowController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.TRANSPARENT);
             stage.setScene(new Scene(root));
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Thông báo", "Không thể mở form đổi mật khẩu");
@@ -219,7 +223,11 @@ public class EmployeeRowController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.TRANSPARENT);
             stage.setScene(new Scene(root));
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             e.printStackTrace();
             DialogHelper.showInfo("Thông báo", "Không thể mở form sửa thông tin nhân viên");

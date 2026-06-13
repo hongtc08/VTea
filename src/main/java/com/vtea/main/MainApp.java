@@ -14,10 +14,23 @@ import atlantafx.base.theme.PrimerLight;
 public class MainApp extends Application {
 
     private static Stage primaryStage;
+    private static String customFontFamily = "Segoe UI";
 
     @Override
     public void start(Stage stage) throws IOException {
         Application.setUserAgentStylesheet(new PrimerLight().getUserAgentStylesheet());
+        
+        try {
+            // Load custom font using file path to bypass IDE build cache
+            String fontPath = new java.io.File("src/main/resources/com/vtea/fonts/BeVietnamPro-Regular.ttf").toURI().toString();
+            javafx.scene.text.Font customFont = javafx.scene.text.Font.loadFont(fontPath, 14);
+            if (customFont != null) {
+                customFontFamily = customFont.getFamily();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         primaryStage = stage;
         primaryStage.setTitle("VTea - POS & Quản lý");
         setRoot("login");
@@ -40,6 +53,7 @@ public class MainApp extends Application {
                 
                 rootLayer = new StackPane(mainContainer, overlayContainer);
                 rootLayer.getStylesheets().add(MainApp.class.getResource("/com/vtea/css/styles.css").toExternalForm());
+                rootLayer.setStyle("-fx-font-family: '" + customFontFamily + "'; -fx-font-size: 14px;");
                 
                 if (primaryStage.getScene() == null) {
                     primaryStage.setScene(new Scene(rootLayer, 1280, 800));
@@ -50,6 +64,18 @@ public class MainApp extends Application {
             
             mainContainer.getChildren().clear();
             mainContainer.getChildren().add(root);
+            
+            root.setOpacity(0);
+            javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(javafx.util.Duration.millis(350), root);
+            fadeIn.setFromValue(0);
+            fadeIn.setToValue(1);
+            
+            javafx.animation.TranslateTransition slideUp = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(350), root);
+            slideUp.setFromY(20);
+            slideUp.setToY(0);
+            
+            javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fadeIn, slideUp);
+            pt.play();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,6 +83,10 @@ public class MainApp extends Application {
 
     public static StackPane getOverlayContainer() {
         return overlayContainer;
+    }
+
+    public static StackPane getRootLayer() {
+        return rootLayer;
     }
 
     public static void main(String[] args) {

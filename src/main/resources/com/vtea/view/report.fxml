@@ -91,6 +91,12 @@
             </HBox>
 
             <TableView fx:id="tableStaff" VBox.vgrow="ALWAYS" styleClass="table-view, report-table">
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="8">
+                        <org.kordamp.ikonli.javafx.FontIcon iconLiteral="fth-inbox" iconSize="48" iconColor="#d6d3d1"/>
+                        <Label text="Chưa có dữ liệu" style="-fx-text-fill: #a8a29e; -fx-font-size: 14px;"/>
+                    </VBox>
+                </placeholder>
                 <columns>
                     <TableColumn fx:id="colStaffName" text="Nhân viên" prefWidth="120"/>
                     <TableColumn fx:id="colStaffOrders" text="Số đơn" prefWidth="80" style="-fx-alignment: CENTER;"/>
