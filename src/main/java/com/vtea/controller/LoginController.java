@@ -1,14 +1,18 @@
 package com.vtea.controller;
 
 import com.vtea.dto.LoginRequestDTO;
-import com.vtea.dto.UserSessionDTO;
 import com.vtea.main.MainApp;
 import com.vtea.service.AuthService;
 import com.vtea.utils.SessionManager;
 import com.vtea.utils.DialogHelper;
+import com.vtea.dao.UserDAO;
+import com.vtea.utils.EmailService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -24,7 +28,10 @@ import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.concurrent.CompletableFuture;
@@ -138,7 +145,7 @@ public class LoginController {
             Platform.runLater(() -> {
                 if (loadingOverlay != null) loadingOverlay.setVisible(false);
                 btnLogin.setDisable(false);
-                
+
                 // Lấy ra nguyên nhân gốc rễ (root cause) để không bị dính chữ Exception
                 Throwable rootCause = ex;
                 while (rootCause.getCause() != null) {
@@ -154,10 +161,71 @@ public class LoginController {
 
     @FXML
     private void handleForgotPassword(ActionEvent event) {
-        DialogHelper.showInfo(
-                "Quên mật khẩu",
-                "Vui lòng liên hệ số điện thoại 0987654321 để được hỗ trợ xử lý."
-        );
+        // 1. Yeu cau nhap Username
+        String username = showCustomDialog("Khôi phục mật khẩu", "Nhập tên đăng nhập của bạn:", true, true);
+
+        if (username != null && !username.trim().isEmpty()) {
+            UserDAO userDAO = new UserDAO();
+            String email = userDAO.getEmailByUsername(username.trim());
+
+            if (email != null) {
+                // 2. Tao OTP va gui Email
+                String otp = EmailService.generateOTP();
+                if (EmailService.sendOTPEmail(email, otp)) {
+
+                    // 3. Yeu cau nhap OTP
+                    String otpInput = showCustomDialog("Xác thực OTP", "Mã đã gửi đến: " + email + "\nVui lòng nhập 6 số OTP:", true, true);
+
+                    if (otpInput != null && otpInput.trim().equals(otp)) {
+
+                        // 4. Khop OTP -> Dat mat khau moi
+                        String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
+
+                        if (newPassword != null && !newPassword.trim().isEmpty()) {
+                            if (userDAO.updatePassword(username.trim(), newPassword.trim())) {
+                                showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
+                            } else {
+                                showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);
+                            }
+                        }
+                    } else {
+                        showCustomDialog("Lỗi xác thực", "Mã OTP không chính xác hoặc đã bị hủy!", false, false);
+                    }
+                } else {
+                    showCustomDialog("Lỗi hệ thống", "Trạm gửi thư đang bận. Không thể gửi email!", false, false);
+                }
+            } else {
+                showCustomDialog("Không tìm thấy", "Tên đăng nhập không tồn tại hoặc chưa liên kết Email!", false, false);
+            }
+        }
+    }
+
+    // Ham goi Custom Dialog
+    private String showCustomDialog(String title, String message, boolean isConfirmType, boolean hasInput) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/CustomDialog.fxml"));
+            Parent root = loader.load();
+
+            CustomDialogController controller = loader.getController();
+            controller.setDialogData(title, message, isConfirmType, hasInput);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+            stage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                return controller.getInputResult();
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi khi load giao diện CustomDialog");
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void preloadSystemDataThenOpenMain(String fullName) {
