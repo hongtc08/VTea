@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.CustomerRowController"
+      alignment="CENTER_LEFT"
+      spacing="10"
+      styleClass="table-row">
+      
+    <padding>
+        <Insets top="16" right="10" bottom="16" left="10"/>
+    </padding>
+
+    <Label fx:id="lblName" styleClass="row-text-main" prefWidth="200" wrapText="true"/>
+    
+    <HBox alignment="CENTER_LEFT" prefWidth="150" spacing="8">
+        <FontIcon iconLiteral="fth-phone" iconSize="14" iconColor="#a8a29e"/>
+        <Label fx:id="lblPhone" styleClass="row-text-sub"/>
+    </HBox>
+    
+    <HBox alignment="CENTER_LEFT" prefWidth="120" spacing="6">
+        <FontIcon iconLiteral="fth-star" iconSize="14" iconColor="#eab308"/>
+        <Label fx:id="lblPoints" styleClass="row-text-main" style="-fx-font-weight: 700;"/>
+    </HBox>
+    
+    <HBox alignment="CENTER_LEFT" prefWidth="120">
+        <Label fx:id="lblTier" styleClass="tier-pill"/>
+    </HBox>
+    
+    <HBox alignment="CENTER_LEFT" prefWidth="200" spacing="8">
+        <FontIcon iconLiteral="fth-clock" iconSize="14" iconColor="#a8a29e"/>
+        <Label fx:id="lblLastPurchase" styleClass="row-text-sub"/>
+    </HBox>
+    
+    <HBox alignment="CENTER" prefWidth="80" spacing="12">
+        <Button styleClass="btn-icon-only" onAction="#handleEdit">
+            <graphic>
+                <FontIcon iconLiteral="fth-edit-2" iconSize="16" styleClass="action-icon"/>
+            </graphic>
+        </Button>
+        <Button styleClass="btn-icon-only" onAction="#handleDelete">
+            <graphic>
+                <FontIcon iconLiteral="fth-trash-2" iconSize="16" styleClass="action-icon, action-icon-danger"/>
+            </graphic>
+        </Button>
+    </HBox>
+    
+</HBox>

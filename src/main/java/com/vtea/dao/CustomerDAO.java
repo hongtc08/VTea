@@ -165,4 +165,99 @@ public class CustomerDAO {
         }
         return false;
     }
+
+    public java.util.List<CustomerDTO> getAllCustomers() {
+        java.util.List<CustomerDTO> list = new java.util.ArrayList<>();
+        String query = "SELECT c.*, t.tier_name, t.discount_percent, " +
+                "(SELECT MAX(created_at) FROM `order` o WHERE o.customer_id = c.customer_id AND o.status = 'PAID') as last_purchase " +
+                "FROM customer c " +
+                "JOIN member_tier t ON c.tier_id = t.tier_id " +
+                "ORDER BY last_purchase DESC, c.total_accumulated_points DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                CustomerDTO customer = new CustomerDTO();
+                customer.setCustomerId(rs.getInt("customer_id"));
+                customer.setFullName(rs.getString("full_name"));
+                customer.setPhoneNumber(rs.getString("phone_number"));
+                customer.setRewardPoints(rs.getInt("reward_points"));
+                customer.setTotalAccumulatedPoints(rs.getInt("total_accumulated_points"));
+                customer.setTierId(rs.getInt("tier_id"));
+                customer.setTierName(rs.getString("tier_name"));
+                customer.setDiscountPercent(rs.getInt("discount_percent"));
+                
+                java.sql.Timestamp lastPurchaseTs = rs.getTimestamp("last_purchase");
+                if (lastPurchaseTs != null) {
+                    customer.setLastPurchase(lastPurchaseTs.toLocalDateTime());
+                }
+
+                list.add(customer);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("SQL ERROR IN GET ALL CUSTOMERS: " + e.getMessage());
+            try {
+                java.io.FileWriter fw = new java.io.FileWriter("C:\\Users\\Hp\\source\\repos\\VTea\\db_error.txt");
+                fw.write(e.getMessage());
+                fw.close();
+            } catch (Exception ex) {}
+        }
+        return list;
+    }
+
+    public com.vtea.dto.CustomerStatsDTO getCustomerStatistics() {
+        String query = "SELECT " +
+                "COUNT(*) as total_customers, " +
+                "SUM(CASE WHEN t.tier_id = 4 THEN 1 ELSE 0 END) as diamond_count, " +
+                "SUM(CASE WHEN t.tier_id = 3 THEN 1 ELSE 0 END) as gold_count, " +
+                "AVG(c.total_accumulated_points) as avg_points " +
+                "FROM customer c " +
+                "JOIN member_tier t ON c.tier_id = t.tier_id";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return new com.vtea.dto.CustomerStatsDTO(
+                        rs.getInt("total_customers"),
+                        rs.getInt("diamond_count"),
+                        rs.getInt("gold_count"),
+                        rs.getInt("avg_points")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new com.vtea.dto.CustomerStatsDTO(0, 0, 0, 0);
+    }
+
+    public boolean updateCustomer(CustomerDTO customer) {
+        String sql = "UPDATE customer SET full_name = ?, phone_number = ? WHERE customer_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, customer.getFullName());
+            ps.setString(2, customer.getPhoneNumber());
+            ps.setInt(3, customer.getCustomerId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteCustomer(int customerId) {
+        String sql = "DELETE FROM customer WHERE customer_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, customerId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

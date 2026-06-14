@@ -65,6 +65,9 @@ public class MainLayoutController {
     public void handleEmployee(ActionEvent actionEvent) {loadView("employee");}
 
     @FXML
+    public void handleCustomer(ActionEvent actionEvent) {loadView("customer");}
+
+    @FXML
     public void handleInvoiceHistory(ActionEvent actionEvent) {loadView("invoiceHistory");}
 
     @FXML
