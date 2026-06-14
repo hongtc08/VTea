@@ -9,6 +9,10 @@ public class CustomerDTO {
     private int tierId;
     private String tierName;
     private int discountPercent;
+    
+    private int currentPoints;
+    private java.time.LocalDateTime createdAt;
+    private java.time.LocalDateTime lastPurchase;
 
     public CustomerDTO(){
 
@@ -87,5 +91,29 @@ public class CustomerDTO {
 
     public void setDiscountPercent(int discountPercent) {
         this.discountPercent = discountPercent;
+    }
+
+    public int getCurrentPoints() {
+        return currentPoints;
+    }
+
+    public void setCurrentPoints(int currentPoints) {
+        this.currentPoints = currentPoints;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public java.time.LocalDateTime getLastPurchase() {
+        return lastPurchase;
+    }
+
+    public void setLastPurchase(java.time.LocalDateTime lastPurchase) {
+        this.lastPurchase = lastPurchase;
     }
 }

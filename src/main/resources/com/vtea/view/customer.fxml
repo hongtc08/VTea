@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.CustomerController"
+      spacing="24"
+      style="-fx-background-color: #f5f5f4; -fx-padding: 32px;">
+
+    <!-- HEADER -->
+    <VBox spacing="4">
+        <Label text="Khách hàng" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: #1c1917;"/>
+        <Label text="Quản lý thông tin và điểm tích luỹ khách hàng" style="-fx-font-size: 14px; -fx-text-fill: #78716c;"/>
+    </VBox>
+
+    <!-- STAT CARDS -->
+    <HBox spacing="20">
+        <!-- Card 1 -->
+        <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="16">
+            <StackPane styleClass="stat-icon-box" style="-fx-background-color: #f3e8ff;">
+                <FontIcon iconLiteral="fth-users" iconSize="24" iconColor="#9333ea"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT">
+                <Label fx:id="lblTotalCustomers" text="0" styleClass="stat-value"/>
+                <Label text="Tổng số khách" styleClass="stat-label" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+        </HBox>
+
+        <!-- Card 2 -->
+        <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="16">
+            <StackPane styleClass="stat-icon-box" style="-fx-background-color: #cffafe;">
+                <FontIcon iconLiteral="fth-award" iconSize="24" iconColor="#06b6d4"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT">
+                <Label fx:id="lblDiamondCount" text="0" styleClass="stat-value"/>
+                <Label text="Hạng Kim cương" styleClass="stat-label" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+        </HBox>
+
+        <!-- Card 3 -->
+        <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="16">
+            <StackPane styleClass="stat-icon-box" style="-fx-background-color: #fef08a;">
+                <FontIcon iconLiteral="fth-star" iconSize="24" iconColor="#ca8a04"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT">
+                <Label fx:id="lblGoldCount" text="0" styleClass="stat-value"/>
+                <Label text="Hạng Vàng" styleClass="stat-label" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+        </HBox>
+
+        <!-- Card 4 -->
+        <HBox styleClass="stat-card" HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="16">
+            <StackPane styleClass="stat-icon-box" style="-fx-background-color: #fce7f3;">
+                <FontIcon iconLiteral="fth-target" iconSize="24" iconColor="#db2777"/>
+            </StackPane>
+            <VBox alignment="CENTER_LEFT">
+                <Label fx:id="lblAvgPoints" text="0" styleClass="stat-value"/>
+                <Label text="Điểm trung bình" styleClass="stat-label" wrapText="true" minHeight="-Infinity"/>
+            </VBox>
+        </HBox>
+    </HBox>
+
+    <!-- SEARCH & FILTER ROW -->
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="search-filter-container">
+        <!-- Search bar -->
+        <HBox alignment="CENTER_LEFT" styleClass="search-bar" HBox.hgrow="ALWAYS" spacing="10">
+            <FontIcon iconLiteral="fth-search" iconSize="16" iconColor="#a8a29e"/>
+            <TextField fx:id="searchField" promptText="Tìm theo tên hoặc số điện thoại..." styleClass="search-input" HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <!-- Filters -->
+        <HBox spacing="8">
+            <Button fx:id="btnFilterAll" text="Tất cả" styleClass="pill-btn pill-btn-active"/>
+            <Button fx:id="btnFilterDong" text="Đồng" styleClass="pill-btn"/>
+            <Button fx:id="btnFilterBac" text="Bạc" styleClass="pill-btn"/>
+            <Button fx:id="btnFilterVang" text="Vàng" styleClass="pill-btn"/>
+            <Button fx:id="btnFilterKimCuong" text="Kim cương" styleClass="pill-btn"/>
+        </HBox>
+    </HBox>
+
+    <!-- CUSTOMER LIST -->
+    <VBox spacing="10" VBox.vgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 12px; -fx-padding: 20px;">
+        <!-- Headers -->
+        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="table-header" style="-fx-padding: 0 10 12 10; -fx-border-color: transparent transparent #e5e5e5 transparent; -fx-border-width: 0 0 1 0;">
+            <Label text="KHÁCH HÀNG" styleClass="header-label" prefWidth="200"/>
+            <Label text="SỐ ĐIỆN THOẠI" styleClass="header-label" prefWidth="150"/>
+            <Label text="ĐIỂM" styleClass="header-label" prefWidth="120"/>
+            <Label text="HẠNG" styleClass="header-label" prefWidth="120"/>
+            <Label text="LẦN CUỐI MUA" styleClass="header-label" prefWidth="200"/>
+            <Label text="THAO TÁC" styleClass="header-label" alignment="CENTER" prefWidth="80"/>
+        </HBox>
+
+        <!-- Scrollable List -->
+        <ScrollPane fitToWidth="true" styleClass="no-border-scroll" VBox.vgrow="ALWAYS">
+            <VBox fx:id="vboxCustomerList" spacing="4"/>
+        </ScrollPane>
+    </VBox>
+
+</VBox>

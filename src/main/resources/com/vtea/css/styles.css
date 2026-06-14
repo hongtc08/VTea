@@ -491,6 +491,7 @@
     -fx-border-color: #e7e5e4;
     -fx-border-radius: 14;
     -fx-border-width: 1;
+    -fx-padding: 16 20;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 10, 0, 0, 2);
 }
 

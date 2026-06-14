@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.CustomerEditFormController"
+      spacing="20"
+      style="-fx-background-color: white; -fx-background-radius: 12px; -fx-padding: 30px;"
+      prefWidth="400">
+
+    <Label text="Sửa thông tin khách hàng" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1c1917;"/>
+
+    <VBox spacing="8">
+        <Label text="Họ và tên" style="-fx-font-weight: 600; -fx-text-fill: #57534e;"/>
+        <TextField fx:id="txtName" promptText="Nhập tên khách hàng..." styleClass="input-field"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Số điện thoại" style="-fx-font-weight: 600; -fx-text-fill: #57534e;"/>
+        <TextField fx:id="txtPhone" promptText="Nhập số điện thoại..." styleClass="input-field"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Tổng điểm tích lũy (Rank)" style="-fx-font-weight: 600; -fx-text-fill: #57534e;"/>
+        <TextField fx:id="txtTotalPoints" promptText="Nhập tổng điểm..." styleClass="input-field"/>
+    </VBox>
+
+    <VBox spacing="8">
+        <Label text="Điểm đổi thưởng hiện có" style="-fx-font-weight: 600; -fx-text-fill: #57534e;"/>
+        <TextField fx:id="txtRewardPoints" promptText="Nhập điểm đổi thưởng..." styleClass="input-field"/>
+    </VBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT" style="-fx-padding: 10 0 0 0;">
+        <Button text="Hủy" onAction="#handleCancel" styleClass="btn-secondary"/>
+        <Button text="Lưu thay đổi" onAction="#handleSave" styleClass="btn-primary"/>
+    </HBox>
+
+</VBox>
