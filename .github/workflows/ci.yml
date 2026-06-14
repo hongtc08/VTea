@@ -37,6 +37,10 @@ jobs:
       - name: 🖥️ Install Xvfb (JavaFX tests)
         run: sudo apt-get update && sudo apt-get install -y xvfb
 
+      # 2.5 Nạp mật khẩu Database từ GitHub Secrets vào máy ảo
+      - name: 🔐 Tạo file database.properties
+        run: echo "${{ secrets.DB_PROPERTIES }}" > database.properties
+
       # 3. Maven: compile, test (kể cả TestFX), package — chạy trong virtual framebuffer
       - name: 🛠️ Compile, Test & Package
         run: xvfb-run -a mvn -B clean package
