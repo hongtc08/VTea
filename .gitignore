@@ -43,3 +43,6 @@ build/
 ### Mac OS ###
 .DS_Store
 src/main/java/com/vtea/utils/DBConnection.java
+
+# Bỏ qua file chứa mật khẩu Database
+database.properties
