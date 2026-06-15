@@ -81,6 +81,25 @@ public class ReportController implements Initializable {
         loadStaffPerformance(start, end);
     }
 
+    private void installHover(javafx.scene.Node node, String tooltipText, boolean isPieChart) {
+        if (node == null) return;
+        Tooltip tooltip = new Tooltip(tooltipText);
+        Tooltip.install(node, tooltip);
+        if (isPieChart) {
+            node.setOnMouseEntered(e -> {
+                node.setOpacity(0.8);
+                node.setCursor(javafx.scene.Cursor.HAND);
+            });
+            node.setOnMouseExited(e -> {
+                node.setOpacity(1.0);
+                node.setCursor(javafx.scene.Cursor.DEFAULT);
+            });
+        } else {
+            node.setOnMouseEntered(e -> node.setStyle("-fx-scale-x: 1.5; -fx-scale-y: 1.5; -fx-cursor: hand;"));
+            node.setOnMouseExited(e -> node.setStyle(""));
+        }
+    }
+
     private void loadRevenueTrend(LocalDate start, LocalDate end) {
         lineChartRevenue.getData().clear();
 
@@ -94,16 +113,11 @@ public class ReportController implements Initializable {
 
         lineChartRevenue.getData().add(series);
 
-        javafx.application.Platform.runLater(() -> {
-            for (XYChart.Data<String, Number> dataNode : series.getData()) {
-                if (dataNode.getNode() != null) {
-                    Tooltip tooltip = new Tooltip(dataNode.getXValue() + "\nDoanh thu: " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getYValue().toString())));
-                    Tooltip.install(dataNode.getNode(), tooltip);
-                    dataNode.getNode().setOnMouseEntered(e -> dataNode.getNode().setStyle("-fx-scale-x: 1.5; -fx-scale-y: 1.5; -fx-cursor: hand;"));
-                    dataNode.getNode().setOnMouseExited(e -> dataNode.getNode().setStyle(""));
-                }
-            }
-        });
+        for (XYChart.Data<String, Number> dataNode : series.getData()) {
+            String txt = dataNode.getXValue() + "\nDoanh thu: " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getYValue().toString()));
+            if (dataNode.getNode() != null) installHover(dataNode.getNode(), txt, false);
+            dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> installHover(newNode, txt, false));
+        }
     }
 
     private void loadCategoryRevenue(LocalDate start, LocalDate end) {
@@ -116,22 +130,11 @@ public class ReportController implements Initializable {
             pieChartCategory.getData().add(slice);
         }
 
-        javafx.application.Platform.runLater(() -> {
-            for (PieChart.Data dataNode : pieChartCategory.getData()) {
-                if (dataNode.getNode() != null) {
-                    Tooltip tooltip = new Tooltip(dataNode.getName() + ": " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getPieValue())));
-                    Tooltip.install(dataNode.getNode(), tooltip);
-                    dataNode.getNode().setOnMouseEntered(e -> {
-                        dataNode.getNode().setOpacity(0.8);
-                        dataNode.getNode().setCursor(javafx.scene.Cursor.HAND);
-                    });
-                    dataNode.getNode().setOnMouseExited(e -> {
-                        dataNode.getNode().setOpacity(1.0);
-                        dataNode.getNode().setCursor(javafx.scene.Cursor.DEFAULT);
-                    });
-                }
-            }
-        });
+        for (PieChart.Data dataNode : pieChartCategory.getData()) {
+            String txt = dataNode.getName() + ": " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getPieValue()));
+            if (dataNode.getNode() != null) installHover(dataNode.getNode(), txt, true);
+            dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> installHover(newNode, txt, true));
+        }
     }
 
     private void loadTopProducts(LocalDate start, LocalDate end) {
@@ -147,22 +150,11 @@ public class ReportController implements Initializable {
 
         barChartTopProducts.getData().add(series);
 
-        javafx.application.Platform.runLater(() -> {
-            for (XYChart.Data<Number, String> dataNode : series.getData()) {
-                if (dataNode.getNode() != null) {
-                    Tooltip tooltip = new Tooltip(dataNode.getYValue() + "\nĐã bán: " + dataNode.getXValue());
-                    Tooltip.install(dataNode.getNode(), tooltip);
-                    dataNode.getNode().setOnMouseEntered(e -> {
-                        dataNode.getNode().setOpacity(0.8);
-                        dataNode.getNode().setCursor(javafx.scene.Cursor.HAND);
-                    });
-                    dataNode.getNode().setOnMouseExited(e -> {
-                        dataNode.getNode().setOpacity(1.0);
-                        dataNode.getNode().setCursor(javafx.scene.Cursor.DEFAULT);
-                    });
-                }
-            }
-        });
+        for (XYChart.Data<Number, String> dataNode : series.getData()) {
+            String txt = dataNode.getYValue() + "\nĐã bán: " + dataNode.getXValue();
+            if (dataNode.getNode() != null) installHover(dataNode.getNode(), txt, false);
+            dataNode.nodeProperty().addListener((obs, oldNode, newNode) -> installHover(newNode, txt, false));
+        }
     }
 
     private void loadStaffPerformance(LocalDate start, LocalDate end) {
