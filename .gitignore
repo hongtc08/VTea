@@ -43,3 +43,5 @@ build/
 ### Mac OS ###
 .DS_Store
 src/main/java/com/vtea/utils/DBConnection.java
+
+database.properties
