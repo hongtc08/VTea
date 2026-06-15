@@ -38,11 +38,12 @@ public class CustomerRowController {
         lblTier.setText(customer.getTierName());
         // Set CSS based on tier
         lblTier.getStyleClass().removeAll("tier-kimcuong", "tier-vang", "tier-bac", "tier-dong");
-        if ("Kim cương".equalsIgnoreCase(customer.getTierName())) {
+        String tName = customer.getTierName() != null ? customer.getTierName().toLowerCase() : "";
+        if (tName.contains("kim") || tName.contains("diamond")) {
             lblTier.getStyleClass().add("tier-kimcuong");
-        } else if ("Vàng".equalsIgnoreCase(customer.getTierName())) {
+        } else if (tName.contains("vàng") || tName.contains("vang") || tName.contains("gold")) {
             lblTier.getStyleClass().add("tier-vang");
-        } else if ("Bạc".equalsIgnoreCase(customer.getTierName())) {
+        } else if (tName.contains("bạc") || tName.contains("bac") || tName.contains("silver")) {
             lblTier.getStyleClass().add("tier-bac");
         } else {
             lblTier.getStyleClass().add("tier-dong");
