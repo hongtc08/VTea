@@ -47,8 +47,9 @@
 
             <!-- User Info -->
             <HBox styleClass="user-info-box" alignment="CENTER_LEFT" spacing="10">
-                <StackPane styleClass="user-avatar">
+                <StackPane styleClass="user-avatar" style="-fx-clip: null;">
                     <Label fx:id="userInitialLabel" text="A" styleClass="user-avatar-text"/>
+                    <FontIcon fx:id="adminCrownIcon" iconLiteral="mdi2c-crown" iconSize="20" StackPane.alignment="TOP_RIGHT" visible="false" translateY="-4" translateX="4"/>
                 </StackPane>
                 <VBox spacing="0">
                     <Label fx:id="userNameLabel" text="Admin" styleClass="user-name"/>

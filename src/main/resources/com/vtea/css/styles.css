@@ -2259,3 +2259,12 @@
 .action-icon-btn:hover {
     -fx-background-color: #e7e5e4;
 }
+
+/* Logout Button Hover */
+.btn-logout:hover {
+    -fx-border-color: #ef4444;
+    -fx-text-fill: #ef4444;
+}
+.btn-logout:hover .header-icon-logout {
+    -fx-icon-color: #ef4444;
+}

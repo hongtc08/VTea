@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 import com.vtea.utils.DialogHelper;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import javafx.animation.FadeTransition;
@@ -22,6 +23,7 @@ public class MainLayoutController {
     @FXML private javafx.scene.control.Label userInitialLabel;
     @FXML private javafx.scene.control.Label userNameLabel;
     @FXML private javafx.scene.control.Label userRoleLabel;
+    @FXML private FontIcon adminCrownIcon;
 
     @FXML private javafx.scene.control.Button btnDashboard;
     @FXML private javafx.scene.control.Button btnPOS;
@@ -31,6 +33,35 @@ public class MainLayoutController {
     @FXML private javafx.scene.control.Button btnCustomer;
     @FXML private javafx.scene.control.Button btnInvoice;
     @FXML private javafx.scene.control.Button btnReport;
+
+    private void applyRoleBasedAccessControl() {
+        if (!com.vtea.utils.SessionManager.isAdmin()) {
+            // Hide admin-only buttons for Staff (Menu, Employee, Report, Customer)
+            if (btnMenu != null) {
+                btnMenu.setVisible(false);
+                btnMenu.setManaged(false);
+            }
+            if (btnEmployee != null) {
+                btnEmployee.setVisible(false);
+                btnEmployee.setManaged(false);
+            }
+            if (btnReport != null) {
+                btnReport.setVisible(false);
+                btnReport.setManaged(false);
+            }
+            if (btnCustomer != null) {
+                btnCustomer.setVisible(false);
+                btnCustomer.setManaged(false);
+            }
+            if (adminCrownIcon != null) {
+                adminCrownIcon.setVisible(false);
+            }
+        } else {
+            if (adminCrownIcon != null) {
+                adminCrownIcon.setVisible(true);
+            }
+        }
+    }
 
     private void setActiveNav(javafx.scene.control.Button activeBtn) {
         javafx.scene.control.Button[] allBtns = {btnDashboard, btnPOS, btnMenu, btnInventory, btnEmployee, btnCustomer, btnInvoice, btnReport};
@@ -54,6 +85,8 @@ public class MainLayoutController {
                 userInitialLabel.setText(user.getFullName().substring(0, 1).toUpperCase());
             }
         }
+
+        applyRoleBasedAccessControl();
 
         // Mặc định load màn hình dashboard đầu tiên
         loadView("dashboard");
