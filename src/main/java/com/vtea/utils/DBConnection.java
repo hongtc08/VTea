@@ -1,5 +1,6 @@
 package com.vtea.utils;
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -13,8 +14,13 @@ public class DBConnection {
     private static String USER;
     private static String PASSWORD;
 
+    private static HikariDataSource dataSource;
+
     static {
-        try (FileInputStream fis = new FileInputStream("database.properties")) {
+
+        try (FileInputStream fis =
+                     new FileInputStream("database.properties")) {
+
             Properties prop = new Properties();
             prop.load(fis);
 
@@ -22,25 +28,37 @@ public class DBConnection {
             USER = prop.getProperty("DB_USER");
             PASSWORD = prop.getProperty("DB_PASS");
 
+            HikariConfig config = new HikariConfig();
+
+            config.setJdbcUrl(URL);
+            config.setUsername(USER);
+            config.setPassword(PASSWORD);
+
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+
+            config.setConnectionTimeout(10000);
+
+            dataSource = new HikariDataSource(config);
+
+            System.out.println("HikariCP initialized");
+
         } catch (IOException e) {
-            System.err.println("❌ [Lỗi nghiêm trọng] Không tìm thấy file database.properties ở thư mục gốc!");
             e.printStackTrace();
         }
     }
 
-    public static Connection getConnection() {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            return conn;
+    public static Connection getConnection()
+            throws SQLException {
 
-        } catch (ClassNotFoundException e) {
-            System.out.println("❌ [Lỗi] Không tìm thấy thư viện MySQL Connector.");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.out.println("❌ [Lỗi] Sai thông tin kết nối hoặc MySQL chưa bật!");
-            e.printStackTrace();
-        }
-        return null;
-    }
+        long start = System.currentTimeMillis();
+
+        Connection conn = dataSource.getConnection();
+
+        System.out.println(
+                "Get connection = "
+                        + (System.currentTimeMillis() - start)
+                        + " ms");
+
+        return conn;    }
 }

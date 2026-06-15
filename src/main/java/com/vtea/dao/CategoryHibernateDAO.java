@@ -1,6 +1,7 @@
 package com.vtea.dao;
 
 import com.vtea.model.Category;
+import com.vtea.utils.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -10,18 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryHibernateDAO {
-    private SessionFactory sessionFactory;
 
-    public CategoryHibernateDAO(){
-        // Đọc cấu hình từ file XML và khởi tạo nhà máy sản xuất Session
-        try {
-            sessionFactory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory();
-            System.out.println("Khởi tạo Hibernate SessionFactory thành công");
-        } catch (Exception e) {
-            System.err.println("Lỗi khởi tạo Hibernate SessionFactory: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
+    private final SessionFactory sessionFactory =
+            HibernateUtil.getSessionFactory();
 
     /**
      * Lấy danh sách phân loại đang Active
