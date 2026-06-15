@@ -144,7 +144,6 @@ public class MenuController {
             showFormStage(root);
             
             // Sau khi đóng dialog, nạp lại cache và tải lại view
-            posCacheService.refresh();
             loadData();
         } catch (Exception e) {
             e.printStackTrace();
