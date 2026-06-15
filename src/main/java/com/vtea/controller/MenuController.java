@@ -1,5 +1,4 @@
 package com.vtea.controller;
-import com.vtea.service.POSCacheService;
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.dto.ToppingDTO;
@@ -35,7 +34,6 @@ import java.util.Locale;
 /**
  * MenuController chịu trách nhiệm quản lý màn hình Quản lý Thực đơn (Admin).
  * Hỗ trợ hiển thị, lọc, thêm, sửa, xóa Món ăn (Product) và Topping.
- * Sử dụng POSCacheService để tối ưu việc tải dữ liệu.
  */
 public class MenuController {
 
@@ -51,7 +49,6 @@ public class MenuController {
     private ProductService productService = new ProductService();
     private CategoryService categoryService = new CategoryService();
     private ToppingService toppingService = new ToppingService();
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     private List<ProductDTO> allProducts = new ArrayList<>();
     private List<CategoryDTO> allCategories = new ArrayList<>();
@@ -73,10 +70,8 @@ public class MenuController {
      */
     public void loadData() {
         try {
-            posCacheService.loadIfNeeded();
-
-            allCategories = posCacheService.getCategories();
-            allProducts = posCacheService.getProducts();
+            allCategories = categoryService.getAllActiveCategories();
+            allProducts = productService.getAllActiveProducts();
 
             currentCategoryIdFilter = CATEGORY_ALL;
             setupCategoryButtons();
@@ -365,7 +360,6 @@ public class MenuController {
         if (isConfirmed) {
             try {
                 productService.softDeleteProduct(product.getProductId());
-                POSCacheService.getInstance().refresh();
 
                 DialogHelper.showInfo("Thành công", "Đã xóa món thành công.");
                 loadData();
@@ -433,7 +427,6 @@ public class MenuController {
         if (isConfirmed) {
             try {
                 toppingService.softDeleteTopping(topping.getToppingId());
-                POSCacheService.getInstance().refresh();
 
                 DialogHelper.showInfo("Thành công", "Đã xóa topping thành công.");
                 reloadToppingMode();

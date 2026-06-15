@@ -17,7 +17,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import com.vtea.service.POSCacheService;
 import javafx.application.Platform;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Label;
@@ -34,14 +33,6 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.concurrent.CompletableFuture;
-import javafx.animation.Interpolator;
-import javafx.animation.TranslateTransition;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.shape.Rectangle;
 
 public class LoginController {
 
@@ -77,12 +68,7 @@ public class LoginController {
     private ProgressBar successProgressBar;
 
     @FXML
-    private Pane scrollingBackgroundPane;
-
-    @FXML
     public void initialize() {
-        setupScrollingBackground();
-
         // Đồng bộ dữ liệu giữa 2 ô nhập liệu
         txtPasswordVisible.textProperty().bindBidirectional(txtPassword.textProperty());
 
@@ -106,84 +92,6 @@ public class LoginController {
 
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();
-
-    //Khoi tao cache tu luc log in
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
-
-    private void setupScrollingBackground() {
-        if (scrollingBackgroundPane == null) return;
-        
-        // Setup clip to hide overflowing images
-        Rectangle clip = new Rectangle(0, 0, 1000, 1000); // oversized clip width
-        clip.heightProperty().bind(scrollingBackgroundPane.heightProperty());
-        clip.widthProperty().bind(scrollingBackgroundPane.widthProperty());
-        scrollingBackgroundPane.setClip(clip);
-
-        HBox gridBox = new HBox(16);
-        gridBox.setStyle("-fx-padding: 16;");
-        // Create 3 columns
-        VBox col1 = createImageColumn(true);
-        VBox col2 = createImageColumn(false);
-        VBox col3 = createImageColumn(true);
-
-        gridBox.getChildren().addAll(col1, col2, col3);
-        scrollingBackgroundPane.getChildren().add(gridBox);
-    }
-
-    private VBox createImageColumn(boolean scrollUp) {
-        VBox column = new VBox(16);
-        String[] imagePaths = {
-            "/images/login/bg1.png",
-            "/images/login/bg2.png",
-            "/images/login/bg3.png",
-            "/images/login/bg4.png",
-            "/images/login/bg5.png",
-            "/images/login/bg6.png"
-        };
-        
-        // Add images multiple times to create a seamless infinite loop
-        for (int i = 0; i < 3; i++) {
-            for (String path : imagePaths) {
-                try {
-                    javafx.scene.layout.Region imgRegion = new javafx.scene.layout.Region();
-                    imgRegion.setPrefSize(240, 340);
-                    imgRegion.setMinSize(240, 340);
-                    imgRegion.setMaxSize(240, 340);
-                    
-                    // URL needs to be properly formatted for CSS
-                    String externalForm = getClass().getResource(path).toExternalForm();
-                    imgRegion.setStyle(
-                        "-fx-background-image: url('" + externalForm + "'); " +
-                        "-fx-background-size: cover; " +
-                        "-fx-background-position: center center; " +
-                        "-fx-background-radius: 20;"
-                    );
-                    
-                    column.getChildren().add(imgRegion);
-                } catch (Exception e) {
-                    System.out.println("Could not load: " + path);
-                }
-            }
-        }
-
-        // Animate
-        Platform.runLater(() -> {
-            double totalHeight = (340 + 16) * 6; // height of one set of 6 images
-            TranslateTransition tt = new TranslateTransition(Duration.seconds(60), column);
-            if (scrollUp) {
-                tt.setFromY(0);
-                tt.setToY(-totalHeight);
-            } else {
-                tt.setFromY(-totalHeight);
-                tt.setToY(0);
-            }
-            tt.setInterpolator(Interpolator.LINEAR);
-            tt.setCycleCount(Timeline.INDEFINITE);
-            tt.play();
-        });
-
-        return column;
-    }
 
     // 3. Hàm này sẽ được gọi khi người dùng bấm nút "Đăng Nhập"
     @FXML
@@ -319,7 +227,9 @@ public class LoginController {
         btnLogin.setText("Đang tải dữ liệu...");
 
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     // Hiệu ứng thành công
                     if (loadingSpinner != null) {
@@ -340,14 +250,14 @@ public class LoginController {
                                 new KeyFrame(Duration.millis(800), new KeyValue(successProgressBar.progressProperty(), 1.0))
                         );
                         timeline.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         timeline.play();
                     } else {
                         PauseTransition pause = new PauseTransition(Duration.millis(800));
                         pause.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         pause.play();

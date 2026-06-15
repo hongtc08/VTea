@@ -8,7 +8,8 @@ import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
 import com.vtea.service.BillService;
 import com.vtea.service.OrderService;
-import com.vtea.service.POSCacheService;
+import com.vtea.service.CategoryService;
+import com.vtea.service.ProductService;
 import com.vtea.service.payment.PayOSCreateResponse;
 import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
@@ -61,8 +62,8 @@ public class POSController {
 
     // ==================== SERVICE / STATE (BE LOGIC GỌI TỪ UI) ====================
 
-    // Cache dữ liệu POS để giảm lag khi load sản phẩm, danh mục và topping.
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
+    private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
 
     // Service xử lý nghiệp vụ giỏ hàng và thanh toán.
     private final OrderService orderService = new OrderService();
@@ -419,10 +420,12 @@ public class POSController {
      */
     private void loadPOSCacheAsync() {
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     setupCategoryButtons();
-                    displayProducts(posCacheService.getProducts());
+                    displayProducts(productService.getAllActiveProducts());
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
@@ -438,7 +441,7 @@ public class POSController {
      * Hiển thị lại danh sách sản phẩm từ cache.
      */
     private void loadProductsFromDatabase() {
-        displayProducts(posCacheService.getProducts());
+        displayProducts(productService.getAllActiveProducts());
     }
 
     /**
@@ -446,7 +449,22 @@ public class POSController {
      */
     private void showOnlyToppings() {
         setCategoryVisible(false);
-        displayProducts(posCacheService.getToppings());
+        displayProducts(getToppings());
+    }
+
+    private List<ProductDTO> getToppings() {
+        List<ProductDTO> toppings = new java.util.ArrayList<>();
+        List<com.vtea.model.Topping> tList = orderService.getAllActiveToppings();
+        for (com.vtea.model.Topping t : tList) {
+            ProductDTO pd = new ProductDTO();
+            pd.setProductId(t.getToppingId());
+            pd.setName(t.getName());
+            pd.setPrice(t.getPrice());
+            pd.setCategoryName("Topping");
+            pd.setImageUrl(t.getImageUrl());
+            toppings.add(pd);
+        }
+        return toppings;
     }
 
     // ==================== CATEGORY EVENTS / DISPLAY ====================
@@ -465,12 +483,12 @@ public class POSController {
         allButton.getStyleClass().add("category-btn-active");
         allButton.setOnAction(event -> {
             setActiveButton(allButton);
-            displayProducts(posCacheService.getProducts());
+            displayProducts(productService.getAllActiveProducts());
         });
         categoryBar.getChildren().add(allButton);
 
         try {
-            List<CategoryDTO> categories = posCacheService.getCategories();
+            List<CategoryDTO> categories = categoryService.getAllActiveCategories();
 
             for (CategoryDTO category : categories) {
                 Button categoryButton = createCategoryButton(category.getName());
@@ -501,7 +519,8 @@ public class POSController {
      * Lọc sản phẩm theo category_id.
      */
     private void filterByCategory(int categoryId) {
-        displayProducts(posCacheService.getProductsByCategory(categoryId));
+        List<ProductDTO> all = productService.getAllActiveProducts();
+        displayProducts(all.stream().filter(p -> p.getCategoryId() == categoryId).collect(java.util.stream.Collectors.toList()));
     }
 
     // ==================== PRODUCT EVENTS / DISPLAY ====================
@@ -820,7 +839,10 @@ public class POSController {
             int toppingId = entry.getKey();
             int qty = entry.getValue();
 
-            ProductDTO topping = posCacheService.findToppingById(toppingId);
+            ProductDTO topping = getToppings().stream()
+                    .filter(t -> t.getProductId() == toppingId)
+                    .findFirst()
+                    .orElse(null);
             String toppingLabel = (topping != null)
                     ? topping.getName() + " (x" + qty + ")"
                     : "Topping#" + toppingId + " (x" + qty + ")";
