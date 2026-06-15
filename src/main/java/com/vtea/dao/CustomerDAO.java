@@ -134,15 +134,14 @@ public class CustomerDAO {
                 "SET reward_points = reward_points + ?, " +
                 "    total_accumulated_points = total_accumulated_points + ?, " +
                 "    tier_id = (SELECT tier_id FROM member_tier " +
-                "               WHERE required_points <= (total_accumulated_points + ?) " +
+                "               WHERE required_points <= total_accumulated_points " +
                 "               ORDER BY required_points DESC LIMIT 1) " +
                 "WHERE customer_id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, pointsEarned); // Cộng điểm thưởng
             ps.setInt(2, pointsEarned); // Cộng điểm xét hạng
-            ps.setInt(3, pointsEarned); // Truyền vào subquery để check điểm mới
-            ps.setInt(4, customerId);
+            ps.setInt(3, customerId);
 
             return ps.executeUpdate() > 0;
         }
