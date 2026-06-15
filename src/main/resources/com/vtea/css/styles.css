@@ -10,8 +10,8 @@
 
 /* ---------- ROOT FONT ---------- */
 .root {
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-font-size: 13px;
+    -fx-font-family: "Inter";
+    -fx-font-size: 14px;
     -fx-background-color: #f5efed;
 }
 
@@ -33,7 +33,7 @@
 .dialog-title {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
-    -fx-text-fill: #222222;
+    -fx-text-fill: #78350f;
 }
 
 .dialog-message {
@@ -430,6 +430,12 @@
     -fx-padding: 12 15 12 15;
 }
 
+.item-container:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 2);
+    -fx-border-color: #d6d3d1;
+    -fx-translate-y: -1px;
+}
+
 /* --- Các thành phần của Đơn hàng gần đây --- */
 .order-id {
     -fx-font-weight: bold;
@@ -485,12 +491,53 @@
     -fx-border-color: #e7e5e4;
     -fx-border-radius: 14;
     -fx-border-width: 1;
+    -fx-padding: 16 20;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 10, 0, 0, 2);
 }
 
 .stat-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.14), 16, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.14), 16, 0, 0, 6);
     -fx-border-color: #d6d3d1;
+    -fx-translate-y: -3px;
+}
+
+.stat-card-1 {
+    -fx-background-color: linear-gradient(to bottom right, #10b981, #059669);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.4), 14, 0, 0, 4);
+}
+.stat-card-1:hover {
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.6), 20, 0, 0, 6);
+    -fx-translate-y: -3px;
+}
+.stat-card-2 {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #2563eb);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.4), 14, 0, 0, 4);
+}
+.stat-card-2:hover {
+    -fx-effect: dropshadow(gaussian, rgba(59, 130, 246, 0.6), 20, 0, 0, 6);
+    -fx-translate-y: -3px;
+}
+.stat-card-3 {
+    -fx-background-color: linear-gradient(to bottom right, #a855f7, #7e22ce);
+    -fx-background-radius: 14;
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.4), 14, 0, 0, 4);
+}
+.stat-card-3:hover {
+    -fx-effect: dropshadow(gaussian, rgba(168, 85, 247, 0.6), 20, 0, 0, 6);
+    -fx-translate-y: -3px;
+}
+.stat-card-1 .stat-label, .stat-card-1 .stat-value,
+.stat-card-2 .stat-label, .stat-card-2 .stat-value,
+.stat-card-3 .stat-label, .stat-card-3 .stat-value {
+    -fx-text-fill: white;
+}
+.stat-card-1 .stat-icon-box, .stat-card-2 .stat-icon-box, .stat-card-3 .stat-icon-box {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+.stat-card-1 .font-icon, .stat-card-2 .font-icon, .stat-card-3 .font-icon {
+    -fx-icon-color: white;
 }
 
 .stat-icon-box {
@@ -548,6 +595,12 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.07), 10, 0, 0, 2);
 }
 
+.card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.14), 16, 0, 0, 6);
+    -fx-border-color: #d6d3d1;
+    -fx-translate-y: -2px;
+}
+
 .card-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
@@ -571,6 +624,7 @@
 
 .vtea-table .table-row-cell:hover {
     -fx-background-color: #fdf8f7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);
 }
 
 .vtea-table .table-row-cell:selected {
@@ -894,25 +948,31 @@
 /* ============================================================
    SCROLLBAR (minimal style)
    ============================================================ */
-
-.scroll-bar:vertical .thumb {
-    -fx-background-color: #d6d3d1;
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 8;
+}
+.scroll-bar:vertical .thumb, .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-background-radius: 4;
 }
-
-.scroll-bar:vertical .thumb:hover {
-    -fx-background-color: #a8a29e;
+.scroll-bar:vertical .thumb:hover, .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
 }
-
 .scroll-bar .track {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
-
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
     -fx-background-color: transparent;
     -fx-pref-height: 0;
     -fx-pref-width: 0;
+    -fx-padding: 0;
 }
 
 /* ========================================= */
@@ -1132,6 +1192,8 @@
 }
 .list-item-row:hover {
     -fx-background-color: #FAFAFA;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 1);
+    -fx-translate-y: -1px;
 }
 /* Nút "Kiểm tra" bên cạnh ô số điện thoại */
 .btn-check {
@@ -1245,13 +1307,20 @@
 }
 
 .recipe-add-card,
-.recipe-list-card {
+.recipe-list-card,
+.cart-row {
     -fx-background-color: #faf9f8;
-    -fx-background-radius: 14;
-    -fx-border-color: #eee5e0;
-    -fx-border-radius: 14;
+    -fx-background-radius: 10;
+    -fx-border-color: #e7e5e4;
+    -fx-border-radius: 10;
     -fx-border-width: 1;
-    -fx-padding: 16;
+    -fx-padding: 12;
+}
+
+.cart-row:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+    -fx-border-color: #d6d3d1;
+    -fx-translate-y: -1px;
 }
 
 .recipe-add-card {
@@ -1353,6 +1422,8 @@
 .recipe-row:hover {
     -fx-border-color: #12b6a2;
     -fx-background-color: #fffdfc;
+    -fx-translate-y: -1px;
+    -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.1), 8, 0, 0, 2);
 }
 
 .recipe-row-index {
@@ -1602,6 +1673,7 @@
 .recipe-row:hover {
     -fx-border-color: #12b6a2;
     -fx-effect: dropshadow(gaussian, rgba(18, 182, 162, 0.14), 12, 0, 0, 3);
+    -fx-translate-y: -1px;
 }
 
 .recipe-row-index {
@@ -1916,6 +1988,82 @@
     -color-accent-emphasis: #523628;
 }
 .custom-tab-pane .tab:selected .tab-label {
+    -fx-font-weight: bold;
+    -fx-text-fill: #523628;
+}
+
+
+/* =========================================
+   CHART & REPORT STYLES
+   ========================================= */
+
+.default-color0.chart-pie { -fx-pie-color: #523628; }
+.default-color1.chart-pie { -fx-pie-color: #8B5A2B; }
+.default-color2.chart-pie { -fx-pie-color: #CD853F; }
+.default-color3.chart-pie { -fx-pie-color: #D2B48C; }
+.default-color4.chart-pie { -fx-pie-color: #FDF1ED; }
+
+.default-color0.chart-bar { -fx-bar-fill: #CD853F; }
+
+.default-color0.chart-series-line { -fx-stroke: #523628; -fx-stroke-width: 3px; }
+.default-color0.chart-line-symbol { -fx-background-color: #523628, white; }
+
+/* Report Table Staff */
+.report-table {
+    -fx-background-color: white;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.report-table .column-header-background {
+    -fx-background-color: #FDF1ED;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.report-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-border-color: transparent;
+}
+.report-table .column-header .label {
+    -fx-text-fill: #523628;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+.report-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #f3f4f6 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 44px;
+}
+.report-table .table-row-cell:hover {
+    -fx-background-color: #f8fafc;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 4, 0, 0, 1);
+}
+.report-table .table-cell {
+    -fx-text-fill: #111827;
+    -fx-font-size: 14px;
+    -fx-border-color: transparent;
+}
+
+/* Chart Fonts */
+.axis {
+    -fx-tick-label-font: bold 11px "System";
+    -fx-tick-label-fill: #523628;
+}
+.axis-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #523628;
+}
+.chart-pie-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-fill: #523628;
+}
+.chart-legend-item {
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-fill: #523628;
 }

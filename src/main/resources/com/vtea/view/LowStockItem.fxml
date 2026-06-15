@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <HBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 10; -fx-background-color: #fdf2f2; -fx-background-radius: 6; -fx-border-color: #f8dede; -fx-border-radius: 6;">
-    <VBox HBox.hgrow="ALWAYS" spacing="4">
-        <Label fx:id="lblIngredientName" text="Tên nguyên liệu" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c;"/>
-        <Label fx:id="lblStockInfo" text="Còn lại: 0 (Tối thiểu: 0)" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;"/>
+      alignment="CENTER_LEFT" spacing="12" style="-fx-padding: 12; -fx-background-color: #FFF5F5; -fx-background-radius: 8; -fx-border-color: #FED7D7; -fx-border-radius: 8;">
+    <StackPane style="-fx-background-color: #FED7D7; -fx-background-radius: 50; -fx-min-width: 32; -fx-min-height: 32; -fx-max-width: 32; -fx-max-height: 32;">
+        <FontIcon iconLiteral="fth-alert-triangle" iconSize="16" iconColor="#C53030"/>
+    </StackPane>
+    <VBox HBox.hgrow="ALWAYS" spacing="2">
+        <Label fx:id="lblIngredientName" text="Tên nguyên liệu" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #9B2C2C;"/>
+        <Label fx:id="lblStockInfo" text="Còn lại: 0 (Tối thiểu: 0)" style="-fx-text-fill: #C53030; -fx-font-size: 12px;"/>
     </VBox>
 </HBox>

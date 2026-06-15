@@ -334,9 +334,12 @@ public class OrderService {
                     }
                 }
 
-                int pointsEarned = currentOrder.getTotalAmount()
-                        .divide(new BigDecimal("10000"), RoundingMode.DOWN)
-                        .intValue();
+                int pointsEarned = 0;
+                if (pointsToUse <= 0) {
+                    pointsEarned = currentOrder.getTotalAmount()
+                            .divide(new BigDecimal("10000"), RoundingMode.DOWN)
+                            .intValue();
+                }
 
                 if (pointsEarned > 0) {
                     boolean added = customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);

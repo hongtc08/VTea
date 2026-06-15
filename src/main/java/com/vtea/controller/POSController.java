@@ -8,7 +8,8 @@ import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
 import com.vtea.service.BillService;
 import com.vtea.service.OrderService;
-import com.vtea.service.POSCacheService;
+import com.vtea.service.CategoryService;
+import com.vtea.service.ProductService;
 import com.vtea.service.payment.PayOSCreateResponse;
 import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
@@ -50,8 +51,8 @@ public class POSController {
 
     // ==================== SERVICE / STATE (BE LOGIC GỌI TỪ UI) ====================
 
-    // Cache dữ liệu POS để giảm lag khi load sản phẩm, danh mục và topping.
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
+    private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
 
     // Service xử lý nghiệp vụ giỏ hàng và thanh toán.
     private final OrderService orderService = new OrderService();
@@ -343,10 +344,12 @@ public class POSController {
      */
     private void loadPOSCacheAsync() {
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     setupCategoryButtons();
-                    displayProducts(posCacheService.getProducts());
+                    displayProducts(productService.getAllActiveProducts());
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
@@ -362,7 +365,7 @@ public class POSController {
      * Hiển thị lại danh sách sản phẩm từ cache.
      */
     private void loadProductsFromDatabase() {
-        displayProducts(posCacheService.getProducts());
+        displayProducts(productService.getAllActiveProducts());
     }
 
     /**
@@ -370,7 +373,22 @@ public class POSController {
      */
     private void showOnlyToppings() {
         setCategoryVisible(false);
-        displayProducts(posCacheService.getToppings());
+        displayProducts(getToppings());
+    }
+
+    private List<ProductDTO> getToppings() {
+        List<ProductDTO> toppings = new java.util.ArrayList<>();
+        List<com.vtea.model.Topping> tList = orderService.getAllActiveToppings();
+        for (com.vtea.model.Topping t : tList) {
+            ProductDTO pd = new ProductDTO();
+            pd.setProductId(t.getToppingId());
+            pd.setName(t.getName());
+            pd.setPrice(t.getPrice());
+            pd.setCategoryName("Topping");
+            pd.setImageUrl(t.getImageUrl());
+            toppings.add(pd);
+        }
+        return toppings;
     }
 
     // ==================== CATEGORY EVENTS / DISPLAY ====================
@@ -389,12 +407,12 @@ public class POSController {
         allButton.getStyleClass().add("category-btn-active");
         allButton.setOnAction(event -> {
             setActiveButton(allButton);
-            displayProducts(posCacheService.getProducts());
+            displayProducts(productService.getAllActiveProducts());
         });
         categoryBar.getChildren().add(allButton);
 
         try {
-            List<CategoryDTO> categories = posCacheService.getCategories();
+            List<CategoryDTO> categories = categoryService.getAllActiveCategories();
 
             for (CategoryDTO category : categories) {
                 Button categoryButton = createCategoryButton(category.getName());
@@ -425,7 +443,8 @@ public class POSController {
      * Lọc sản phẩm theo category_id.
      */
     private void filterByCategory(int categoryId) {
-        displayProducts(posCacheService.getProductsByCategory(categoryId));
+        List<ProductDTO> all = productService.getAllActiveProducts();
+        displayProducts(all.stream().filter(p -> p.getCategoryId() == categoryId).collect(java.util.stream.Collectors.toList()));
     }
 
     // ==================== PRODUCT EVENTS / DISPLAY ====================
@@ -438,13 +457,25 @@ public class POSController {
             orderService.addToCart(productId, productName, price, 1);
             refreshCart();
 
+            // Hiệu ứng "Ting" và nảy giỏ hàng
+            com.vtea.utils.SoundHelper.playTingSound();
+            if (lblTotalAmount != null) {
+                javafx.animation.ScaleTransition bounce = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), lblTotalAmount);
+                bounce.setFromX(1.0);
+                bounce.setFromY(1.0);
+                bounce.setToX(1.3);
+                bounce.setToY(1.3);
+                bounce.setAutoReverse(true);
+                bounce.setCycleCount(2);
+                bounce.play();
+            }
+
             showSuccessAlert(
-                    "Thêm vào giỏ",
-                    productName + " ✓\nGiá: " + FormatUtils.formatPrice(price)
+                    "Thêm món thành công",
+                    "Đã thêm " + productName + " vào giỏ hàng."
             );
         } catch (Exception e) {
-            e.printStackTrace();
-            showErrorAlert("Lỗi", "Không thể thêm sản phẩm vào giỏ hàng!");
+            showErrorAlert("Lỗi", e.getMessage());
         }
     }
 
@@ -524,7 +555,20 @@ public class POSController {
         try {
             orderService.addToppingToItem(toppingTargetItem, product.getProductId());
             refreshCart();
-            showSuccessAlert("Thêm topping", product.getName() + " ✓");
+
+            com.vtea.utils.SoundHelper.playTingSound();
+            if (lblTotalAmount != null) {
+                javafx.animation.ScaleTransition bounce = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), lblTotalAmount);
+                bounce.setFromX(1.0);
+                bounce.setFromY(1.0);
+                bounce.setToX(1.2);
+                bounce.setToY(1.2);
+                bounce.setAutoReverse(true);
+                bounce.setCycleCount(2);
+                bounce.play();
+            }
+
+            showSuccessAlert("Thêm topping", product.getName() + " đã được thêm làm topping.");
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể thêm topping: " + e.getMessage());
@@ -717,7 +761,10 @@ public class POSController {
             int toppingId = entry.getKey();
             int qty = entry.getValue();
 
-            ProductDTO topping = posCacheService.findToppingById(toppingId);
+            ProductDTO topping = getToppings().stream()
+                    .filter(t -> t.getProductId() == toppingId)
+                    .findFirst()
+                    .orElse(null);
             String toppingLabel = (topping != null)
                     ? topping.getName() + " (x" + qty + ")"
                     : "Topping#" + toppingId + " (x" + qty + ")";
@@ -870,12 +917,22 @@ public class POSController {
      * Hiển thị thông báo giỏ hàng trống.
      */
     private void showEmptyCartMessage() {
-        if (cartItemsBox == null || cartEmptyLabel == null) {
-            return;
-        }
-
-        if (!cartItemsBox.getChildren().contains(cartEmptyLabel)) {
-            cartItemsBox.getChildren().add(cartEmptyLabel);
+        if (cartItemsBox != null) {
+            cartItemsBox.getChildren().clear();
+            
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(80, 0, 0, 0));
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-shopping-cart");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Chưa có món nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 16px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            cartItemsBox.getChildren().add(emptyState);
         }
     }
 
@@ -939,7 +996,8 @@ public class POSController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.setResizable(false);
-            stage.showAndWait();
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true); com.vtea.utils.DialogHelper.animateDialog(root); try { stage.showAndWait(); } finally { com.vtea.utils.DialogHelper.applyBlurBackground(false); }
 
             return controller;
         } catch (Exception e) {
@@ -971,7 +1029,8 @@ public class POSController {
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setResizable(false);
-            stage.showAndWait();
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true); com.vtea.utils.DialogHelper.animateDialog(root); try { stage.showAndWait(); } finally { com.vtea.utils.DialogHelper.applyBlurBackground(false); }
         } catch (Exception e) {
             e.printStackTrace();
             showErrorAlert("Lỗi", "Không thể mở bill preview: " + e.getMessage());
@@ -1034,3 +1093,4 @@ public class POSController {
         return DialogHelper.showConfirm(title, message);
     }
 }
+

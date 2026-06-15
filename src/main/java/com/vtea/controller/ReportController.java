@@ -93,6 +93,17 @@ public class ReportController implements Initializable {
         }
 
         lineChartRevenue.getData().add(series);
+
+        javafx.application.Platform.runLater(() -> {
+            for (XYChart.Data<String, Number> dataNode : series.getData()) {
+                if (dataNode.getNode() != null) {
+                    Tooltip tooltip = new Tooltip(dataNode.getXValue() + "\nDoanh thu: " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getYValue().toString())));
+                    Tooltip.install(dataNode.getNode(), tooltip);
+                    dataNode.getNode().setOnMouseEntered(e -> dataNode.getNode().setStyle("-fx-scale-x: 1.5; -fx-scale-y: 1.5; -fx-cursor: hand;"));
+                    dataNode.getNode().setOnMouseExited(e -> dataNode.getNode().setStyle(""));
+                }
+            }
+        });
     }
 
     private void loadCategoryRevenue(LocalDate start, LocalDate end) {
@@ -104,6 +115,23 @@ public class ReportController implements Initializable {
             PieChart.Data slice = new PieChart.Data(data.getCategoryName(), data.getTotalRevenue().doubleValue());
             pieChartCategory.getData().add(slice);
         }
+
+        javafx.application.Platform.runLater(() -> {
+            for (PieChart.Data dataNode : pieChartCategory.getData()) {
+                if (dataNode.getNode() != null) {
+                    Tooltip tooltip = new Tooltip(dataNode.getName() + ": " + com.vtea.utils.FormatUtils.formatPrice(new java.math.BigDecimal(dataNode.getPieValue())));
+                    Tooltip.install(dataNode.getNode(), tooltip);
+                    dataNode.getNode().setOnMouseEntered(e -> {
+                        dataNode.getNode().setOpacity(0.8);
+                        dataNode.getNode().setCursor(javafx.scene.Cursor.HAND);
+                    });
+                    dataNode.getNode().setOnMouseExited(e -> {
+                        dataNode.getNode().setOpacity(1.0);
+                        dataNode.getNode().setCursor(javafx.scene.Cursor.DEFAULT);
+                    });
+                }
+            }
+        });
     }
 
     private void loadTopProducts(LocalDate start, LocalDate end) {
@@ -118,6 +146,23 @@ public class ReportController implements Initializable {
         }
 
         barChartTopProducts.getData().add(series);
+
+        javafx.application.Platform.runLater(() -> {
+            for (XYChart.Data<Number, String> dataNode : series.getData()) {
+                if (dataNode.getNode() != null) {
+                    Tooltip tooltip = new Tooltip(dataNode.getYValue() + "\nĐã bán: " + dataNode.getXValue());
+                    Tooltip.install(dataNode.getNode(), tooltip);
+                    dataNode.getNode().setOnMouseEntered(e -> {
+                        dataNode.getNode().setOpacity(0.8);
+                        dataNode.getNode().setCursor(javafx.scene.Cursor.HAND);
+                    });
+                    dataNode.getNode().setOnMouseExited(e -> {
+                        dataNode.getNode().setOpacity(1.0);
+                        dataNode.getNode().setCursor(javafx.scene.Cursor.DEFAULT);
+                    });
+                }
+            }
+        });
     }
 
     private void loadStaffPerformance(LocalDate start, LocalDate end) {

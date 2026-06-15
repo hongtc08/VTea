@@ -138,6 +138,22 @@ public class InventoryController {
                 }
             }
         }
+
+        if (inventoryListContainer.getChildren().isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-package");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không tìm thấy nguyên liệu nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            inventoryListContainer.getChildren().add(emptyState);
+        }
     }
 
     @FXML
@@ -156,7 +172,11 @@ public class InventoryController {
             Scene scene = new Scene(root);
             scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
             stage.setScene(scene);
+            
+            com.vtea.utils.DialogHelper.applyBlurBackground(true);
+            com.vtea.utils.DialogHelper.animateDialog(root);
             stage.showAndWait();
+            com.vtea.utils.DialogHelper.applyBlurBackground(false);
         } catch (IOException e) {
             DialogHelper.showInfo("Lỗi", "Không thể mở form thêm nguyên liệu: " + e.getMessage());
         }

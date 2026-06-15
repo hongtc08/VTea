@@ -20,4 +20,19 @@ public class CustomerService {
         return customerDAO.insertCustomer(customer);
     }
 
+    public java.util.List<CustomerDTO> getAllCustomers() {
+        return customerDAO.getAllCustomers();
+    }
+
+    public com.vtea.dto.CustomerStatsDTO getCustomerStatistics() {
+        return customerDAO.getCustomerStatistics();
+    }
+
+    public boolean updateCustomer(CustomerDTO customer) {
+        return customerDAO.updateCustomer(customer);
+    }
+
+    public boolean deleteCustomer(int customerId) {
+        return customerDAO.deleteCustomer(customerId);
+    }
 }

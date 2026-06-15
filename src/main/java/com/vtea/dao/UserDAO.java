@@ -256,6 +256,49 @@ public class UserDAO {
         return false;
     }
 
+    /**
+     * Tìm email dựa vào username (Dùng cho chức năng quên mật khẩu)
+     */
+    public String getEmailByUsername(String username) {
+        String sql = "SELECT email FROM user WHERE username = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, username);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi tìm email trong Database!");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Cập nhật mật khẩu mới dựa vào username (Dùng cho chức năng quên mật khẩu)
+     */
+    public boolean updatePassword(String username, String newPassword) {
+        String sql = "UPDATE user SET password = ? WHERE username = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, newPassword);
+            ps.setString(2, username);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            System.out.println("Lỗi khi cập nhật mật khẩu mới!");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // ==================== HELPER METHOD ====================
 
     /**

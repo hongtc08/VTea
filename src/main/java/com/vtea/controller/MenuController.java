@@ -1,5 +1,4 @@
 package com.vtea.controller;
-import com.vtea.service.POSCacheService;
 import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.ProductDTO;
 import com.vtea.dto.ToppingDTO;
@@ -35,7 +34,6 @@ import java.util.Locale;
 /**
  * MenuController chịu trách nhiệm quản lý màn hình Quản lý Thực đơn (Admin).
  * Hỗ trợ hiển thị, lọc, thêm, sửa, xóa Món ăn (Product) và Topping.
- * Sử dụng POSCacheService để tối ưu việc tải dữ liệu.
  */
 public class MenuController {
 
@@ -51,7 +49,6 @@ public class MenuController {
     private ProductService productService = new ProductService();
     private CategoryService categoryService = new CategoryService();
     private ToppingService toppingService = new ToppingService();
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     private List<ProductDTO> allProducts = new ArrayList<>();
     private List<CategoryDTO> allCategories = new ArrayList<>();
@@ -73,10 +70,8 @@ public class MenuController {
      */
     public void loadData() {
         try {
-            posCacheService.loadIfNeeded();
-
-            allCategories = posCacheService.getCategories();
-            allProducts = posCacheService.getProducts();
+            allCategories = categoryService.getAllActiveCategories();
+            allProducts = productService.getAllActiveProducts();
 
             currentCategoryIdFilter = CATEGORY_ALL;
             setupCategoryButtons();
@@ -202,6 +197,23 @@ public class MenuController {
                 menuGrid.getChildren().add(createProductCard(product));
             }
         }
+        
+        if (menuGrid.getChildren().isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            emptyState.setPrefWidth(800);
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-coffee");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không tìm thấy món nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            menuGrid.getChildren().add(emptyState);
+        }
     }
 
     private void filterToppings() {
@@ -215,6 +227,23 @@ public class MenuController {
             if (matchesSearch) {
                 menuGrid.getChildren().add(createToppingCard(topping));
             }
+        }
+        
+        if (menuGrid.getChildren().isEmpty()) {
+            javafx.scene.layout.VBox emptyState = new javafx.scene.layout.VBox(16);
+            emptyState.setAlignment(javafx.geometry.Pos.CENTER);
+            emptyState.setPadding(new javafx.geometry.Insets(100, 0, 0, 0));
+            emptyState.setPrefWidth(800);
+            
+            org.kordamp.ikonli.javafx.FontIcon icon = new org.kordamp.ikonli.javafx.FontIcon("fth-grid");
+            icon.setIconSize(64);
+            icon.setIconColor(javafx.scene.paint.Color.web("#d6d3d1"));
+            
+            javafx.scene.control.Label lbl = new javafx.scene.control.Label("Không tìm thấy topping nào");
+            lbl.setStyle("-fx-text-fill: #a8a29e; -fx-font-size: 18px; -fx-font-weight: bold;");
+            
+            emptyState.getChildren().addAll(icon, lbl);
+            menuGrid.getChildren().add(emptyState);
         }
     }
 
@@ -314,7 +343,6 @@ public class MenuController {
         if (isConfirmed) {
             try {
                 productService.softDeleteProduct(product.getProductId());
-                POSCacheService.getInstance().refresh();
 
                 DialogHelper.showInfo("Thành công", "Đã xóa món thành công.");
                 loadData();
@@ -382,7 +410,6 @@ public class MenuController {
         if (isConfirmed) {
             try {
                 toppingService.softDeleteTopping(topping.getToppingId());
-                POSCacheService.getInstance().refresh();
 
                 DialogHelper.showInfo("Thành công", "Đã xóa topping thành công.");
                 reloadToppingMode();
@@ -405,7 +432,11 @@ public class MenuController {
         Scene scene = new Scene(root);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         stage.setScene(scene);
+        
+        com.vtea.utils.DialogHelper.applyBlurBackground(true);
+        com.vtea.utils.DialogHelper.animateDialog(root);
         stage.showAndWait();
+        com.vtea.utils.DialogHelper.applyBlurBackground(false);
     }
 
     private void setCategoryVisible(boolean visible) {

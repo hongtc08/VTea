@@ -18,10 +18,11 @@ public class DashboardService {
     public DashboardSummaryDTO getTodaySummary() {
         LocalDate today = LocalDate.now();
 
-        LocalDateTime startOfDay = today.atStartOfDay();
+        // Lấy dữ liệu từ đầu tháng đến hiện tại thay vì chỉ hôm nay để dashboard hiển thị đẹp hơn
+        LocalDateTime startOfMonth = today.withDayOfMonth(1).atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
-        return dashboardDAO.getDashBoardSummary(startOfDay, endOfDay);
+        return dashboardDAO.getDashBoardSummary(startOfMonth, endOfDay);
     }
 
     /**

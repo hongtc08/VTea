@@ -1,60 +1,64 @@
 package com.vtea.utils;
-
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class DBConnection {
 
-    // 1. ĐỊA CHỈ DATABASE:
-    private static final String URL = "jdbc:mysql://fnb-db-java-se330.g.aivencloud.com:11776/fnb_management?sslMode=REQUIRED";
-    // 2. TÀI KHOẢN:
-    private static final String USER = "avnadmin";
-    // 3. MẬT KHẨU
-    private static final String PASSWORD = "AVNS_cmtIkCkYcgnQn_c6xvV";
+    private static String URL;
+    private static String USER;
+    private static String PASSWORD;
 
-    /* ========================================================================================= */
+    private static HikariDataSource dataSource;
 
-    // private static Connection conn = null;
+    static {
 
-    // Hàm thực hiện kết nối
-    public static Connection getConnection() {
-        try {
-            // Tải driver MySQL (giữ nguyên cho an toàn)
-            Class.forName("com.mysql.cj.jdbc.Driver");
+        try (FileInputStream fis =
+                     new FileInputStream("database.properties")) {
 
-            System.out.println("Đang kết nối tới: " + URL);
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("✅ [Thành công] Đã kết nối tới Database VTea!");
+            Properties prop = new Properties();
+            prop.load(fis);
 
-            return conn;
+            URL = prop.getProperty("DB_URL");
+            USER = prop.getProperty("DB_USER");
+            PASSWORD = prop.getProperty("DB_PASS");
 
-        } catch (ClassNotFoundException e) {
-            System.out.println("❌ [Lỗi] Không tìm thấy thư viện MySQL Connector. Hãy kiểm tra lại file pom.xml");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.out.println("❌ [Lỗi] Sai thông tin kết nối (URL, User, Pass) hoặc MySQL chưa được bật!");
-            e.printStackTrace();
-        }
+            HikariConfig config = new HikariConfig();
 
-        return null;
-    }
+            config.setJdbcUrl(URL);
+            config.setUsername(USER);
+            config.setPassword(PASSWORD);
 
-    // Hàm dùng để đóng kết nối khi tắt app (giữ lại cho đúng structure, nhưng không còn cần thiết)
-    public static void closeConnection(Connection conn) {
-        try {
-            if (conn != null && !conn.isClosed()) {
-                conn.close();
-                System.out.println("🔒 Đã đóng kết nối Database an toàn.");
-            }
-        } catch (SQLException e) {
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(2);
+
+            config.setConnectionTimeout(10000);
+
+            dataSource = new HikariDataSource(config);
+
+            System.out.println("HikariCP initialized");
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Hàm main để test thử xem code có chạy đúng không
-    public static void main(String[] args) {
-        Connection conn = getConnection();
-        closeConnection(conn);
-    }
+    public static Connection getConnection()
+            throws SQLException {
+
+        long start = System.currentTimeMillis();
+
+        Connection conn = dataSource.getConnection();
+
+        System.out.println(
+                "Get connection = "
+                        + (System.currentTimeMillis() - start)
+                        + " ms");
+
+        return conn;    }
 }

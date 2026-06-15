@@ -24,7 +24,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import com.vtea.service.POSCacheService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -344,7 +343,6 @@ public class MenuFormController {
                 productService.createProduct(currentProduct);
                 DialogHelper.showInfo("Thành công", "Đã thêm món ăn mới.");
             }
-            POSCacheService.getInstance().refresh();
             if (parentController != null) {
                 parentController.loadData();
             }
@@ -374,8 +372,6 @@ public class MenuFormController {
             toppingService.createTopping(currentTopping);
             DialogHelper.showInfo("Thành công", "Đã thêm topping mới.");
         }
-
-        POSCacheService.getInstance().refresh();
         if (parentController != null) {
             parentController.reloadToppingMode();
         }
