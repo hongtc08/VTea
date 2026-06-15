@@ -89,12 +89,22 @@
             </Button>
 
             <Button fx:id="btnPOS"
-                    text="Bán hàng (POS)"
-                    styleClass="nav-btn"
+                    styleClass="pos-prominent-btn"
                     maxWidth="Infinity"
                     onAction="#handlePOS">
                 <graphic>
-                    <FontIcon iconLiteral="fth-shopping-cart" iconSize="18"/>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <StackPane style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 8; -fx-padding: 8;">
+                            <FontIcon iconLiteral="fth-shopping-cart" iconSize="24" iconColor="white"/>
+                        </StackPane>
+                        <VBox alignment="CENTER_LEFT" spacing="2" HBox.hgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT" spacing="4">
+                                <Label text="POS" style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: white;" minWidth="-Infinity"/>
+                                <Label text="BÁN HÀNG" styleClass="pos-badge" minWidth="-Infinity"/>
+                            </HBox>
+                        </VBox>
+                        <FontIcon iconLiteral="fth-zap" iconSize="18" styleClass="pos-lightning-icon"/>
+                    </HBox>
                 </graphic>
             </Button>
 
