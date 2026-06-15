@@ -2202,3 +2202,60 @@
     -fx-text-fill: #a8a29e;
     -fx-font-size: 13px;
 }
+/* TableView Premium Styling */
+.custom-table {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+.custom-table .column-header-background {
+    -fx-background-color: #f5f5f4;
+    -fx-background-radius: 8 8 0 0;
+    -fx-border-color: #e7e5e4;
+    -fx-border-width: 0 0 1 0;
+}
+.custom-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40px;
+    -fx-border-color: transparent;
+}
+.custom-table .column-header .label {
+    -fx-text-fill: #78716c;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-alignment: center-left;
+    -fx-padding: 0 0 0 10;
+}
+.custom-table .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: transparent transparent #f5f5f4 transparent;
+    -fx-border-width: 1;
+    -fx-cell-size: 45px;
+}
+.custom-table .table-row-cell:odd {
+    -fx-background-color: #fafaf9;
+}
+.custom-table .table-row-cell:hover {
+    -fx-background-color: #f0fdfa;
+}
+.custom-table .table-row-cell:selected {
+    -fx-background-color: #ccfbf1;
+    -fx-text-fill: #115e59;
+}
+.custom-table .table-cell {
+    -fx-border-color: transparent;
+    -fx-text-fill: #44403c;
+    -fx-font-size: 14px;
+    -fx-padding: 0 0 0 10;
+}
+
+/* Icon Buttons in Table */
+.action-icon-btn {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
+.action-icon-btn:hover {
+    -fx-background-color: #e7e5e4;
+}

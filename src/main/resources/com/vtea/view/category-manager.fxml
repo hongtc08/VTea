@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<StackPane xmlns="http://javafx.com/javafx/17"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.vtea.controller.CategoryManagerController"
+           style="-fx-background-color: transparent;">
+
+    <stylesheets>
+        <URL value="@../css/styles.css" />
+    </stylesheets>
+
+    <!-- Dialog container -->
+    <VBox maxWidth="650" maxHeight="600" styleClass="dialog-container" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 15, 0, 0, 5);">
+        
+        <!-- Header -->
+        <HBox alignment="CENTER_LEFT" styleClass="dialog-header" style="-fx-background-color: #fcfcfc; -fx-background-radius: 12 12 0 0; -fx-border-color: #f5f5f4; -fx-border-width: 0 0 1 0;">
+            <padding><Insets top="16" right="20" bottom="16" left="24"/></padding>
+            <HBox alignment="CENTER" spacing="10">
+                <FontIcon iconLiteral="fth-folder" iconSize="20" iconColor="#523628"/>
+                <Label text="Quản lý danh mục" styleClass="dialog-title" style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #292524;"/>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button styleClass="btn-close-dialog" onAction="#handleClose" style="-fx-background-color: transparent; -fx-cursor: hand;">
+                <graphic>
+                    <FontIcon iconLiteral="fth-x" iconSize="22" iconColor="#a8a29e"/>
+                </graphic>
+            </Button>
+        </HBox>
+
+        <!-- Body -->
+        <VBox spacing="20" VBox.vgrow="ALWAYS">
+            <padding><Insets top="20" right="24" bottom="24" left="24"/></padding>
+
+            <!-- Bảng danh sách Category -->
+            <TableView fx:id="tvCategories" VBox.vgrow="ALWAYS" minHeight="250" styleClass="custom-table">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60"/>
+                    <TableColumn fx:id="colName" text="TÊN DANH MỤC" prefWidth="250"/>
+                    <TableColumn fx:id="colStatus" text="TRẠNG THÁI" prefWidth="140"/>
+                    <TableColumn fx:id="colAction" text="" prefWidth="120" style="-fx-alignment: CENTER;"/>
+                </columns>
+            </TableView>
+
+            <Separator/>
+
+            <!-- Form Thêm / Sửa -->
+            <VBox spacing="15" style="-fx-background-color: #fafaf9; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #e7e5e4; -fx-border-radius: 12;">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <FontIcon fx:id="iconFormMode" iconLiteral="fth-plus-circle" iconSize="18" iconColor="#12b6a2"/>
+                    <Label fx:id="lblFormTitle" text="Thêm danh mục mới" style="-fx-font-weight: 900; -fx-font-size: 15px; -fx-text-fill: #1c1917;"/>
+                </HBox>
+                
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                        <Label text="Tên danh mục:" style="-fx-text-fill: #78716c; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                        <TextField fx:id="txtName" promptText="VD: Trà sữa, Cà phê..." styleClass="input-field" style="-fx-background-color: white;"/>
+                    </VBox>
+                    <VBox spacing="8">
+                        <Label text="Trạng thái hiển thị:" style="-fx-text-fill: #78716c; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                        <HBox alignment="CENTER_LEFT" prefHeight="40">
+                            <CheckBox fx:id="chkAvailable" text="Đang bán" selected="true" style="-fx-text-fill: #292524; -fx-font-size: 14px;"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
+                
+                <HBox spacing="12" alignment="CENTER_RIGHT">
+                    <Button text="Hủy / Làm mới" onAction="#handleResetForm" style="-fx-background-color: transparent; -fx-text-fill: #78716c; -fx-cursor: hand; -fx-font-weight: bold;"/>
+                    <Button fx:id="btnSave" text="Thêm mới" onAction="#handleSave" styleClass="action-btn-primary" style="-fx-padding: 8 20;"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </VBox>
+</StackPane>
