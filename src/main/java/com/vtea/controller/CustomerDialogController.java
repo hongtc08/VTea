@@ -376,10 +376,10 @@ public class CustomerDialogController {
 
         BigDecimal vatAfterDiscount = amountAfterDiscount.multiply(VAT_RATE);
         BigDecimal totalAfterDiscount = amountAfterDiscount.add(vatAfterDiscount);
-        earnPoints = calculateEarnPoints(totalAfterDiscount);
+        earnPoints = 0;
 
         updateLabels(vatAfterDiscount, totalAfterDiscount, 
-                "Sau khi trừ điểm sẽ nhận " + earnPoints + " điểm", 
+                "Sau khi trừ điểm sẽ nhận 0 điểm", 
                 "Dùng " + pointsToUse + " điểm, giảm " + FormatUtils.formatPrice(discount));
     }
 
@@ -409,7 +409,9 @@ public class CustomerDialogController {
         BigDecimal subtotalAfterTier = orderSubtotal.subtract(tierDiscountAmount);
         if (subtotalAfterTier.compareTo(BigDecimal.ZERO) <= 0) return 0;
 
-        int maxByOrder = subtotalAfterTier.divide(POINT_CONVERSION_RATE, 0, RoundingMode.DOWN).intValue();
+        BigDecimal maxAllowedPointDiscount = subtotalAfterTier.multiply(new BigDecimal("0.50"));
+        int maxByOrder = maxAllowedPointDiscount.divide(POINT_CONVERSION_RATE, 0, RoundingMode.DOWN).intValue();
+        
         return Math.min(customer.getRewardPoints(), maxByOrder);
     }
 

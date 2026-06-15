@@ -17,7 +17,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import com.vtea.service.POSCacheService;
 import javafx.application.Platform;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Label;
@@ -93,9 +92,6 @@ public class LoginController {
 
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();
-
-    //Khoi tao cache tu luc log in
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     // 3. Hàm này sẽ được gọi khi người dùng bấm nút "Đăng Nhập"
     @FXML
@@ -231,7 +227,9 @@ public class LoginController {
         btnLogin.setText("Đang tải dữ liệu...");
 
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     // Hiệu ứng thành công
                     if (loadingSpinner != null) {
@@ -252,14 +250,14 @@ public class LoginController {
                                 new KeyFrame(Duration.millis(800), new KeyValue(successProgressBar.progressProperty(), 1.0))
                         );
                         timeline.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         timeline.play();
                     } else {
                         PauseTransition pause = new PauseTransition(Duration.millis(800));
                         pause.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         pause.play();
