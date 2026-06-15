@@ -76,12 +76,7 @@
 }
 
 /* Left branding panel */
-.login-left-panel {
-    -fx-background-image: url("../images/login-bg.jpg");
-    -fx-background-size: cover;
-    -fx-background-position: center center;
-    -fx-background-repeat: no-repeat;
-    -fx-min-width: 460;
+.login-left-panel { -fx-background-color: #1c1917; -fx-min-width: 460;
     -fx-max-width: 600;
     -fx-pref-width: 50%;
 }
@@ -241,31 +236,26 @@
 }
 
 .btn-logout {
-    -fx-background-color: white;
-    -fx-border-color: #d6d3d1;
+    -fx-background-color: rgba(255,255,255,0.1);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255,255,255,0.4);
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-border-width: 1.5;
-    -fx-text-fill: #57534e;
-    -fx-font-size: 13px;
-    -fx-cursor: hand;
     -fx-padding: 8 16;
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
 }
 
-.btn-logout:hover {
-    -fx-background-color: #fdf8f7;
-    -fx-border-color: #a8998f;
-}
+.btn-logout:hover { -fx-background-color: rgba(239,68,68,0.1); -fx-border-color: #ef4444; }
 
 /* ============================================================
    HEADER
    ============================================================ */
 
-.header {
-    -fx-background-color: white;
-    -fx-border-color: transparent transparent #e7e5e4 transparent;
+.header { -fx-background-color: #3e2723; -fx-border-color: transparent transparent #2d1b15 transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 8, 0, 0, 2);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 4);
 }
 
 .header-logo-box {
@@ -278,10 +268,11 @@
 .header-brand {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1c1917;
+    -fx-text-fill: #ffffff;
 }
 
-.header-icon-logout{
+.header-icon-logout {
+    -fx-icon-color: #ffffff;
     -fx-icon-code: "fth-log-out";
 }
 
@@ -292,7 +283,7 @@
 
 .header-sub {
     -fx-font-size: 13px;
-    -fx-text-fill: #78716c;
+    -fx-text-fill: #a8a29e;
     -fx-font-weight: bold;
 }
 
@@ -302,15 +293,14 @@
 
 .header-status {
     -fx-font-size: 11px;
-    -fx-text-fill: #78716c;
+    -fx-text-fill: #a8a29e;
 }
 
 .user-info-box {
-    -fx-background-color: #faf9f8;
-    -fx-border-color: #e7e5e4;
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-border-color: rgba(255,255,255,0.3);
     -fx-border-radius: 10;
     -fx-background-radius: 10;
-    -fx-border-width: 1;
     -fx-padding: 8 14;
 }
 
@@ -330,14 +320,14 @@
 }
 
 .user-name {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-text-fill: #1c1917;
+    -fx-text-fill: #ffffff;
 }
 
 .user-role {
-    -fx-font-size: 11px;
-    -fx-text-fill: #78716c;
+    -fx-font-size: 12px;
+    -fx-text-fill: #a8a29e;
 }
 
 /* ============================================================
@@ -2268,3 +2258,6 @@
 .btn-logout:hover .header-icon-logout {
     -fx-icon-color: #ef4444;
 }
+
+
+

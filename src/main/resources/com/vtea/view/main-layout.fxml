@@ -5,6 +5,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.*?>
 <?import java.net.URL?>
+<?import javafx.scene.image.*?>
 
 
 <?import org.kordamp.ikonli.javafx.FontIcon?>
@@ -26,8 +27,15 @@
 
             <!-- Logo -->
             <HBox alignment="CENTER_LEFT" spacing="14">
-                <StackPane styleClass="header-logo-box" minWidth="48" minHeight="36">
-                    <FontIcon iconLiteral="fth-coffee" styleClass="logo-icon" iconSize="22" iconColor="aliceblue"/>
+                <StackPane styleClass="header-logo-box" minWidth="48" minHeight="40" style="-fx-background-color: transparent; -fx-padding: 0;">
+                    <ImageView fitWidth="42" fitHeight="42" preserveRatio="true">
+                        <image>
+                            <Image url="@/images/logo.png" />
+                        </image>
+                        <clip>
+                            <Rectangle width="42" height="42" arcWidth="14" arcHeight="14" />
+                        </clip>
+                    </ImageView>
                 </StackPane>
                 <VBox spacing="0">
                     <HBox spacing="8" alignment="CENTER_LEFT">
@@ -85,7 +93,7 @@
                     maxWidth="Infinity"
                     onAction="#handleDashboard">
                 <graphic>
-                    <FontIcon iconLiteral="mdi2v-view-dashboard-outline" styleClass="sidebar-icon-dashboard" iconSize="18"/>
+                    <FontIcon iconLiteral="mdi2v-view-dashboard-outline" styleClass="sidebar-icon" iconSize="18"/>
                 </graphic>
             </Button>
 
@@ -115,7 +123,7 @@
                     maxWidth="Infinity"
                     onAction="#handleMenu">
                 <graphic>
-                    <FontIcon iconLiteral="fth-book-open" iconSize="18"/>
+                    <FontIcon iconLiteral="fth-book-open" styleClass="sidebar-icon" iconSize="18"/>
                 </graphic>
             </Button>
 
