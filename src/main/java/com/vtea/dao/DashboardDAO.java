@@ -1,6 +1,5 @@
 package com.vtea.dao;
 
-import com.vtea.dto.CategoryRevenueDTO;
 import com.vtea.dto.DashboardSummaryDTO;
 import com.vtea.dto.ProductSalesDTO;
 import com.vtea.dto.IngredientDTO;
@@ -8,11 +7,9 @@ import com.vtea.utils.DBConnection;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,7 +85,7 @@ public class DashboardDAO {
     }
 
     /**
-     *  Lấy danh sách đơn hàng gần đây nhất (Dùng hiển thị trên Dashboard)
+     *  Lấy danh sách đơn hàng gần đây nhất
      * Chỉ lấy các đơn hàng đã thanh toán (PAID)
      * Kèm danh sách sản phẩm trong mỗi đơn hàng
      */
