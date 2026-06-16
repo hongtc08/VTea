@@ -184,19 +184,26 @@ public class POSController {
     @FXML
     private void handleCheckout(ActionEvent event) {
         try {
+            // 1. Kiểm tra xem giỏ hàng có trống không và đã chọn phương thức thanh toán chưa
             if (!validateCheckoutCondition()) return;
 
             String paymentMethod = cmbPaymentMethod.getValue();
+            
+            // 2. Mở popup cho phép nhân viên chọn Khách hàng (để tích/trừ điểm)
             CustomerDialogController customerDialog = showCustomerDialog();
 
+            // Nếu nhân viên bấm "Hủy" hoặc đóng popup thì dừng thanh toán
             if (customerDialog == null || !customerDialog.isSubmitted()) {
                 return;
             }
 
+            // 3. Lấy thông tin khách hàng và số điểm họ muốn dùng từ popup
             CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
             processCustomerSelection(customerDialog, selectedCustomer);
 
             int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
+            
+            // 4. Bắt đầu luồng lưu đơn hàng dựa trên phương thức thanh toán (Tiền mặt hoặc mã QR)
             buildAndSaveOrder(paymentMethod, selectedCustomer, usedPoints);
 
         } catch (Exception e) {
@@ -307,27 +314,33 @@ public class POSController {
             CustomerDTO selectedCustomer,
             int usedPoints
     ) {
+        // Tạo một bộ đếm thời gian (Timeline) chạy ngầm
         Timeline timeline = new Timeline();
 
+        // Nếu nhân viên đóng thông báo chờ -> Hủy bỏ việc kiểm tra trạng thái
         waitingAlert.setOnCloseRequest(event -> timeline.stop());
 
+        // Thiết lập vòng lặp: Cứ mỗi 3 giây sẽ thực hiện khối lệnh bên dưới 1 lần
         KeyFrame keyFrame = new KeyFrame(Duration.seconds(3), event ->
                 CompletableFuture
                         .supplyAsync(() -> {
                             try {
+                                // Gọi API lên máy chủ PayOS để hỏi xem mã đơn này khách đã chuyển khoản chưa
                                 return payOSPaymentClient.getStatus(payment.getOrderCode());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         })
                         .thenAccept(status -> Platform.runLater(() -> {
+                            // Nếu khách ĐÃ CHUYỂN KHOẢN thành công
                             if ("PAID".equalsIgnoreCase(status)) {
-                                timeline.stop();
-                                waitingAlert.close();
-                                completeCheckout(order, selectedCustomer, usedPoints);
+                                timeline.stop();       // Dừng vòng lặp 3 giây
+                                waitingAlert.close();  // Đóng thông báo chờ
+                                completeCheckout(order, selectedCustomer, usedPoints); // Chốt đơn!
                                 return;
                             }
 
+                            // Nếu khách HỦY hoặc GIAO DỊCH LỖI
                             if ("CANCELLED".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
                                 timeline.stop();
                                 waitingAlert.close();
@@ -341,7 +354,7 @@ public class POSController {
         );
 
         timeline.getKeyFrames().add(keyFrame);
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(Timeline.INDEFINITE); // Cho vòng lặp chạy vô hạn (đến khi gọi stop() thì thôi)
         timeline.play();
     }
 
@@ -350,11 +363,14 @@ public class POSController {
      * Method này dùng chung cho tiền mặt và QR payOS.
      */
     private void completeCheckout(Order order, CustomerDTO selectedCustomer, int usedPoints) {
+        // 1. Gọi OrderService để chính thức lưu Hóa đơn vào CSDL và xử lý điểm thưởng
         boolean success = orderService.checkoutCurrentOrder();
 
         if (success) {
+            // Lấy ra số điểm mà khách vừa được cộng thêm từ hóa đơn này
             int awardedPoints = selectedCustomer != null ? orderService.getLastEarnedPoints() : 0;
 
+            // 2. Hiển thị thông báo thành công và hỏi xem có muốn in/xuất file Bill (PDF) không
             boolean exportBill = DialogHelper.showSuccessWithBillButton(
                     "✓ Thanh toán thành công!",
                     "Tổng tiền: " + FormatUtils.formatPrice(order.getTotalAmount())
@@ -368,10 +384,12 @@ public class POSController {
                             + awardedPoints
             );
 
+            // 3. Nếu nhân viên chọn "Xuất Bill", mở màn hình xem trước hóa đơn
             if (exportBill) {
                 showBillPreviewAfterCheckout(order);
             }
 
+            // 4. Xóa sạch giỏ hàng và làm mới màn hình để chuẩn bị đón khách tiếp theo
             orderService.clearCart();
             refreshCart();
         } else {
