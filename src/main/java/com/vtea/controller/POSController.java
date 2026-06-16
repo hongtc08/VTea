@@ -28,6 +28,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -100,6 +101,9 @@ public class POSController {
     @FXML private Label lblTotalAmount;
 
     @FXML private ComboBox<String> cmbPaymentMethod;
+    @FXML private TextField searchField;
+
+    private int currentCategoryId = -1;
 
     // ==================== INIT ====================
 
@@ -113,6 +117,12 @@ public class POSController {
         updateCartDisplay();
         updateTotalAmount();
         loadPOSCacheAsync();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filterProducts();
+            });
+        }
     }
 
     /**
@@ -484,7 +494,8 @@ public class POSController {
         allButton.getStyleClass().add("category-btn-active");
         allButton.setOnAction(event -> {
             setActiveButton(allButton);
-            displayProducts(productService.getAllActiveProducts());
+            currentCategoryId = -1;
+            filterProducts();
         });
         categoryBar.getChildren().add(allButton);
 
@@ -496,7 +507,8 @@ public class POSController {
 
                 categoryButton.setOnAction(event -> {
                     setActiveButton(categoryButton);
-                    filterByCategory(category.getCategoryId());
+                    currentCategoryId = category.getCategoryId();
+                    filterProducts();
                 });
 
                 categoryBar.getChildren().add(categoryButton);
@@ -517,11 +529,18 @@ public class POSController {
     }
 
     /**
-     * Lọc sản phẩm theo category_id.
+     * Lọc sản phẩm theo category_id và searchText.
      */
-    private void filterByCategory(int categoryId) {
+    private void filterProducts() {
         List<ProductDTO> all = productService.getAllActiveProducts();
-        displayProducts(all.stream().filter(p -> p.getCategoryId() == categoryId).collect(java.util.stream.Collectors.toList()));
+        String searchText = searchField != null ? searchField.getText().toLowerCase().trim() : "";
+        
+        List<ProductDTO> filtered = all.stream()
+            .filter(p -> currentCategoryId == -1 || p.getCategoryId() == currentCategoryId)
+            .filter(p -> searchText.isEmpty() || p.getName().toLowerCase().contains(searchText))
+            .collect(java.util.stream.Collectors.toList());
+            
+        displayProducts(filtered);
     }
 
     // ==================== PRODUCT EVENTS / DISPLAY ====================

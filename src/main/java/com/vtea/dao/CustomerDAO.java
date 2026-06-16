@@ -235,12 +235,18 @@ public class CustomerDAO {
     }
 
     public boolean updateCustomer(CustomerDTO customer) {
-        String sql = "UPDATE customer SET full_name = ?, phone_number = ? WHERE customer_id = ?";
+        String sql = "UPDATE customer SET full_name = ?, phone_number = ?, " +
+                     "reward_points = ?, total_accumulated_points = ?, " +
+                     "tier_id = (SELECT tier_id FROM member_tier WHERE required_points <= ? ORDER BY required_points DESC LIMIT 1) " +
+                     "WHERE customer_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, customer.getFullName());
             ps.setString(2, customer.getPhoneNumber());
-            ps.setInt(3, customer.getCustomerId());
+            ps.setInt(3, customer.getRewardPoints());
+            ps.setInt(4, customer.getTotalAccumulatedPoints());
+            ps.setInt(5, customer.getTotalAccumulatedPoints());
+            ps.setInt(6, customer.getCustomerId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
