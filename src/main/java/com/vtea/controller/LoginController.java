@@ -17,7 +17,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import com.vtea.service.POSCacheService;
 import javafx.application.Platform;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.Label;
@@ -34,6 +33,14 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.concurrent.CompletableFuture;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 
 public class LoginController {
 
@@ -69,7 +76,12 @@ public class LoginController {
     private ProgressBar successProgressBar;
 
     @FXML
+    private Pane scrollingBackgroundPane;
+
+    @FXML
     public void initialize() {
+        setupScrollingBackground();
+
         // Đồng bộ dữ liệu giữa 2 ô nhập liệu
         txtPasswordVisible.textProperty().bindBidirectional(txtPassword.textProperty());
 
@@ -91,11 +103,82 @@ public class LoginController {
         });
     }
 
+    //Khoi tao cache tu luc log in
+
+    private void setupScrollingBackground() {
+        if (scrollingBackgroundPane == null) return;
+        
+        // Setup clip to hide overflowing images
+        Rectangle clip = new Rectangle(0, 0, 1000, 1000); // oversized clip width
+        clip.heightProperty().bind(scrollingBackgroundPane.heightProperty());
+        clip.widthProperty().bind(scrollingBackgroundPane.widthProperty());
+        scrollingBackgroundPane.setClip(clip);
+
+        HBox gridBox = new HBox(16);
+        gridBox.setStyle("-fx-padding: 16;");
+        // Create 3 columns
+        VBox col1 = createImageColumn(true);
+        VBox col2 = createImageColumn(false);
+        VBox col3 = createImageColumn(true);
+
+        gridBox.getChildren().addAll(col1, col2, col3);
+        scrollingBackgroundPane.getChildren().add(gridBox);
+    }
+
+    private VBox createImageColumn(boolean scrollUp) {
+        VBox column = new VBox(16);
+        String[] imagePaths = {
+            "/images/login/bg1.png",
+            "/images/login/bg2.png",
+            "/images/login/bg3.png",
+            "/images/login/bg4.png",
+            "/images/login/bg5.png",
+            "/images/login/bg6.png"
+        };
+        
+        // Add images multiple times to create a seamless infinite loop
+        for (int i = 0; i < 3; i++) {
+            for (String path : imagePaths) {
+                try {
+                    ImageView imageView = new ImageView(new Image(getClass().getResource(path).toExternalForm()));
+                    imageView.setFitWidth(240);
+                    imageView.setFitHeight(240);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Add rounded corners
+                    Rectangle rect = new Rectangle(240, 240);
+                    rect.setArcWidth(20);
+                    rect.setArcHeight(20);
+                    imageView.setClip(rect);
+                    
+                    column.getChildren().add(imageView);
+                } catch (Exception e) {
+                    System.out.println("Could not load: " + path);
+                }
+            }
+        }
+
+        // Animate
+        Platform.runLater(() -> {
+            double totalHeight = (240 + 16) * 6; // height of one set of 6 images
+            TranslateTransition tt = new TranslateTransition(Duration.seconds(60), column);
+            if (scrollUp) {
+                tt.setFromY(0);
+                tt.setToY(-totalHeight);
+            } else {
+                tt.setFromY(-totalHeight);
+                tt.setToY(0);
+            }
+            tt.setInterpolator(Interpolator.LINEAR);
+            tt.setCycleCount(Timeline.INDEFINITE);
+            tt.play();
+        });
+
+        return column;
+    }
+
     // 2. Khởi tạo Service để xử lý logic
     private AuthService authService = new AuthService();
-
-    //Khoi tao cache tu luc log in
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
 
     // 3. Hàm này sẽ được gọi khi người dùng bấm nút "Đăng Nhập"
     @FXML
@@ -160,41 +243,72 @@ public class LoginController {
 
     @FXML
     private void handleForgotPassword(ActionEvent event) {
-        // 1. Yeu cau nhap Username
+        // 1. Yêu cầu nhập Username (Chạy trên UI Thread bình thường)
         String username = showCustomDialog("Khôi phục mật khẩu", "Nhập tên đăng nhập của bạn:", true, true);
 
         if (username != null && !username.trim().isEmpty()) {
-            String email = authService.getEmailByUsername(username.trim());
 
-            if (email != null) {
-                // 2. Tao OTP va gui Email
-                String otp = EmailService.generateOTP();
-                if (EmailService.sendOTPEmail(email, otp)) {
+            // Đổi con trỏ chuột thành hình vòng xoay (Loading) để báo hiệu hệ thống đang xử lý
+            btnLogin.getScene().setCursor(javafx.scene.Cursor.WAIT);
 
-                    // 3. Yeu cau nhap OTP
-                    String otpInput = showCustomDialog("Xác thực OTP", "Mã đã gửi đến: " + email + "\nVui lòng nhập 6 số OTP:", true, true);
+            // 2. Đẩy tác vụ nặng (Tìm DB + Gửi Email) sang luồng chạy ngầm để không đơ UI
+            CompletableFuture.supplyAsync(() -> {
+                String email = authService.getEmailByUsername(username.trim());
+                if (email != null) {
+                    String otp = EmailService.generateOTP();
+                    boolean isSent = EmailService.sendOTPEmail(email, otp);
+                    // Trả về một mảng chứa 3 kết quả để chuyển qua bước tiếp theo
+                    return new Object[]{email, otp, isSent};
+                }
+                return null;
 
-                    if (otpInput != null && otpInput.trim().equals(otp)) {
+            }).thenAccept(result -> {
+                // 3. Xử lý xong, dùng Platform.runLater để trở về luồng UI hiện Popup
+                Platform.runLater(() -> {
+                    // Trả lại con trỏ chuột bình thường
+                    btnLogin.getScene().setCursor(javafx.scene.Cursor.DEFAULT);
 
-                        // 4. Khop OTP -> Dat mat khau moi
-                        String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
+                    if (result != null) {
+                        String email = (String) result[0];
+                        String otp = (String) result[1];
+                        boolean isSent = (boolean) result[2];
 
-                        if (newPassword != null && !newPassword.trim().isEmpty()) {
-                            if (authService.updatePassword(username.trim(), newPassword.trim())) {
-                                showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
+                        if (isSent) {
+                            String otpInput = showCustomDialog("Xác thực OTP", "Mã đã gửi đến: " + email + "\nVui lòng nhập 6 số OTP:", true, true);
+
+                            if (otpInput != null && otpInput.trim().equals(otp)) {
+                                String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
+
+                                if (newPassword != null && !newPassword.trim().isEmpty()) {
+                                    // Tiếp tục chạy ngầm việc cập nhật mật khẩu mới xuống Database
+                                    CompletableFuture.supplyAsync(() -> authService.updatePassword(username.trim(), newPassword.trim()))
+                                            .thenAccept(isUpdated -> Platform.runLater(() -> {
+                                                if (isUpdated) {
+                                                    showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
+                                                } else {
+                                                    showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);
+                                                }
+                                            }));
+                                }
                             } else {
-                                showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);
+                                showCustomDialog("Lỗi xác thực", "Mã OTP không chính xác hoặc đã bị hủy!", false, false);
                             }
+                        } else {
+                            showCustomDialog("Lỗi hệ thống", "Trạm gửi thư đang bận. Không thể gửi email!", false, false);
                         }
                     } else {
-                        showCustomDialog("Lỗi xác thực", "Mã OTP không chính xác hoặc đã bị hủy!", false, false);
+                        showCustomDialog("Không tìm thấy", "Tên đăng nhập không tồn tại hoặc chưa liên kết Email!", false, false);
                     }
-                } else {
-                    showCustomDialog("Lỗi hệ thống", "Trạm gửi thư đang bận. Không thể gửi email!", false, false);
-                }
-            } else {
-                showCustomDialog("Không tìm thấy", "Tên đăng nhập không tồn tại hoặc chưa liên kết Email!", false, false);
-            }
+                });
+            }).exceptionally(ex -> {
+                // Xử lý khi có lỗi ngoại lệ (rớt mạng, sập DB...)
+                Platform.runLater(() -> {
+                    btnLogin.getScene().setCursor(javafx.scene.Cursor.DEFAULT);
+                    showCustomDialog("Lỗi", "Đã xảy ra lỗi kết nối. Vui lòng thử lại!", false, false);
+                    ex.printStackTrace();
+                });
+                return null;
+            });
         }
     }
 
@@ -231,7 +345,9 @@ public class LoginController {
         btnLogin.setText("Đang tải dữ liệu...");
 
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     // Hiệu ứng thành công
                     if (loadingSpinner != null) {
@@ -252,14 +368,14 @@ public class LoginController {
                                 new KeyFrame(Duration.millis(800), new KeyValue(successProgressBar.progressProperty(), 1.0))
                         );
                         timeline.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         timeline.play();
                     } else {
                         PauseTransition pause = new PauseTransition(Duration.millis(800));
                         pause.setOnFinished(event -> {
-                            System.out.println("Đã tải cache POS, chuẩn bị chuyển sang màn hình chính...");
+                            System.out.println("Chuẩn bị chuyển sang màn hình chính...");
                             MainApp.setRoot("main-layout");
                         });
                         pause.play();
@@ -277,14 +393,5 @@ public class LoginController {
 
                     return null;
                 });
-    }
-
-    // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code
-    private void showAlert(Alert.AlertType alertType, String title, String content) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 }

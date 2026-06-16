@@ -31,6 +31,7 @@ public class CustomerController {
     @FXML private Button btnFilterKimCuong;
 
     @FXML private VBox vboxCustomerList;
+    @FXML private VBox vboxLoading;
 
     private final CustomerService customerService = new CustomerService();
     private List<CustomerDTO> allCustomers;
@@ -38,6 +39,7 @@ public class CustomerController {
 
     @FXML
     public void initialize() {
+        btnFilterAll.getStyleClass().add("pill-btn-active");
         setupFilters();
         loadData();
     }
@@ -66,18 +68,31 @@ public class CustomerController {
     }
 
     public void loadData() {
-        Platform.runLater(() -> {
-            // Load stats
-            CustomerStatsDTO stats = customerService.getCustomerStatistics();
-            lblTotalCustomers.setText(String.valueOf(stats.getTotalCustomers()));
-            lblDiamondCount.setText(String.valueOf(stats.getDiamondCount()));
-            lblGoldCount.setText(String.valueOf(stats.getGoldCount()));
-            lblAvgPoints.setText(FormatUtils.formatNumber(stats.getAvgPoints()));
-
-            // Load list
-            allCustomers = customerService.getAllCustomers();
-            filterData();
-        });
+        vboxLoading.setVisible(true);
+        
+        new Thread(() -> {
+            try {
+                CustomerStatsDTO stats = customerService.getCustomerStatistics();
+                List<CustomerDTO> customers = customerService.getAllCustomers();
+                
+                javafx.application.Platform.runLater(() -> {
+                    // Update stats
+                    lblTotalCustomers.setText(String.valueOf(stats.getTotalCustomers()));
+                    lblDiamondCount.setText(String.valueOf(stats.getDiamondCount()));
+                    lblGoldCount.setText(String.valueOf(stats.getGoldCount()));
+                    lblAvgPoints.setText(FormatUtils.formatNumber(stats.getAvgPoints()));
+                    
+                    allCustomers = customers;
+                    filterData();
+                    vboxLoading.setVisible(false);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                javafx.application.Platform.runLater(() -> {
+                    vboxLoading.setVisible(false);
+                });
+            }
+        }).start();
     }
 
     private void filterData() {

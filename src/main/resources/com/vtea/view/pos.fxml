@@ -8,10 +8,10 @@
 
 
 
-<HBox xmlns="http://javafx.com/javafx/17"
+<StackPane fx:id="posRoot" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.vtea.controller.POSController"
-      spacing="20" styleClass="screen-root">
+      fx:controller="com.vtea.controller.POSController">
+      <HBox spacing="20" styleClass="screen-root">
 
     <stylesheets>
         <URL value="@../css/styles.css" />
@@ -53,6 +53,8 @@
                 </padding>
             </FlowPane>
         </ScrollPane>
+
+
 
     </VBox>
 
@@ -130,3 +132,4 @@
     </VBox>
 
 </HBox>
+</StackPane>

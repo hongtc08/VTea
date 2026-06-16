@@ -8,7 +8,8 @@ import com.vtea.dto.ProductDTO;
 import com.vtea.model.Order;
 import com.vtea.service.BillService;
 import com.vtea.service.OrderService;
-import com.vtea.service.POSCacheService;
+import com.vtea.service.CategoryService;
+import com.vtea.service.ProductService;
 import com.vtea.service.payment.PayOSCreateResponse;
 import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
@@ -27,6 +28,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -40,6 +42,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import javafx.scene.layout.StackPane;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 /**
  * Controller cho màn hình POS bán hàng.
@@ -50,8 +63,8 @@ public class POSController {
 
     // ==================== SERVICE / STATE (BE LOGIC GỌI TỪ UI) ====================
 
-    // Cache dữ liệu POS để giảm lag khi load sản phẩm, danh mục và topping.
-    private final POSCacheService posCacheService = POSCacheService.getInstance();
+    private final ProductService productService = new ProductService();
+    private final CategoryService categoryService = new CategoryService();
 
     // Service xử lý nghiệp vụ giỏ hàng và thanh toán.
     private final OrderService orderService = new OrderService();
@@ -74,6 +87,7 @@ public class POSController {
     // ==================== FXML COMPONENTS (FE UI) ====================
 
     @FXML private FlowPane productGrid;
+    @FXML private StackPane posRoot;
 
     @FXML private ScrollPane categoryScroll;
     @FXML private HBox categoryBar;
@@ -87,6 +101,9 @@ public class POSController {
     @FXML private Label lblTotalAmount;
 
     @FXML private ComboBox<String> cmbPaymentMethod;
+    @FXML private TextField searchField;
+
+    private int currentCategoryId = -1;
 
     // ==================== INIT ====================
 
@@ -100,6 +117,12 @@ public class POSController {
         updateCartDisplay();
         updateTotalAmount();
         loadPOSCacheAsync();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+                filterProducts();
+            });
+        }
     }
 
     /**
@@ -108,13 +131,60 @@ public class POSController {
     private void setupPaymentMethods() {
         cmbPaymentMethod.setItems(FXCollections.observableArrayList(
                 "Tiền mặt",
-                "Thẻ ghi nợ",
                 "QR Pay"
         ));
         cmbPaymentMethod.setValue("Tiền mặt");
     }
 
     // ==================== CHECKOUT EVENTS ====================
+
+    private void playFlyingAnimation(javafx.scene.Node sourceNode, Runnable onFinished) {
+        if (posRoot == null || cartItemsBox == null) {
+            onFinished.run();
+            return;
+        }
+        
+        Bounds sourceBounds = sourceNode.localToScene(sourceNode.getBoundsInLocal());
+        Bounds targetBounds = cartItemsBox.localToScene(cartItemsBox.getBoundsInLocal());
+        
+        Circle flyingDot = new Circle(12, javafx.scene.paint.Color.web("#12b6a2"));
+        flyingDot.setManaged(false);
+        
+        Point2D sourceCenter = new Point2D(
+                sourceBounds.getMinX() + sourceBounds.getWidth() / 2,
+                sourceBounds.getMinY() + sourceBounds.getHeight() / 2
+        );
+        Point2D targetCenter = new Point2D(
+                targetBounds.getMinX() + targetBounds.getWidth() / 2,
+                targetBounds.getMinY() + 40 // Target the top area of the cart
+        );
+        
+        Bounds rootBounds = posRoot.localToScene(posRoot.getBoundsInLocal());
+        
+        flyingDot.setLayoutX(sourceCenter.getX() - rootBounds.getMinX() - 12);
+        flyingDot.setLayoutY(sourceCenter.getY() - rootBounds.getMinY() - 12);
+        
+        posRoot.getChildren().add(flyingDot);
+        
+        TranslateTransition tt = new TranslateTransition(Duration.millis(450), flyingDot);
+        tt.setToX(targetCenter.getX() - sourceCenter.getX());
+        tt.setToY(targetCenter.getY() - sourceCenter.getY());
+        tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        
+        ScaleTransition st = new ScaleTransition(Duration.millis(450), flyingDot);
+        st.setToX(0.4);
+        st.setToY(0.4);
+        
+        FadeTransition ft = new FadeTransition(Duration.millis(450), flyingDot);
+        ft.setToValue(0.3);
+        
+        ParallelTransition pt = new ParallelTransition(tt, st, ft);
+        pt.setOnFinished(e -> {
+            posRoot.getChildren().remove(flyingDot);
+            onFinished.run();
+        });
+        pt.play();
+    }
 
     /**
      * Xử lý khi bấm nút thanh toán.
@@ -124,19 +194,26 @@ public class POSController {
     @FXML
     private void handleCheckout(ActionEvent event) {
         try {
+            // 1. Kiểm tra xem giỏ hàng có trống không và đã chọn phương thức thanh toán chưa
             if (!validateCheckoutCondition()) return;
 
             String paymentMethod = cmbPaymentMethod.getValue();
+            
+            // 2. Mở popup cho phép nhân viên chọn Khách hàng (để tích/trừ điểm)
             CustomerDialogController customerDialog = showCustomerDialog();
 
+            // Nếu nhân viên bấm "Hủy" hoặc đóng popup thì dừng thanh toán
             if (customerDialog == null || !customerDialog.isSubmitted()) {
                 return;
             }
 
+            // 3. Lấy thông tin khách hàng và số điểm họ muốn dùng từ popup
             CustomerDTO selectedCustomer = customerDialog.getSelectedCustomer();
             processCustomerSelection(customerDialog, selectedCustomer);
 
             int usedPoints = selectedCustomer != null ? customerDialog.getPointsToUse() : 0;
+            
+            // 4. Bắt đầu luồng lưu đơn hàng dựa trên phương thức thanh toán (Tiền mặt hoặc mã QR)
             buildAndSaveOrder(paymentMethod, selectedCustomer, usedPoints);
 
         } catch (Exception e) {
@@ -247,27 +324,33 @@ public class POSController {
             CustomerDTO selectedCustomer,
             int usedPoints
     ) {
+        // Tạo một bộ đếm thời gian (Timeline) chạy ngầm
         Timeline timeline = new Timeline();
 
+        // Nếu nhân viên đóng thông báo chờ -> Hủy bỏ việc kiểm tra trạng thái
         waitingAlert.setOnCloseRequest(event -> timeline.stop());
 
+        // Thiết lập vòng lặp: Cứ mỗi 3 giây sẽ thực hiện khối lệnh bên dưới 1 lần
         KeyFrame keyFrame = new KeyFrame(Duration.seconds(3), event ->
                 CompletableFuture
                         .supplyAsync(() -> {
                             try {
+                                // Gọi API lên máy chủ PayOS để hỏi xem mã đơn này khách đã chuyển khoản chưa
                                 return payOSPaymentClient.getStatus(payment.getOrderCode());
                             } catch (Exception e) {
                                 throw new RuntimeException(e);
                             }
                         })
                         .thenAccept(status -> Platform.runLater(() -> {
+                            // Nếu khách ĐÃ CHUYỂN KHOẢN thành công
                             if ("PAID".equalsIgnoreCase(status)) {
-                                timeline.stop();
-                                waitingAlert.close();
-                                completeCheckout(order, selectedCustomer, usedPoints);
+                                timeline.stop();       // Dừng vòng lặp 3 giây
+                                waitingAlert.close();  // Đóng thông báo chờ
+                                completeCheckout(order, selectedCustomer, usedPoints); // Chốt đơn!
                                 return;
                             }
 
+                            // Nếu khách HỦY hoặc GIAO DỊCH LỖI
                             if ("CANCELLED".equalsIgnoreCase(status) || "FAILED".equalsIgnoreCase(status)) {
                                 timeline.stop();
                                 waitingAlert.close();
@@ -281,7 +364,7 @@ public class POSController {
         );
 
         timeline.getKeyFrames().add(keyFrame);
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(Timeline.INDEFINITE); // Cho vòng lặp chạy vô hạn (đến khi gọi stop() thì thôi)
         timeline.play();
     }
 
@@ -290,11 +373,14 @@ public class POSController {
      * Method này dùng chung cho tiền mặt và QR payOS.
      */
     private void completeCheckout(Order order, CustomerDTO selectedCustomer, int usedPoints) {
+        // 1. Gọi OrderService để chính thức lưu Hóa đơn vào CSDL và xử lý điểm thưởng
         boolean success = orderService.checkoutCurrentOrder();
 
         if (success) {
+            // Lấy ra số điểm mà khách vừa được cộng thêm từ hóa đơn này
             int awardedPoints = selectedCustomer != null ? orderService.getLastEarnedPoints() : 0;
 
+            // 2. Hiển thị thông báo thành công và hỏi xem có muốn in/xuất file Bill (PDF) không
             boolean exportBill = DialogHelper.showSuccessWithBillButton(
                     "✓ Thanh toán thành công!",
                     "Tổng tiền: " + FormatUtils.formatPrice(order.getTotalAmount())
@@ -308,10 +394,12 @@ public class POSController {
                             + awardedPoints
             );
 
+            // 3. Nếu nhân viên chọn "Xuất Bill", mở màn hình xem trước hóa đơn
             if (exportBill) {
                 showBillPreviewAfterCheckout(order);
             }
 
+            // 4. Xóa sạch giỏ hàng và làm mới màn hình để chuẩn bị đón khách tiếp theo
             orderService.clearCart();
             refreshCart();
         } else {
@@ -343,10 +431,12 @@ public class POSController {
      */
     private void loadPOSCacheAsync() {
         CompletableFuture
-                .runAsync(() -> posCacheService.loadIfNeeded())
+                .runAsync(() -> {
+                    // Cache removed, do nothing
+                })
                 .thenRun(() -> Platform.runLater(() -> {
                     setupCategoryButtons();
-                    displayProducts(posCacheService.getProducts());
+                    displayProducts(productService.getAllActiveProducts());
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
@@ -362,7 +452,7 @@ public class POSController {
      * Hiển thị lại danh sách sản phẩm từ cache.
      */
     private void loadProductsFromDatabase() {
-        displayProducts(posCacheService.getProducts());
+        displayProducts(productService.getAllActiveProducts());
     }
 
     /**
@@ -370,7 +460,22 @@ public class POSController {
      */
     private void showOnlyToppings() {
         setCategoryVisible(false);
-        displayProducts(posCacheService.getToppings());
+        displayProducts(getToppings());
+    }
+
+    private List<ProductDTO> getToppings() {
+        List<ProductDTO> toppings = new java.util.ArrayList<>();
+        List<com.vtea.model.Topping> tList = orderService.getAllActiveToppings();
+        for (com.vtea.model.Topping t : tList) {
+            ProductDTO pd = new ProductDTO();
+            pd.setProductId(t.getToppingId());
+            pd.setName(t.getName());
+            pd.setPrice(t.getPrice());
+            pd.setCategoryName("Topping");
+            pd.setImageUrl(t.getImageUrl());
+            toppings.add(pd);
+        }
+        return toppings;
     }
 
     // ==================== CATEGORY EVENTS / DISPLAY ====================
@@ -389,19 +494,21 @@ public class POSController {
         allButton.getStyleClass().add("category-btn-active");
         allButton.setOnAction(event -> {
             setActiveButton(allButton);
-            displayProducts(posCacheService.getProducts());
+            currentCategoryId = -1;
+            filterProducts();
         });
         categoryBar.getChildren().add(allButton);
 
         try {
-            List<CategoryDTO> categories = posCacheService.getCategories();
+            List<CategoryDTO> categories = categoryService.getAllActiveCategories();
 
             for (CategoryDTO category : categories) {
                 Button categoryButton = createCategoryButton(category.getName());
 
                 categoryButton.setOnAction(event -> {
                     setActiveButton(categoryButton);
-                    filterByCategory(category.getCategoryId());
+                    currentCategoryId = category.getCategoryId();
+                    filterProducts();
                 });
 
                 categoryBar.getChildren().add(categoryButton);
@@ -422,10 +529,18 @@ public class POSController {
     }
 
     /**
-     * Lọc sản phẩm theo category_id.
+     * Lọc sản phẩm theo category_id và searchText.
      */
-    private void filterByCategory(int categoryId) {
-        displayProducts(posCacheService.getProductsByCategory(categoryId));
+    private void filterProducts() {
+        List<ProductDTO> all = productService.getAllActiveProducts();
+        String searchText = searchField != null ? searchField.getText().toLowerCase().trim() : "";
+        
+        List<ProductDTO> filtered = all.stream()
+            .filter(p -> currentCategoryId == -1 || p.getCategoryId() == currentCategoryId)
+            .filter(p -> searchText.isEmpty() || p.getName().toLowerCase().contains(searchText))
+            .collect(java.util.stream.Collectors.toList());
+            
+        displayProducts(filtered);
     }
 
     // ==================== PRODUCT EVENTS / DISPLAY ====================
@@ -511,11 +626,13 @@ public class POSController {
                 if (toppingMode) {
                     handleAddToppingToTargetItem(product);
                 } else {
-                    handleAddToCart(
-                            product.getProductId(),
-                            product.getName(),
-                            product.getPrice()
-                    );
+                    playFlyingAnimation(cardNode, () -> {
+                        handleAddToCart(
+                                product.getProductId(),
+                                product.getName(),
+                                product.getPrice()
+                        );
+                    });
                 }
             });
 
@@ -742,7 +859,10 @@ public class POSController {
             int toppingId = entry.getKey();
             int qty = entry.getValue();
 
-            ProductDTO topping = posCacheService.findToppingById(toppingId);
+            ProductDTO topping = getToppings().stream()
+                    .filter(t -> t.getProductId() == toppingId)
+                    .findFirst()
+                    .orElse(null);
             String toppingLabel = (topping != null)
                     ? topping.getName() + " (x" + qty + ")"
                     : "Topping#" + toppingId + " (x" + qty + ")";

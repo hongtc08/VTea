@@ -19,7 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+/**
+ * Logic đơn hàng
+ * Thao tác giỏ hàng, tổng tiền, áp dụng điểm thưởng/giảm giá, và thanh toán
+ */
 public class OrderService {
 
     private Order currentOrder;
@@ -29,14 +32,14 @@ public class OrderService {
     private final CustomerDAO customerDAO;
     private List<Topping> cachedActiveToppings;
 
-    // Thong tin lien quan den khach hang va diem thuong
+    // Thông tin khách hàng và điểm thưởng
     private int currentCustomerId = 0;
-    private CustomerDTO currentCustomerInfo = null; // Cache thong tin khach de tinh tien
+    private CustomerDTO currentCustomerInfo = null; // Cache thông tin khách để tạm tính
     private int pointsToUse = 0;
-    private int lastEarnedPoints = 0;
+    private int lastEarnedPoints = 0; //Điểm cộng sau khi thanh toán
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000");
+    public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000"); //quy đổi điểm
 
     public OrderService() {
         this.currentOrder = new Order();
@@ -48,9 +51,13 @@ public class OrderService {
         calculateTotal();
     }
 
-    // ==================== CART METHODS ====================
+    // ==================== THAO TÁC GIỎ ====================
 
+    /**
+     * Thêm món
+     */
     public void addToCart(int productId, String productName, BigDecimal price, int quantity) {
+        //Gọi hàm dưới với topping=empty
         addToCart(productId, productName, price, quantity, Collections.emptyMap());
     }
 
@@ -63,9 +70,12 @@ public class OrderService {
     ) {
         validateCartItem(productId, productName, price, quantity);
 
+        //Loại topping null, <=0
         Map<Integer, Integer> safeToppingQuantities = normalizeToppingQuantities(toppingQuantities);
+
         BigDecimal toppingPrice = calculateToppingPrice(safeToppingQuantities);
 
+        //Tạo DTO và gán giá trị
         OrderDetailDTO newItem = new OrderDetailDTO(
                 productId,
                 productName.trim(),
@@ -81,6 +91,43 @@ public class OrderService {
         calculateTotal();
     }
 
+    /**
+     * Tăng số lượng của một món trong giỏ
+     */
+    public void increaseQuantity(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
+            item.setQuantity(item.getQuantity() + 1);
+            calculateTotal();
+        }
+    }
+
+    /**
+     * Giảm số lượng của một món trong giỏ (xóa nếu bằng 0)
+     */
+    public void decreaseQuantity(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
+            if (item.getQuantity() > 1) {
+                item.setQuantity(item.getQuantity() - 1);
+            } else {
+                cartItems.remove(item);
+            }
+            calculateTotal();
+        }
+    }
+
+    /**
+     * Xóa một món khỏi giỏ hàng
+     */
+    public void removeFromCart(OrderDetailDTO item) {
+        if (item != null && cartItems.contains(item)) {
+            cartItems.remove(item);
+            calculateTotal();
+        }
+    }
+
+    /**
+     * Xóa toàn bộ giỏ hàng
+     */
     public void clearCart() {
         cartItems.clear();
         currentOrder = new Order();
@@ -103,82 +150,16 @@ public class OrderService {
         return currentOrder;
     }
 
-    public void increaseQuantity(OrderDetailDTO item) {
-        if (item != null && cartItems.contains(item)) {
-            item.setQuantity(item.getQuantity() + 1);
-            calculateTotal();
-        }
-    }
-
-    public void decreaseQuantity(OrderDetailDTO item) {
-        if (item != null && cartItems.contains(item)) {
-            if (item.getQuantity() > 1) {
-                item.setQuantity(item.getQuantity() - 1);
-            } else {
-                cartItems.remove(item);
-            }
-            calculateTotal();
-        }
-    }
-
-    public void removeFromCart(OrderDetailDTO item) {
-        if (item != null && cartItems.contains(item)) {
-            cartItems.remove(item);
-            calculateTotal();
-        }
-    }
-
-    // ==================== TOPPING MANIPULATION FOR SPECIFIC ITEM ====================
-
-    public void changeToppingQuantity(OrderDetailDTO item, int toppingId, int delta) {
-        if (item == null || !cartItems.contains(item)) {
-            return;
-        }
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        if (map == null) {
-            map = new HashMap<>();
-        } else {
-            map = new HashMap<>(map);
-        }
-
-        int prev = map.getOrDefault(toppingId, 0);
-        int now = prev + delta;
-
-        if (now <= 0) {
-            map.remove(toppingId);
-        } else {
-            map.put(toppingId, now);
-        }
-
-        item.setToppingQuantities(map);
-        item.setToppingPrice(calculateToppingPrice(map));
-        calculateTotal();
-    }
-
-    public void removeToppingFromItem(OrderDetailDTO item, int toppingId) {
-        if (item == null || !cartItems.contains(item)) {
-            return;
-        }
-
-        Map<Integer, Integer> map = item.getToppingQuantities();
-        if (map == null || !map.containsKey(toppingId)) {
-            return;
-        }
-
-        map = new HashMap<>(map);
-        map.remove(toppingId);
-
-        item.setToppingQuantities(map);
-        item.setToppingPrice(calculateToppingPrice(map));
-        calculateTotal();
-    }
-
+    // ==================== TOPPING ====================
+    /**
+     * Thêm topping
+     */
     public void addToppingToItem(OrderDetailDTO item, int toppingId) {
         if (item == null || !cartItems.contains(item)) {
             throw new IllegalArgumentException("Khong tim thay mon trong gio!");
         }
 
+        //Danh sách topping
         Map<Integer, Integer> map = item.getToppingQuantities();
         if (map == null) {
             map = new HashMap<>();
@@ -194,31 +175,121 @@ public class OrderService {
         calculateTotal();
     }
 
-    // ==================== CHECKOUT METHODS ====================
-
-    public List<OrderDetail> getDetailsForCheckout(int savedOrderId) {
-        List<OrderDetail> detailsForDB = new ArrayList<>();
-
-        for (OrderDetailDTO dto : cartItems) {
-            OrderDetail detail = new OrderDetail(
-                    savedOrderId,
-                    dto.getProductId(),
-                    dto.getQuantity(),
-                    dto.getUnitPrice()
-            );
-
-            detail.setToppingQuantities(dto.getToppingQuantities());
-            detailsForDB.add(detail);
+    /**
+     * Xóa topping
+     */
+    public void removeToppingFromItem(OrderDetailDTO item, int toppingId) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
         }
 
-        return detailsForDB;
+        //Danh sách topping
+        Map<Integer, Integer> map = item.getToppingQuantities();
+        if (map == null || !map.containsKey(toppingId)) {
+            return;
+        }
+
+        map = new HashMap<>(map);
+        map.remove(toppingId);
+
+        item.setToppingQuantities(map);
+        //Tính lại tiền
+        item.setToppingPrice(calculateToppingPrice(map));
+        calculateTotal();
     }
 
+    /**
+     * Thay đổi số lượng topping
+     */
+    public void changeToppingQuantity(OrderDetailDTO item, int toppingId, int delta) {
+        if (item == null || !cartItems.contains(item)) {
+            return;
+        }
+
+        //Danh sách topping
+        Map<Integer, Integer> map = item.getToppingQuantities();
+        if (map == null) {
+            map = new HashMap<>();
+        } else {
+            map = new HashMap<>(map);
+        }
+
+        //Lấy số lượng hiện tại rồi + delta
+        int prev = map.getOrDefault(toppingId, 0);
+        int now = prev + delta;
+
+        if (now <= 0) {
+            map.remove(toppingId);
+        } else {
+            map.put(toppingId, now);
+        }
+
+        item.setToppingQuantities(map);
+        //Tính lại tiền
+        item.setToppingPrice(calculateToppingPrice(map));
+        calculateTotal();
+    }
+
+
+    public java.util.List<Topping> getAllActiveToppings() {
+        return toppingDAO.getAllActiveToppings();
+    }
+
+    // ==================== CUSTOMER & REWARD ====================
+
+    /**
+     * Gắn khách hàng vào đơn hiện tại để áp dụng ưu đãi
+     */
+    public void setCustomer(int customerId) {
+        if (customerId > 0) {
+            this.currentCustomerId = customerId;
+            this.currentOrder.setCustomerId(customerId);
+            this.currentCustomerInfo = customerDAO.getCustomerById(customerId);
+        } else {
+            this.currentCustomerId = 0;
+            this.currentOrder.setCustomerId(null);
+            this.currentCustomerInfo = null;
+        }
+
+        this.pointsToUse = 0;
+        calculateTotal();
+    }
+
+    /**
+     * Sử dụng điểm
+     */
+    public void applyRewardPoints(int points) throws Exception {
+        if (currentCustomerId <= 0 || currentCustomerInfo == null) {
+            throw new Exception("Loi: Vui long chon khach hang thanh vien truoc!");
+        }
+
+        if (currentCustomerInfo.getRewardPoints() < points) {
+            throw new Exception("Loi: Khach hang khong du diem!");
+        }
+
+        this.pointsToUse = points;
+        calculateTotal();
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public int getLastEarnedPoints() {
+        return lastEarnedPoints;
+    }
+
+    // ==================== THANH TOÁN ====================
+
+    /**
+     Lưu DB, trừ/cộng điểm và reset giỏ
+     */
     public boolean checkoutCurrentOrder() {
         if (cartItems.isEmpty()) {
             return false;
         }
 
+        //Lấy ID khách nếu có
         if (currentOrder.getCustomerId() != null && currentOrder.getCustomerId() > 0) {
             currentCustomerId = currentOrder.getCustomerId();
         } else {
@@ -227,6 +298,7 @@ public class OrderService {
             currentCustomerInfo = null;
         }
 
+        //Danh sách chi tiết món
         List<OrderDetail> details = getDetailsForCheckout(0);
         Connection conn = null;
 
@@ -235,20 +307,27 @@ public class OrderService {
             if (conn == null) {
                 throw new java.sql.SQLException("Khong the ket noi den co so du lieu.");
             }
+
+            //Transaction: lưu hóa đơn & điểm thưởng
             conn.setAutoCommit(false);
 
-            // Tinh toan tien lan cuoi cung de dam bao du lieu chinh xac tuyet doi
             calculateTotal();
 
+            //Lưu DB và get ID hóa đơn vừa được tạo
             int savedOrderId = orderDAO.checkoutOrder(conn, currentOrder, details);
 
             if (savedOrderId <= 0) {
                 throw new Exception("Loi he thong: Khong the tao hoa don!");
             }
 
+            // Gắn ID vừa tạo vào đơn hàng hiện tại
             currentOrder.setOrderId(savedOrderId);
 
+
+            //Điểm khách hàng nếu có
             if (currentCustomerId > 0) {
+
+                //Chọn dùng điểm
                 if (pointsToUse > 0) {
                     boolean deducted = customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
                     if (!deducted) {
@@ -256,10 +335,18 @@ public class OrderService {
                     }
                 }
 
-                int pointsEarned = currentOrder.getTotalAmount()
-                        .divide(new BigDecimal("10000"), RoundingMode.DOWN)
-                        .intValue();
+                int pointsEarned = 0;
 
+
+                //Chọn tích điểm
+                if (pointsToUse <= 0) {
+                    pointsEarned = currentOrder.getTotalAmount()
+                            .divide(new BigDecimal("10000"), RoundingMode.DOWN)
+                            .intValue();
+                }
+
+
+                //Lưu điểm DB và ktra hạng
                 if (pointsEarned > 0) {
                     boolean added = customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
                     if (!added) {
@@ -272,13 +359,14 @@ public class OrderService {
 
             conn.commit();
 
+            //Reste cho đơn sau
             currentCustomerId = 0;
             currentCustomerInfo = null;
             pointsToUse = 0;
 
             return true;
 
-        } catch (Exception e) {
+        } catch (Exception e) { //Rollback
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -302,121 +390,36 @@ public class OrderService {
         }
     }
 
-    // ==================== TOPPING HELPERS ====================
+    //Entity khớp DB
+    public List<OrderDetail> getDetailsForCheckout(int savedOrderId) {
+        List<OrderDetail> detailsForDB = new ArrayList<>();
 
-    private Map<Integer, Integer> normalizeToppingQuantities(Map<Integer, Integer> toppingQuantities) {
-        Map<Integer, Integer> normalized = new HashMap<>();
+        for (OrderDetailDTO dto : cartItems) {
+            //Trích xuất dữ liệu DTO và thêm savedOrderId
+            OrderDetail detail = new OrderDetail(
+                    savedOrderId,
+                    dto.getProductId(),
+                    dto.getQuantity(),
+                    dto.getUnitPrice()
+            );
 
-        if (toppingQuantities == null || toppingQuantities.isEmpty()) {
-            return normalized;
+            //Thông tin topping
+            detail.setToppingQuantities(dto.getToppingQuantities());
+            detailsForDB.add(detail);
         }
 
-        for (Map.Entry<Integer, Integer> entry : toppingQuantities.entrySet()) {
-            Integer toppingId = entry.getKey();
-            Integer quantity = entry.getValue();
-
-            if (toppingId == null || toppingId <= 0) {
-                throw new IllegalArgumentException("Topping ID khong hop le!");
-            }
-
-            if (quantity == null || quantity <= 0) {
-                throw new IllegalArgumentException("So luong topping phai lon hon 0!");
-            }
-
-            normalized.put(toppingId, quantity);
-        }
-
-        return normalized;
+        return detailsForDB;
     }
 
-    private BigDecimal calculateToppingPrice(Map<Integer, Integer> toppingQuantities) {
-        if (toppingQuantities == null || toppingQuantities.isEmpty()) {
-            return BigDecimal.ZERO;
-        }
+    // ========================================
 
-        BigDecimal total = BigDecimal.ZERO;
-
-        for (Map.Entry<Integer, Integer> entry : toppingQuantities.entrySet()) {
-            int toppingId = entry.getKey();
-            int quantity = entry.getValue();
-
-            Topping topping = findActiveToppingById(this.cachedActiveToppings, toppingId);
-
-            if (topping == null) {
-                throw new IllegalArgumentException("Topping khong ton tai hoac da ngung ban: " + toppingId);
-            }
-
-            total = total.add(topping.getPrice().multiply(BigDecimal.valueOf(quantity)));
-        }
-
-        return total;
-    }
-
-    private Topping findActiveToppingById(List<Topping> toppings, int toppingId) {
-        for (Topping topping : toppings) {
-            if (topping.getToppingId() == toppingId) {
-                return topping;
-            }
-        }
-        return null;
-    }
-
-    public java.util.List<Topping> getAllActiveToppings() {
-        return toppingDAO.getAllActiveToppings();
-    }
-
-    public Topping findActiveToppingById(int toppingId) {
-        List<Topping> list = toppingDAO.getAllActiveToppings();
-        for (Topping t : list) {
-            if (t.getToppingId() == toppingId) return t;
-        }
-        return null;
-    }
-
-
-    // ==================== CUSTOMER & POINTS METHODS ====================
-
-    public void setCustomer(int customerId) {
-        if (customerId > 0) {
-            this.currentCustomerId = customerId;
-            this.currentOrder.setCustomerId(customerId);
-            this.currentCustomerInfo = customerDAO.getCustomerById(customerId);
-        } else {
-            this.currentCustomerId = 0;
-            this.currentOrder.setCustomerId(null);
-            this.currentCustomerInfo = null;
-        }
-
-        this.pointsToUse = 0;
-        calculateTotal();
-    }
-
-    public void applyRewardPoints(int points) throws Exception {
-        if (currentCustomerId <= 0 || currentCustomerInfo == null) {
-            throw new Exception("Loi: Vui long chon khach hang thanh vien truoc!");
-        }
-
-        if (currentCustomerInfo.getRewardPoints() < points) {
-            throw new Exception("Loi: Khach hang khong du diem!");
-        }
-
-        this.pointsToUse = points;
-        calculateTotal();
-    }
-
-    public BigDecimal getDiscountAmount() {
-        return discountAmount;
-    }
-
-    public int getLastEarnedPoints() {
-        return lastEarnedPoints;
-    }
-
-    // ==================== CALCULATE / VALIDATE METHODS ====================
-
+    /**
+     * Tính toán tổng tiền: tổng món, topping, chiết khấu hạng, điểm thưởng, VAT
+     */
     private void calculateTotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
 
+        //Nước + topping
         for (OrderDetailDTO item: cartItems) {
             subtotal = subtotal.add(item.getSubTotal());
         }
@@ -479,5 +482,63 @@ public class OrderService {
         if (quantity <= 0) {
             throw new IllegalArgumentException("So luong san pham phai lon hon 0!");
         }
+    }
+
+    //Ktra giỏ topping
+    private Map<Integer, Integer> normalizeToppingQuantities(Map<Integer, Integer> toppingQuantities) {
+        Map<Integer, Integer> normalized = new HashMap<>();
+
+        if (toppingQuantities == null || toppingQuantities.isEmpty()) {
+            return normalized;
+        }
+
+        for (Map.Entry<Integer, Integer> entry : toppingQuantities.entrySet()) {
+            Integer toppingId = entry.getKey();
+            Integer quantity = entry.getValue();
+
+            if (toppingId == null || toppingId <= 0) {
+                throw new IllegalArgumentException("Topping ID khong hop le!");
+            }
+
+            if (quantity == null || quantity <= 0) {
+                throw new IllegalArgumentException("So luong topping phai lon hon 0!");
+            }
+
+            normalized.put(toppingId, quantity);
+        }
+
+        return normalized;
+    }
+
+    private BigDecimal calculateToppingPrice(Map<Integer, Integer> toppingQuantities) {
+        if (toppingQuantities == null || toppingQuantities.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Map.Entry<Integer, Integer> entry : toppingQuantities.entrySet()) {
+            int toppingId = entry.getKey();
+            int quantity = entry.getValue();
+
+            Topping topping = findActiveToppingById(this.cachedActiveToppings, toppingId);
+
+            if (topping == null) {
+                throw new IllegalArgumentException("Topping khong ton tai hoac da ngung ban: " + toppingId);
+            }
+
+            total = total.add(topping.getPrice().multiply(BigDecimal.valueOf(quantity)));
+        }
+
+        return total;
+    }
+
+    private Topping findActiveToppingById(List<Topping> toppings, int toppingId) {
+        for (Topping topping : toppings) {
+            if (topping.getToppingId() == toppingId) {
+                return topping;
+            }
+        }
+        return null;
     }
 }
