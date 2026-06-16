@@ -12,18 +12,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Service format nội dung hóa đơn dạng text.
- * Dùng chung cho bill preview, lịch sử hóa đơn và xuất PDF.
+ * Format hóa đơn
  */
 public class BillReceiptFormatter {
 
+    //Rộng 42 ký tự
     private static final int BILL_WIDTH = 42;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    // ========================================
+
     /**
-     * Tạo nội dung hóa đơn dạng bill cửa hàng.
+     * Lấy nội dung từ DTO
      */
     public String format(BillDTO bill) {
         if (bill == null) {
@@ -32,10 +34,12 @@ public class BillReceiptFormatter {
 
         StringBuilder builder = new StringBuilder();
 
+        // --- Tiêu đề
         builder.append(center("VTEA COFFEE")).append("\n");
         builder.append(center("HÓA ĐƠN THANH TOÁN")).append("\n");
         builder.append(line()).append("\n");
 
+        // --- Thông tin hóa đơn, nhân viên, khách hàng
         builder.append(leftRight("Mã HĐ: #" + bill.getOrderId(), formatDateTime(bill))).append("\n");
         builder.append("Nhân viên: ").append(nullToDefault(bill.getStaffName(), "Không rõ")).append("\n");
         builder.append("Khách hàng: ").append(bill.getCustomerName()).append("\n");
@@ -56,15 +60,18 @@ public class BillReceiptFormatter {
         builder.append("Thanh toán: ").append(nullToDefault(bill.getPaymentMethod(), "Không rõ")).append("\n");
         builder.append(line()).append("\n");
 
+        // --- Dòng tiêu đề món ---
         builder.append(String.format("%-22s %3s %7s %8s", "TÊN MÓN", "SL", "GIÁ", "TIỀN")).append("\n");
         builder.append(line()).append("\n");
 
+        // --- List món ---
         BigDecimal subtotal = BigDecimal.ZERO;
 
         for (BillItemDTO item : buildDisplayItems(bill.getItems())) {
             BigDecimal productTotal = item.getProductTotal();
             subtotal = subtotal.add(productTotal);
 
+            // In dòng món chính
             appendItemLine(
                     builder,
                     item.getProductName(),
@@ -73,6 +80,7 @@ public class BillReceiptFormatter {
                     productTotal
             );
 
+            // In các dòng topping (nếu có)
             for (BillToppingDTO topping : item.getToppings()) {
                 BigDecimal toppingTotal = topping.getTotalPrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity()));
@@ -80,15 +88,16 @@ public class BillReceiptFormatter {
                 subtotal = subtotal.add(toppingTotal);
 
                 appendItemLine(
-                        builder,
-                        "  + " + topping.getToppingName(),
-                        topping.getQuantity() * item.getQuantity(),
-                        topping.getUnitPrice(),
-                        toppingTotal
+                    builder,
+                    "  + " + topping.getToppingName(),
+                    topping.getQuantity() * item.getQuantity(),
+                    topping.getUnitPrice(),
+                    toppingTotal
                 );
             }
         }
 
+        // --- Tính tiền ---
         BigDecimal tierDiscount = bill.getTierDiscountAmount();
         BigDecimal pointDiscount = bill.getPointDiscountAmount();
 
@@ -117,98 +126,17 @@ public class BillReceiptFormatter {
         builder.append(moneyLine("Tổng cộng:", total)).append("\n");
         builder.append(line()).append("\n");
 
+        // --- Kết ---
         builder.append(center("Cảm ơn quý khách!")).append("\n");
         builder.append(center("Hẹn gặp lại")).append("\n");
 
         return builder.toString();
     }
 
-    /**
-     * Thêm một dòng món hoặc topping vào bill.
-     */
-    private void appendItemLine(
-            StringBuilder builder,
-            String name,
-            int quantity,
-            BigDecimal unitPrice,
-            BigDecimal total
-    ) {
-        String safeName = shorten(name, 22);
-
-        builder.append(String.format(
-                "%-22s %3d %7s %8s",
-                safeName,
-                quantity,
-                formatShortMoney(unitPrice),
-                formatShortMoney(total)
-        )).append("\n");
-    }
+    // ========================================
 
     /**
-     * Format dòng tiền ở cuối bill.
-     */
-    private String moneyLine(String label, BigDecimal amount) {
-        return leftRight(label, formatMoney(amount));
-    }
-
-    /**
-     * Căn trái - phải trên cùng một dòng.
-     */
-    private String leftRight(String left, String right) {
-        if (left == null) {
-            left = "";
-        }
-
-        if (right == null) {
-            right = "";
-        }
-
-        int space = BILL_WIDTH - left.length() - right.length();
-
-        if (space < 1) {
-            space = 1;
-        }
-
-        return left + " ".repeat(space) + right;
-    }
-
-    /**
-     * Căn giữa tiêu đề bill.
-     */
-    private String center(String text) {
-        if (text == null) {
-            text = "";
-        }
-
-        if (text.length() >= BILL_WIDTH) {
-            return text;
-        }
-
-        int leftPadding = (BILL_WIDTH - text.length()) / 2;
-        return " ".repeat(leftPadding) + text;
-    }
-
-    private String line() {
-        return "-".repeat(BILL_WIDTH);
-    }
-
-    /**
-     * Cắt ngắn tên món để không vỡ cột bill.
-     */
-    private String shorten(String text, int maxLength) {
-        if (text == null) {
-            return "";
-        }
-
-        if (text.length() <= maxLength) {
-            return text;
-        }
-
-        return text.substring(0, maxLength - 1) + ".";
-    }
-    /**
-     * Gom các món giống nhau không có topping để bill hiển thị gọn hơn.
-     * Các món có topping vẫn giữ riêng để tránh sai topping từng ly.
+     * 2 món giống nhau gom số lượng
      */
     private List<BillItemDTO> buildDisplayItems(List<BillItemDTO> items) {
         List<BillItemDTO> displayItems = new ArrayList<>();
@@ -217,17 +145,21 @@ public class BillReceiptFormatter {
         for (BillItemDTO item : items) {
             boolean hasTopping = item.getToppings() != null && !item.getToppings().isEmpty();
 
+            //Có topping -> ko gộp
             if (hasTopping) {
                 displayItems.add(item);
                 continue;
             }
 
+            //Tạo key
             String key = item.getProductId() + "|" + item.getUnitPrice();
 
             if (groupedItems.containsKey(key)) {
+                // Đã có món này rồi -> Cộng dồn số lượng
                 BillItemDTO existingItem = groupedItems.get(key);
                 existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
             } else {
+                // Chưa có -> Tạo bản sao và thêm vào danh sách gộp
                 BillItemDTO copiedItem = new BillItemDTO(
                         item.getDetailId(),
                         item.getProductId(),
@@ -244,35 +176,90 @@ public class BillReceiptFormatter {
 
         return displayItems;
     }
-    private String formatDateTime(BillDTO bill) {
-        if (bill.getCreatedAt() == null) {
-            return "";
-        }
 
+    // ====================CĂN LỀ====================
+
+    /**
+     * Căn trái - phải trên cùng một dòng.
+     */
+    private String leftRight(String left, String right) {
+        if (left == null) left = "";
+        if (right == null) right = "";
+
+        int space = BILL_WIDTH - left.length() - right.length();
+        if (space < 1) space = 1;
+
+        return left + " ".repeat(space) + right;
+    }
+
+    /**
+     * Căn giữa văn bản dựa trên độ rộng hóa đơn.
+     */
+    private String center(String text) {
+        if (text == null) text = "";
+        if (text.length() >= BILL_WIDTH) return text;
+
+        int leftPadding = (BILL_WIDTH - text.length()) / 2;
+        return " ".repeat(leftPadding) + text;
+    }
+
+    /**
+     * Vẽ một đường gạch ngang chia cắt (---)
+     */
+    private String line() {
+        return "-".repeat(BILL_WIDTH);
+    }
+
+    // ==================== FORMAT DỮ LIỆU ====================
+
+    /**
+     * Thêm một dòng hiển thị món ăn hoặc topping theo đúng cột
+     */
+    private void appendItemLine(StringBuilder builder, String name, int quantity, BigDecimal unitPrice, BigDecimal total) {
+        String safeName = shorten(name, 22);
+
+        builder.append(String.format(
+                "%-22s %3d %7s %8s",
+                safeName,
+                quantity,
+                formatShortMoney(unitPrice),
+                formatShortMoney(total)
+        )).append("\n");
+    }
+
+    /**
+     * Cắt ngắn tên quá dài để không bị vỡ bố cục cột của hóa đơn
+     */
+    private String shorten(String text, int maxLength) {
+        if (text == null) return "";
+        if (text.length() <= maxLength) return text;
+        return text.substring(0, maxLength - 1) + ".";
+    }
+
+    /**
+     * Format dòng tiền tệ ở phần tổng kết cuối hóa đơn
+     */
+    private String moneyLine(String label, BigDecimal amount) {
+        return leftRight(label, formatMoney(amount));
+    }
+
+    private String formatDateTime(BillDTO bill) {
+        if (bill.getCreatedAt() == null) return "";
         return bill.getCreatedAt().format(DATE_TIME_FORMATTER);
     }
 
     private String formatMoney(BigDecimal amount) {
-        if (amount == null) {
-            return "0 đ";
-        }
-
+        if (amount == null) return "0 đ";
         return String.format("%,.0f đ", amount);
     }
 
     private String formatShortMoney(BigDecimal amount) {
-        if (amount == null) {
-            return "0";
-        }
-
+        if (amount == null) return "0";
         return String.format("%,.0f", amount);
     }
 
     private String nullToDefault(String value, String defaultValue) {
-        if (value == null || value.isBlank()) {
-            return defaultValue;
-        }
-
+        if (value == null || value.isBlank()) return defaultValue;
         return value;
     }
 }

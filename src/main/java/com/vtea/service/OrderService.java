@@ -36,7 +36,7 @@ public class OrderService {
     private int currentCustomerId = 0;
     private CustomerDTO currentCustomerInfo = null; // Cache thông tin khách để tạm tính
     private int pointsToUse = 0;
-    private int lastEarnedPoints = 0;
+    private int lastEarnedPoints = 0; //Điểm cộng sau khi thanh toán
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
     public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000"); //quy đổi điểm
@@ -235,15 +235,7 @@ public class OrderService {
         return toppingDAO.getAllActiveToppings();
     }
 
-    public Topping findActiveToppingById(int toppingId) {
-        List<Topping> list = toppingDAO.getAllActiveToppings();
-        for (Topping t : list) {
-            if (t.getToppingId() == toppingId) return t;
-        }
-        return null;
-    }
-
-    // ==================== 3. KHÁCH HÀNG & ĐIỂM THƯỞNG ====================
+    // ==================== CUSTOMER & REWARD ====================
 
     /**
      * Gắn khách hàng vào đơn hiện tại để áp dụng ưu đãi
@@ -264,7 +256,7 @@ public class OrderService {
     }
 
     /**
-     * Sử dụng điểm thưởng để giảm giá đơn hàng
+     * Sử dụng điểm
      */
     public void applyRewardPoints(int points) throws Exception {
         if (currentCustomerId <= 0 || currentCustomerInfo == null) {
@@ -287,16 +279,17 @@ public class OrderService {
         return lastEarnedPoints;
     }
 
-    // ==================== 4. XỬ LÝ THANH TOÁN ====================
+    // ==================== THANH TOÁN ====================
 
     /**
-     * Thực hiện thanh toán: lưu DB, trừ/cộng điểm và reset giỏ
+     Lưu DB, trừ/cộng điểm và reset giỏ
      */
     public boolean checkoutCurrentOrder() {
         if (cartItems.isEmpty()) {
             return false;
         }
 
+        //Lấy ID khách nếu có
         if (currentOrder.getCustomerId() != null && currentOrder.getCustomerId() > 0) {
             currentCustomerId = currentOrder.getCustomerId();
         } else {
@@ -305,6 +298,7 @@ public class OrderService {
             currentCustomerInfo = null;
         }
 
+        //Danh sách chi tiết món
         List<OrderDetail> details = getDetailsForCheckout(0);
         Connection conn = null;
 
@@ -313,20 +307,27 @@ public class OrderService {
             if (conn == null) {
                 throw new java.sql.SQLException("Khong the ket noi den co so du lieu.");
             }
+
+            //Transaction: lưu hóa đơn & điểm thưởng
             conn.setAutoCommit(false);
 
-            // Tính tiền lần cuối trước khi lưu
             calculateTotal();
 
+            //Lưu DB và get ID hóa đơn vừa được tạo
             int savedOrderId = orderDAO.checkoutOrder(conn, currentOrder, details);
 
             if (savedOrderId <= 0) {
                 throw new Exception("Loi he thong: Khong the tao hoa don!");
             }
 
+            // Gắn ID vừa tạo vào đơn hàng hiện tại
             currentOrder.setOrderId(savedOrderId);
 
+
+            //Điểm khách hàng nếu có
             if (currentCustomerId > 0) {
+
+                //Chọn dùng điểm
                 if (pointsToUse > 0) {
                     boolean deducted = customerDAO.deductRewardPoints(conn, currentCustomerId, pointsToUse);
                     if (!deducted) {
@@ -335,12 +336,17 @@ public class OrderService {
                 }
 
                 int pointsEarned = 0;
+
+
+                //Chọn tích điểm
                 if (pointsToUse <= 0) {
                     pointsEarned = currentOrder.getTotalAmount()
                             .divide(new BigDecimal("10000"), RoundingMode.DOWN)
                             .intValue();
                 }
 
+
+                //Lưu điểm DB và ktra hạng
                 if (pointsEarned > 0) {
                     boolean added = customerDAO.addPointsAndUpgradeTier(conn, currentCustomerId, pointsEarned);
                     if (!added) {
@@ -353,13 +359,14 @@ public class OrderService {
 
             conn.commit();
 
+            //Reste cho đơn sau
             currentCustomerId = 0;
             currentCustomerInfo = null;
             pointsToUse = 0;
 
             return true;
 
-        } catch (Exception e) {
+        } catch (Exception e) { //Rollback
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -383,10 +390,12 @@ public class OrderService {
         }
     }
 
+    //Entity khớp DB
     public List<OrderDetail> getDetailsForCheckout(int savedOrderId) {
         List<OrderDetail> detailsForDB = new ArrayList<>();
 
         for (OrderDetailDTO dto : cartItems) {
+            //Trích xuất dữ liệu DTO và thêm savedOrderId
             OrderDetail detail = new OrderDetail(
                     savedOrderId,
                     dto.getProductId(),
@@ -394,6 +403,7 @@ public class OrderService {
                     dto.getUnitPrice()
             );
 
+            //Thông tin topping
             detail.setToppingQuantities(dto.getToppingQuantities());
             detailsForDB.add(detail);
         }
@@ -401,7 +411,7 @@ public class OrderService {
         return detailsForDB;
     }
 
-    // ==================== 5. TIỆN ÍCH NỘI BỘ ====================
+    // ========================================
 
     /**
      * Tính toán tổng tiền: tổng món, topping, chiết khấu hạng, điểm thưởng, VAT
@@ -409,6 +419,7 @@ public class OrderService {
     private void calculateTotal() {
         BigDecimal subtotal = BigDecimal.ZERO;
 
+        //Nước + topping
         for (OrderDetailDTO item: cartItems) {
             subtotal = subtotal.add(item.getSubTotal());
         }
@@ -473,6 +484,7 @@ public class OrderService {
         }
     }
 
+    //Ktra giỏ topping
     private Map<Integer, Integer> normalizeToppingQuantities(Map<Integer, Integer> toppingQuantities) {
         Map<Integer, Integer> normalized = new HashMap<>();
 
