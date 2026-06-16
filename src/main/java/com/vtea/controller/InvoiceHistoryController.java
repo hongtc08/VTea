@@ -28,7 +28,7 @@ import java.util.Map;
 
 /**
  * Controller cho tab lịch sử hóa đơn.
- * Màn này chỉ load danh sách hóa đơn cơ bản, khi bấm Chi tiết mới query full bill.
+ * Load danh sách hóa đơn cơ bản, khi bấm Chi tiết mới query full bill.
  */
 public class InvoiceHistoryController {
 
