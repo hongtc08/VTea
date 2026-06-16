@@ -1,13 +1,13 @@
 package com.vtea.dao;
 
 import com.vtea.dto.CustomerDTO;
+import com.vtea.dto.CustomerStatsDTO;
 import com.vtea.model.Customer;
 import com.vtea.utils.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomerDAO {
 
@@ -165,8 +165,8 @@ public class CustomerDAO {
         return false;
     }
 
-    public java.util.List<CustomerDTO> getAllCustomers() {
-        java.util.List<CustomerDTO> list = new java.util.ArrayList<>();
+    public List<CustomerDTO> getAllCustomers() {
+        List<CustomerDTO> list = new ArrayList<>();
         String query = "SELECT c.*, t.tier_name, t.discount_percent, " +
                 "(SELECT MAX(created_at) FROM `order` o WHERE o.customer_id = c.customer_id AND o.status = 'PAID') as last_purchase " +
                 "FROM customer c " +
@@ -188,7 +188,7 @@ public class CustomerDAO {
                 customer.setTierName(rs.getString("tier_name"));
                 customer.setDiscountPercent(rs.getInt("discount_percent"));
                 
-                java.sql.Timestamp lastPurchaseTs = rs.getTimestamp("last_purchase");
+                Timestamp lastPurchaseTs = rs.getTimestamp("last_purchase");
                 if (lastPurchaseTs != null) {
                     customer.setLastPurchase(lastPurchaseTs.toLocalDateTime());
                 }
@@ -198,11 +198,6 @@ public class CustomerDAO {
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("SQL ERROR IN GET ALL CUSTOMERS: " + e.getMessage());
-            try {
-                java.io.FileWriter fw = new java.io.FileWriter("C:\\Users\\Hp\\source\\repos\\VTea\\db_error.txt");
-                fw.write(e.getMessage());
-                fw.close();
-            } catch (Exception ex) {}
         }
         return list;
     }
@@ -221,7 +216,7 @@ public class CustomerDAO {
              ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                return new com.vtea.dto.CustomerStatsDTO(
+                return new CustomerStatsDTO(
                         rs.getInt("total_customers"),
                         rs.getInt("diamond_count"),
                         rs.getInt("gold_count"),
@@ -231,7 +226,7 @@ public class CustomerDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new com.vtea.dto.CustomerStatsDTO(0, 0, 0, 0);
+        return new CustomerStatsDTO(0, 0, 0, 0);
     }
 
     public boolean updateCustomer(CustomerDTO customer) {

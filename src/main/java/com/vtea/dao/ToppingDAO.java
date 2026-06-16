@@ -67,34 +67,6 @@ public class ToppingDAO {
         return null;
     }
 
-    /**
-     * Dành cho màn hình Quản lý (Admin):
-     * Lấy TOÀN BỘ danh sách topping (kể cả những món đã tạm ngưng)
-     */
-    public List<Topping> getAllToppingsForAdmin() {
-        List<Topping> toppingList = new ArrayList<>();
-        String query = "SELECT * FROM topping";
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Topping topping = new Topping();
-                topping.setToppingId(rs.getInt("topping_id"));
-                topping.setName(rs.getString("name"));
-                topping.setPrice(rs.getBigDecimal("price"));
-                topping.setImageUrl(rs.getString("image_url"));
-                topping.setAvailable(rs.getBoolean("is_available"));
-
-                toppingList.add(topping);
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy toàn bộ danh sách Topping: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return toppingList;
-    }
 
     /**
      * Thêm Topping mới

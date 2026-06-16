@@ -5,6 +5,7 @@ import com.vtea.dto.CategoryDTO;
 import com.vtea.dto.CustomerDTO;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.dto.ProductDTO;
+import com.vtea.dto.UserSessionDTO;
 import com.vtea.model.Order;
 import com.vtea.service.BillService;
 import com.vtea.service.OrderService;
@@ -14,6 +15,7 @@ import com.vtea.service.payment.PayOSCreateResponse;
 import com.vtea.service.payment.PayOSPaymentClient;
 import com.vtea.utils.DialogHelper;
 import com.vtea.utils.FormatUtils;
+import com.vtea.utils.SessionManager;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -76,7 +78,6 @@ public class POSController {
     private final PayOSPaymentClient payOSPaymentClient = new PayOSPaymentClient();
 
 
-
     // Trạng thái thêm topping cho một món trong giỏ.
     private boolean toppingMode = false;
 
@@ -112,6 +113,15 @@ public class POSController {
      */
     @FXML
     public void initialize() {
+        // Lấy ID của user đang đăng nhập từ SessionManager
+        UserSessionDTO currentUser = SessionManager.getCurrentUser();
+        if (currentUser != null) {
+            this.currentUserId = currentUser.getId();
+        } else {
+            // Nếu không có user đăng nhập, dùng ID mặc định
+            this.currentUserId = 1;
+        }
+
         setupPaymentMethods();
         updateCartDisplay();
         updateTotalAmount();
