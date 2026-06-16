@@ -8,10 +8,10 @@
 
 
 
-<HBox xmlns="http://javafx.com/javafx/17"
+<StackPane fx:id="posRoot" xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.vtea.controller.POSController"
-      spacing="20" styleClass="screen-root">
+      fx:controller="com.vtea.controller.POSController">
+      <HBox spacing="20" styleClass="screen-root">
 
     <stylesheets>
         <URL value="@../css/styles.css" />
@@ -53,6 +53,25 @@
                 </padding>
             </FlowPane>
         </ScrollPane>
+
+        <!-- Keyboard shortcuts guide -->
+        <HBox alignment="CENTER" spacing="20" styleClass="pos-shortcut-bar">
+            <HBox alignment="CENTER" spacing="6">
+                <Label text="Phím tắt:" style="-fx-text-fill: #78716c; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+            </HBox>
+            <HBox alignment="CENTER" spacing="6">
+                <Label text="F1" styleClass="kbd-key"/>
+                <Label text="Bật Bán hàng" styleClass="kbd-desc"/>
+            </HBox>
+            <HBox alignment="CENTER" spacing="6">
+                <Label text="F12" styleClass="kbd-key"/>
+                <Label text="Thanh toán" styleClass="kbd-desc"/>
+            </HBox>
+            <HBox alignment="CENTER" spacing="6">
+                <Label text="Esc" styleClass="kbd-key"/>
+                <Label text="Hủy / Xóa giỏ" styleClass="kbd-desc"/>
+            </HBox>
+        </HBox>
 
     </VBox>
 
@@ -130,3 +149,4 @@
     </VBox>
 
 </HBox>
+</StackPane>

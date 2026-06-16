@@ -41,6 +41,17 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import javafx.scene.layout.StackPane;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ScaleTransition;
+import javafx.animation.FadeTransition;
+import javafx.animation.ParallelTransition;
+import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
 
 /**
  * Controller cho màn hình POS bán hàng.
@@ -75,6 +86,7 @@ public class POSController {
     // ==================== FXML COMPONENTS (FE UI) ====================
 
     @FXML private FlowPane productGrid;
+    @FXML private StackPane posRoot;
 
     @FXML private ScrollPane categoryScroll;
     @FXML private HBox categoryBar;
@@ -101,6 +113,23 @@ public class POSController {
         updateCartDisplay();
         updateTotalAmount();
         loadPOSCacheAsync();
+
+        if (posRoot != null) {
+            posRoot.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    newScene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                        if (posRoot.getScene() != newScene) return;
+                        if (event.getCode() == javafx.scene.input.KeyCode.F12) {
+                            handleCheckout(null);
+                            event.consume();
+                        } else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                            handleClearCart(null);
+                            event.consume();
+                        }
+                    });
+                }
+            });
+        }
     }
 
     /**
@@ -109,13 +138,60 @@ public class POSController {
     private void setupPaymentMethods() {
         cmbPaymentMethod.setItems(FXCollections.observableArrayList(
                 "Tiền mặt",
-                "Thẻ ghi nợ",
                 "QR Pay"
         ));
         cmbPaymentMethod.setValue("Tiền mặt");
     }
 
     // ==================== CHECKOUT EVENTS ====================
+
+    private void playFlyingAnimation(javafx.scene.Node sourceNode, Runnable onFinished) {
+        if (posRoot == null || cartItemsBox == null) {
+            onFinished.run();
+            return;
+        }
+        
+        Bounds sourceBounds = sourceNode.localToScene(sourceNode.getBoundsInLocal());
+        Bounds targetBounds = cartItemsBox.localToScene(cartItemsBox.getBoundsInLocal());
+        
+        Circle flyingDot = new Circle(12, javafx.scene.paint.Color.web("#12b6a2"));
+        flyingDot.setManaged(false);
+        
+        Point2D sourceCenter = new Point2D(
+                sourceBounds.getMinX() + sourceBounds.getWidth() / 2,
+                sourceBounds.getMinY() + sourceBounds.getHeight() / 2
+        );
+        Point2D targetCenter = new Point2D(
+                targetBounds.getMinX() + targetBounds.getWidth() / 2,
+                targetBounds.getMinY() + 40 // Target the top area of the cart
+        );
+        
+        Bounds rootBounds = posRoot.localToScene(posRoot.getBoundsInLocal());
+        
+        flyingDot.setLayoutX(sourceCenter.getX() - rootBounds.getMinX() - 12);
+        flyingDot.setLayoutY(sourceCenter.getY() - rootBounds.getMinY() - 12);
+        
+        posRoot.getChildren().add(flyingDot);
+        
+        TranslateTransition tt = new TranslateTransition(Duration.millis(450), flyingDot);
+        tt.setToX(targetCenter.getX() - sourceCenter.getX());
+        tt.setToY(targetCenter.getY() - sourceCenter.getY());
+        tt.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        
+        ScaleTransition st = new ScaleTransition(Duration.millis(450), flyingDot);
+        st.setToX(0.4);
+        st.setToY(0.4);
+        
+        FadeTransition ft = new FadeTransition(Duration.millis(450), flyingDot);
+        ft.setToValue(0.3);
+        
+        ParallelTransition pt = new ParallelTransition(tt, st, ft);
+        pt.setOnFinished(e -> {
+            posRoot.getChildren().remove(flyingDot);
+            onFinished.run();
+        });
+        pt.play();
+    }
 
     /**
      * Xử lý khi bấm nút thanh toán.
@@ -530,11 +606,13 @@ public class POSController {
                 if (toppingMode) {
                     handleAddToppingToTargetItem(product);
                 } else {
-                    handleAddToCart(
-                            product.getProductId(),
-                            product.getName(),
-                            product.getPrice()
-                    );
+                    playFlyingAnimation(cardNode, () -> {
+                        handleAddToCart(
+                                product.getProductId(),
+                                product.getName(),
+                                product.getPrice()
+                        );
+                    });
                 }
             });
 

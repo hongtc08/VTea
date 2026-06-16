@@ -33,6 +33,11 @@ public class MainApp extends Application {
         
         primaryStage = stage;
         primaryStage.setTitle("VTea - POS & Quản lý");
+        try {
+            primaryStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/images/logo.png")));
+        } catch (Exception e) {
+            System.out.println("Could not load app icon: " + e.getMessage());
+        }
         setRoot("login");
         primaryStage.show();
     }

@@ -21,6 +21,15 @@
             <Label text="Cập nhật danh sách món ăn và giá bán của hệ thống Vtea" styleClass="screen-subtitle"/>
         </VBox>
 
+        <Button fx:id="btnManageCategory" onAction="#handleManageCategory" styleClass="btn-secondary">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <FontIcon iconLiteral="fth-folder" iconColor="#523628" iconSize="18"/>
+                    <Label text="Quản lý danh mục" style="-fx-text-fill: #523628; -fx-font-weight: bold;"/>
+                </HBox>
+            </graphic>
+        </Button>
+
         <Button fx:id="btnToggleToppingMode" onAction="#handleToggleToppingMode" styleClass="btn-secondary">
             <graphic>
                 <HBox spacing="8" alignment="CENTER">
