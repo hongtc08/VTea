@@ -363,13 +363,4 @@ public class LoginController {
                     return null;
                 });
     }
-
-    // 4. Hàm tiện ích để hiển thị Popup thông báo cho gọn code
-    private void showAlert(Alert.AlertType alertType, String title, String content) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
 }
