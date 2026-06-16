@@ -122,41 +122,6 @@ public class ReportDAO {
         return list;
     }
 
-    /**
-     * Thống kê Doanh thu theo Phương thức thanh toán
-     */
-    public List<PaymentMethodRevenueDTO> getRevenueByPaymentMethod(LocalDate startDate, LocalDate endDate) {
-        List<PaymentMethodRevenueDTO> list = new ArrayList<>();
-
-        String sql = """
-                SELECT o.payment_method, COUNT(o.order_id) AS total_orders, SUM(o.total_amount) AS total_revenue
-                FROM `order` o        
-                WHERE o.status = 'PAID' AND o.created_at BETWEEN ? AND ?
-                GROUP BY o.payment_method
-                ORDER BY total_revenue DESC
-                """;
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setObject(1, startDate);
-            ps.setObject(2, endDate);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    PaymentMethodRevenueDTO dto = new PaymentMethodRevenueDTO();
-                    dto.setPaymentMethod(rs.getString("payment_method"));
-                    dto.setTotalOrders(rs.getInt("total_orders"));
-                    dto.setTotalRevenue(rs.getBigDecimal("total_revenue"));
-                    list.add(dto);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi lấy doanh thu theo phương thức thanh toán: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
 
     /**
      * doanh thu trong một khoảng thời gian
@@ -194,40 +159,5 @@ public class ReportDAO {
         return list;
     }
 
-    /**
-     * doanh thu theo TỪNG THÁNG trong một năm cụ thể
-     */
-    public List<TimeRevenueDTO> getRevenueByMonth(int year){
-        List<TimeRevenueDTO> list = new ArrayList<>();
-
-        String sql = """
-                SELECT MONTH(created_at) AS month, COUNT(order_id) AS total_orders, SUM(total_amount) AS total_revenue
-                FROM `order` o 
-                WHERE status = 'PAID' AND YEAR(created_at) = ?
-                GROUP BY MONTH(created_at)
-                ORDER BY month ASC
-                """;
-
-        try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
-
-            ps.setInt(1, year);
-
-            try(ResultSet rs = ps.executeQuery()){
-                while(rs.next()){
-                    TimeRevenueDTO dto = new TimeRevenueDTO();
-                    int m = rs.getInt("month");
-                    dto.setTimeLabel("Tháng " + (m < 10 ? "0" + m : m));
-                    dto.setTotalOrders(rs.getInt("total_orders"));
-                    dto.setTotalRevenue(rs.getBigDecimal("total_revenue"));
-                    list.add(dto);
-                }
-            }
-        } catch (SQLException e){
-            System.err.println("Lỗi thống kê doanh thu theo tháng: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return list;
-    }
 }
 
