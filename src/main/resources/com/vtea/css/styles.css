@@ -2261,3 +2261,25 @@
 
 
 
+
+/* Large POS Button */
+.pos-prominent-btn-large {
+    -fx-background-color: linear-gradient(to bottom right, #795548, #4e342e);
+    -fx-text-fill: white;
+    -fx-background-radius: 16;
+    -fx-padding: 24 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);
+}
+.pos-prominent-btn-large:hover {
+    -fx-background-color: linear-gradient(to bottom right, #8d6e63, #5d4037);
+    -fx-translate-y: -2px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 6);
+}
+
+
+.pos-prominent-btn-large.nav-btn-active {
+    -fx-background-color: linear-gradient(to bottom right, #5d4037, #3e2723);
+    -fx-effect: dropshadow(three-pass-box, rgba(18, 182, 162, 0.8), 20, 0.4, 0, 0);
+}
+

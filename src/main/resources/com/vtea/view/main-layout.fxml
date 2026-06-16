@@ -97,25 +97,7 @@
                 </graphic>
             </Button>
 
-            <Button fx:id="btnPOS"
-                    styleClass="pos-prominent-btn"
-                    maxWidth="Infinity"
-                    onAction="#handlePOS">
-                <graphic>
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <StackPane style="-fx-background-color: rgba(255,255,255,0.15); -fx-background-radius: 8; -fx-padding: 8;">
-                            <FontIcon iconLiteral="fth-shopping-cart" iconSize="24" iconColor="white"/>
-                        </StackPane>
-                        <VBox alignment="CENTER_LEFT" spacing="2" HBox.hgrow="ALWAYS">
-                            <HBox alignment="CENTER_LEFT" spacing="4">
-                                <Label text="POS" style="-fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: white;" minWidth="-Infinity"/>
-                                <Label text="BÁN HÀNG" styleClass="pos-badge" minWidth="-Infinity"/>
-                            </HBox>
-                        </VBox>
-                        <FontIcon iconLiteral="fth-zap" iconSize="18" styleClass="pos-lightning-icon"/>
-                    </HBox>
-                </graphic>
-            </Button>
+
 
             <Button fx:id="btnMenu"
                     text="Thực đơn"
@@ -174,6 +156,34 @@
                     onAction="#handleReport">
                 <graphic>
                     <FontIcon iconLiteral="fth-pie-chart" styleClass="sidebar-icon" iconSize="18"/>
+                </graphic>
+            </Button>
+
+            <!-- Spacer to push POS button to bottom -->
+            <Region VBox.vgrow="ALWAYS" />
+
+            <Button fx:id="btnPOS"
+                    styleClass="pos-prominent-btn-large"
+                    maxWidth="Infinity"
+                    onAction="#handlePOS">
+                <graphic>
+                    <VBox alignment="CENTER" spacing="12">
+                        <!-- Icon area with circular background -->
+                        <StackPane style="-fx-background-color: rgba(255,255,255,0.2); -fx-background-radius: 50; -fx-min-width: 64; -fx-min-height: 64; -fx-max-width: 64; -fx-max-height: 64;">
+                            <FontIcon iconLiteral="fth-shopping-cart" iconSize="32" iconColor="white"/>
+                            <!-- Lightning badge at the top right of the circle -->
+                            <StackPane StackPane.alignment="TOP_RIGHT" translateX="5" translateY="-5" 
+                                       style="-fx-background-color: #12b6a2; -fx-background-radius: 12; -fx-padding: 4; -fx-max-width: 24; -fx-max-height: 24;">
+                                <FontIcon iconLiteral="fth-zap" iconSize="14" iconColor="white"/>
+                            </StackPane>
+                        </StackPane>
+                        
+                        <!-- Text area -->
+                        <VBox alignment="CENTER" spacing="4">
+                            <Label text="POS" style="-fx-font-size: 24px; -fx-font-weight: 900; -fx-text-fill: white;"/>
+                            <Label text="MÀN HÌNH BÁN HÀNG" styleClass="pos-badge" style="-fx-font-size: 11px; -fx-padding: 4 8;"/>
+                        </VBox>
+                    </VBox>
                 </graphic>
             </Button>
         </VBox>
