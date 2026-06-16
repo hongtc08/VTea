@@ -136,6 +136,22 @@ public class MenuController {
     }
 
     @FXML
+    private void handleManageCategory(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/category-manager.fxml"));
+            javafx.scene.Parent root = loader.load();
+            
+            showFormStage(root);
+            
+            // Sau khi đóng dialog, nạp lại cache và tải lại view
+            loadData();
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form quản lý danh mục: " + e.getMessage());
+        }
+    }
+
+    @FXML
     private void handleToggleToppingMode(ActionEvent event) {
         toppingMode = !toppingMode;
 

@@ -19,19 +19,29 @@
 
 
     <!-- ===== LEFT PANEL: Branding ===== -->
-    <StackPane styleClass="login-left-panel" HBox.hgrow="ALWAYS">
+    <StackPane styleClass="login-left-panel" HBox.hgrow="ALWAYS" style="-fx-clip: null;">
 
-        <!-- Background Overlay -->
-        <Region styleClass="background-overlay" />
+        <!-- Animated Scrolling Background -->
+        <Pane fx:id="scrollingBackgroundPane" />
+
+        <!-- Background Overlay to darken images for text readability -->
+        <Region styleClass="background-overlay" style="-fx-background-color: linear-gradient(to right, rgba(28,25,23,0.85), rgba(28,25,23,0.4));" />
 
         <!-- Content -->
         <VBox alignment="CENTER_LEFT" spacing="0">
             <padding><Insets bottom="80" left="80" right="80" top="80" /></padding>
 
             <!-- Logo Icon -->
-            <StackPane maxHeight="88" maxWidth="88" styleClass="logo-icon-box">
+            <StackPane maxHeight="100" maxWidth="100" styleClass="logo-icon-box" style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
                 <VBox.margin><Insets bottom="32" /></VBox.margin>
-                <FontIcon iconLiteral="fth-coffee" styleClass="logo-icon" iconSize="42" iconColor="#4db6ac"/>
+                <ImageView fitWidth="120" fitHeight="120" preserveRatio="true" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+                    <image>
+                        <Image url="@/images/logo.png" />
+                    </image>
+                    <clip>
+                        <Rectangle width="120" height="120" arcWidth="30" arcHeight="30" />
+                    </clip>
+                </ImageView>
             </StackPane>
 
             <!-- Brand Name -->

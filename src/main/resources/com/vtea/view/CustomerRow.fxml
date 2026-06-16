@@ -19,12 +19,12 @@
     <Label fx:id="lblName" styleClass="row-text-main" prefWidth="200" wrapText="true"/>
     
     <HBox alignment="CENTER_LEFT" prefWidth="150" spacing="8">
-        <FontIcon iconLiteral="fth-phone" iconSize="14" iconColor="#a8a29e"/>
+        <FontIcon iconLiteral="fth-phone" iconSize="14" styleClass="icon-grey"/>
         <Label fx:id="lblPhone" styleClass="row-text-sub"/>
     </HBox>
     
     <HBox alignment="CENTER_LEFT" prefWidth="120" spacing="6">
-        <FontIcon iconLiteral="fth-star" iconSize="14" iconColor="#eab308"/>
+        <FontIcon iconLiteral="fth-star" iconSize="14" styleClass="icon-yellow"/>
         <Label fx:id="lblPoints" styleClass="row-text-main" style="-fx-font-weight: 700;"/>
     </HBox>
     
@@ -33,21 +33,28 @@
     </HBox>
     
     <HBox alignment="CENTER_LEFT" prefWidth="200" spacing="8">
-        <FontIcon iconLiteral="fth-clock" iconSize="14" iconColor="#a8a29e"/>
+        <FontIcon iconLiteral="fth-clock" iconSize="14" styleClass="icon-grey"/>
         <Label fx:id="lblLastPurchase" styleClass="row-text-sub"/>
     </HBox>
     
-    <HBox alignment="CENTER" prefWidth="80" spacing="12">
-        <Button styleClass="btn-icon-only" onAction="#handleEdit">
+    <HBox alignment="CENTER" prefWidth="80">
+        <MenuButton styleClass="btn-icon-only, kebab-menu">
             <graphic>
-                <FontIcon iconLiteral="fth-edit-2" iconSize="16" styleClass="action-icon"/>
+                <FontIcon iconLiteral="fth-more-vertical" iconSize="18" styleClass="action-icon"/>
             </graphic>
-        </Button>
-        <Button styleClass="btn-icon-only" onAction="#handleDelete">
-            <graphic>
-                <FontIcon iconLiteral="fth-trash-2" iconSize="16" styleClass="action-icon, action-icon-danger"/>
-            </graphic>
-        </Button>
+            <items>
+                <MenuItem text="Sửa" onAction="#handleEdit">
+                    <graphic>
+                        <FontIcon iconLiteral="fth-edit-2" iconSize="16" styleClass="action-icon"/>
+                    </graphic>
+                </MenuItem>
+                <MenuItem text="Xóa" onAction="#handleDelete">
+                    <graphic>
+                        <FontIcon iconLiteral="fth-trash-2" iconSize="16" styleClass="action-icon, action-icon-danger"/>
+                    </graphic>
+                </MenuItem>
+            </items>
+        </MenuButton>
     </HBox>
     
 </HBox>

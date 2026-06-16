@@ -9,6 +9,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.StackPane;
 import com.vtea.utils.DialogHelper;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
 import javafx.animation.FadeTransition;
@@ -22,6 +23,53 @@ public class MainLayoutController {
     @FXML private javafx.scene.control.Label userInitialLabel;
     @FXML private javafx.scene.control.Label userNameLabel;
     @FXML private javafx.scene.control.Label userRoleLabel;
+    @FXML private FontIcon adminCrownIcon;
+
+    @FXML private javafx.scene.control.Button btnDashboard;
+    @FXML private javafx.scene.control.Button btnPOS;
+    @FXML private javafx.scene.control.Button btnMenu;
+    @FXML private javafx.scene.control.Button btnInventory;
+    @FXML private javafx.scene.control.Button btnEmployee;
+    @FXML private javafx.scene.control.Button btnCustomer;
+    @FXML private javafx.scene.control.Button btnInvoice;
+    @FXML private javafx.scene.control.Button btnReport;
+
+    private void applyRoleBasedAccessControl() {
+        if (!com.vtea.utils.SessionManager.isAdmin()) {
+            // Hide admin-only buttons for Staff (Menu, Employee, Report, Customer)
+            if (btnMenu != null) {
+                btnMenu.setVisible(false);
+                btnMenu.setManaged(false);
+            }
+            if (btnEmployee != null) {
+                btnEmployee.setVisible(false);
+                btnEmployee.setManaged(false);
+            }
+            if (btnReport != null) {
+                btnReport.setVisible(false);
+                btnReport.setManaged(false);
+            }
+            if (btnCustomer != null) {
+                btnCustomer.setVisible(false);
+                btnCustomer.setManaged(false);
+            }
+            if (adminCrownIcon != null) {
+                adminCrownIcon.setVisible(false);
+            }
+        } else {
+            if (adminCrownIcon != null) {
+                adminCrownIcon.setVisible(true);
+            }
+        }
+    }
+
+    private void setActiveNav(javafx.scene.control.Button activeBtn) {
+        javafx.scene.control.Button[] allBtns = {btnDashboard, btnPOS, btnMenu, btnInventory, btnEmployee, btnCustomer, btnInvoice, btnReport};
+        for (javafx.scene.control.Button b : allBtns) {
+            if (b != null) b.getStyleClass().remove("nav-btn-active");
+        }
+        if (activeBtn != null) activeBtn.getStyleClass().add("nav-btn-active");
+    }
 
     @FXML
     public void initialize() {
@@ -38,37 +86,66 @@ public class MainLayoutController {
             }
         }
 
+        applyRoleBasedAccessControl();
+
         // Mặc định load màn hình dashboard đầu tiên
         loadView("dashboard");
+        setActiveNav(btnDashboard);
+
+        contentArea.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                    if (event.getCode() == javafx.scene.input.KeyCode.F1) {
+                        handlePOS(null);
+                        event.consume();
+                    }
+                });
+            }
+        });
     }
 
     @FXML
     private void handleDashboard(ActionEvent event) {
         loadView("dashboard");
+        setActiveNav(btnDashboard);
     }
 
     @FXML
     private void handlePOS(ActionEvent event) {
         loadView("pos");
+        setActiveNav(btnPOS);
     }
 
     // Thêm hàm xử lý nút Thực đơn
     @FXML
     private void handleMenu(ActionEvent event) {
         loadView("menu");
+        setActiveNav(btnMenu);
     }
 
     @FXML
-    public void handleInventory(ActionEvent actionEvent) {loadView("inventory");}
+    public void handleInventory(ActionEvent event) {
+        loadView("inventory");
+        setActiveNav(btnInventory);
+    }
 
     @FXML
-    public void handleEmployee(ActionEvent actionEvent) {loadView("employee");}
+    public void handleEmployee(ActionEvent event) {
+        loadView("employee");
+        setActiveNav(btnEmployee);
+    }
 
     @FXML
-    public void handleCustomer(ActionEvent actionEvent) {loadView("customer");}
+    public void handleCustomer(ActionEvent event) {
+        loadView("customer");
+        setActiveNav(btnCustomer);
+    }
 
     @FXML
-    public void handleInvoiceHistory(ActionEvent actionEvent) {loadView("invoiceHistory");}
+    public void handleInvoiceHistory(ActionEvent actionEvent) {
+        loadView("invoiceHistory");
+        setActiveNav(btnInvoice);
+    }
 
     @FXML
     private void handleLogout(ActionEvent event) {
@@ -77,8 +154,9 @@ public class MainLayoutController {
     }
 
     @FXML
-    public void handleReport(ActionEvent event) {
+    public void handleReport(ActionEvent actionEvent) {
         loadView("report");
+        setActiveNav(btnReport);
     }
 
     // Hàm load màn hình con siêu "xịn" giúp bạn phát hiện mọi lỗi

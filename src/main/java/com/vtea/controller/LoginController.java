@@ -33,6 +33,14 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.concurrent.CompletableFuture;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 
 public class LoginController {
 
@@ -68,7 +76,12 @@ public class LoginController {
     private ProgressBar successProgressBar;
 
     @FXML
+    private Pane scrollingBackgroundPane;
+
+    @FXML
     public void initialize() {
+        setupScrollingBackground();
+
         // Đồng bộ dữ liệu giữa 2 ô nhập liệu
         txtPasswordVisible.textProperty().bindBidirectional(txtPassword.textProperty());
 
@@ -88,6 +101,80 @@ public class LoginController {
                 txtPassword.setManaged(true);
             }
         });
+    }
+
+    //Khoi tao cache tu luc log in
+
+    private void setupScrollingBackground() {
+        if (scrollingBackgroundPane == null) return;
+        
+        // Setup clip to hide overflowing images
+        Rectangle clip = new Rectangle(0, 0, 1000, 1000); // oversized clip width
+        clip.heightProperty().bind(scrollingBackgroundPane.heightProperty());
+        clip.widthProperty().bind(scrollingBackgroundPane.widthProperty());
+        scrollingBackgroundPane.setClip(clip);
+
+        HBox gridBox = new HBox(16);
+        gridBox.setStyle("-fx-padding: 16;");
+        // Create 3 columns
+        VBox col1 = createImageColumn(true);
+        VBox col2 = createImageColumn(false);
+        VBox col3 = createImageColumn(true);
+
+        gridBox.getChildren().addAll(col1, col2, col3);
+        scrollingBackgroundPane.getChildren().add(gridBox);
+    }
+
+    private VBox createImageColumn(boolean scrollUp) {
+        VBox column = new VBox(16);
+        String[] imagePaths = {
+            "/images/login/bg1.png",
+            "/images/login/bg2.png",
+            "/images/login/bg3.png",
+            "/images/login/bg4.png",
+            "/images/login/bg5.png",
+            "/images/login/bg6.png"
+        };
+        
+        // Add images multiple times to create a seamless infinite loop
+        for (int i = 0; i < 3; i++) {
+            for (String path : imagePaths) {
+                try {
+                    ImageView imageView = new ImageView(new Image(getClass().getResource(path).toExternalForm()));
+                    imageView.setFitWidth(240);
+                    imageView.setFitHeight(240);
+                    imageView.setPreserveRatio(true);
+                    
+                    // Add rounded corners
+                    Rectangle rect = new Rectangle(240, 240);
+                    rect.setArcWidth(20);
+                    rect.setArcHeight(20);
+                    imageView.setClip(rect);
+                    
+                    column.getChildren().add(imageView);
+                } catch (Exception e) {
+                    System.out.println("Could not load: " + path);
+                }
+            }
+        }
+
+        // Animate
+        Platform.runLater(() -> {
+            double totalHeight = (240 + 16) * 6; // height of one set of 6 images
+            TranslateTransition tt = new TranslateTransition(Duration.seconds(60), column);
+            if (scrollUp) {
+                tt.setFromY(0);
+                tt.setToY(-totalHeight);
+            } else {
+                tt.setFromY(-totalHeight);
+                tt.setToY(0);
+            }
+            tt.setInterpolator(Interpolator.LINEAR);
+            tt.setCycleCount(Timeline.INDEFINITE);
+            tt.play();
+        });
+
+        return column;
     }
 
     // 2. Khởi tạo Service để xử lý logic
