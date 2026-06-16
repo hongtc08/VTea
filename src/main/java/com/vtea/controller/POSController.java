@@ -113,23 +113,6 @@ public class POSController {
         updateCartDisplay();
         updateTotalAmount();
         loadPOSCacheAsync();
-
-        if (posRoot != null) {
-            posRoot.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                if (newScene != null) {
-                    newScene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
-                        if (posRoot.getScene() != newScene) return;
-                        if (event.getCode() == javafx.scene.input.KeyCode.F12) {
-                            handleCheckout(null);
-                            event.consume();
-                        } else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
-                            handleClearCart(null);
-                            event.consume();
-                        }
-                    });
-                }
-            });
-        }
     }
 
     /**
