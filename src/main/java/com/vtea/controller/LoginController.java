@@ -243,41 +243,72 @@ public class LoginController {
 
     @FXML
     private void handleForgotPassword(ActionEvent event) {
-        // 1. Yeu cau nhap Username
+        // 1. Yêu cầu nhập Username (Chạy trên UI Thread bình thường)
         String username = showCustomDialog("Khôi phục mật khẩu", "Nhập tên đăng nhập của bạn:", true, true);
 
         if (username != null && !username.trim().isEmpty()) {
-            String email = authService.getEmailByUsername(username.trim());
 
-            if (email != null) {
-                // 2. Tao OTP va gui Email
-                String otp = EmailService.generateOTP();
-                if (EmailService.sendOTPEmail(email, otp)) {
+            // Đổi con trỏ chuột thành hình vòng xoay (Loading) để báo hiệu hệ thống đang xử lý
+            btnLogin.getScene().setCursor(javafx.scene.Cursor.WAIT);
 
-                    // 3. Yeu cau nhap OTP
-                    String otpInput = showCustomDialog("Xác thực OTP", "Mã đã gửi đến: " + email + "\nVui lòng nhập 6 số OTP:", true, true);
+            // 2. Đẩy tác vụ nặng (Tìm DB + Gửi Email) sang luồng chạy ngầm để không đơ UI
+            CompletableFuture.supplyAsync(() -> {
+                String email = authService.getEmailByUsername(username.trim());
+                if (email != null) {
+                    String otp = EmailService.generateOTP();
+                    boolean isSent = EmailService.sendOTPEmail(email, otp);
+                    // Trả về một mảng chứa 3 kết quả để chuyển qua bước tiếp theo
+                    return new Object[]{email, otp, isSent};
+                }
+                return null;
 
-                    if (otpInput != null && otpInput.trim().equals(otp)) {
+            }).thenAccept(result -> {
+                // 3. Xử lý xong, dùng Platform.runLater để trở về luồng UI hiện Popup
+                Platform.runLater(() -> {
+                    // Trả lại con trỏ chuột bình thường
+                    btnLogin.getScene().setCursor(javafx.scene.Cursor.DEFAULT);
 
-                        // 4. Khop OTP -> Dat mat khau moi
-                        String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
+                    if (result != null) {
+                        String email = (String) result[0];
+                        String otp = (String) result[1];
+                        boolean isSent = (boolean) result[2];
 
-                        if (newPassword != null && !newPassword.trim().isEmpty()) {
-                            if (authService.updatePassword(username.trim(), newPassword.trim())) {
-                                showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
+                        if (isSent) {
+                            String otpInput = showCustomDialog("Xác thực OTP", "Mã đã gửi đến: " + email + "\nVui lòng nhập 6 số OTP:", true, true);
+
+                            if (otpInput != null && otpInput.trim().equals(otp)) {
+                                String newPassword = showCustomDialog("Mật khẩu mới", "Xác thực thành công!\nNhập mật khẩu mới của bạn:", true, true);
+
+                                if (newPassword != null && !newPassword.trim().isEmpty()) {
+                                    // Tiếp tục chạy ngầm việc cập nhật mật khẩu mới xuống Database
+                                    CompletableFuture.supplyAsync(() -> authService.updatePassword(username.trim(), newPassword.trim()))
+                                            .thenAccept(isUpdated -> Platform.runLater(() -> {
+                                                if (isUpdated) {
+                                                    showCustomDialog("Thành công", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.", false, false);
+                                                } else {
+                                                    showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);
+                                                }
+                                            }));
+                                }
                             } else {
-                                showCustomDialog("Thất bại", "Không thể cập nhật mật khẩu mới.", false, false);
+                                showCustomDialog("Lỗi xác thực", "Mã OTP không chính xác hoặc đã bị hủy!", false, false);
                             }
+                        } else {
+                            showCustomDialog("Lỗi hệ thống", "Trạm gửi thư đang bận. Không thể gửi email!", false, false);
                         }
                     } else {
-                        showCustomDialog("Lỗi xác thực", "Mã OTP không chính xác hoặc đã bị hủy!", false, false);
+                        showCustomDialog("Không tìm thấy", "Tên đăng nhập không tồn tại hoặc chưa liên kết Email!", false, false);
                     }
-                } else {
-                    showCustomDialog("Lỗi hệ thống", "Trạm gửi thư đang bận. Không thể gửi email!", false, false);
-                }
-            } else {
-                showCustomDialog("Không tìm thấy", "Tên đăng nhập không tồn tại hoặc chưa liên kết Email!", false, false);
-            }
+                });
+            }).exceptionally(ex -> {
+                // Xử lý khi có lỗi ngoại lệ (rớt mạng, sập DB...)
+                Platform.runLater(() -> {
+                    btnLogin.getScene().setCursor(javafx.scene.Cursor.DEFAULT);
+                    showCustomDialog("Lỗi", "Đã xảy ra lỗi kết nối. Vui lòng thử lại!", false, false);
+                    ex.printStackTrace();
+                });
+                return null;
+            });
         }
     }
 
