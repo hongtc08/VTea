@@ -47,16 +47,17 @@ public class AuthService {
      * Hàm lấy email theo username để gửi mã OTP khôi phục mật khẩu
      */
     public String getEmailByUsername(String username) {
-        UserDAO userDAO = new com.vtea.dao.UserDAO();
         return userDAO.getEmailByUsername(username);
     }
 
     /**
      * Hàm cập nhật mật khẩu mới sau khi người dùng đã xác thực mã OTP thành công
      */
-
     public boolean updatePassword(String username, String newPassword) {
-        UserDAO userDAO = new com.vtea.dao.UserDAO();
-        return userDAO.updatePassword(username, newPassword);
+        // 1. Mã hóa mật khẩu mới bằng BCrypt trước khi đưa xuống Database
+        String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+
+        // 2. Gửi mật khẩu đã mã hóa (hashedPassword) xuống DAO
+        return userDAO.updatePassword(username, hashedPassword);
     }
 }
