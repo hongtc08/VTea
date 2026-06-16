@@ -73,10 +73,7 @@ public class OrderDetailDTO {
         this.unitPrice = unitPrice;
     }
 
-    public List<String> getToppingList() { return toppingList; }
     public void setToppingList(List<String> toppingList) { this.toppingList = toppingList; }
-
-    public BigDecimal getToppingPrice() { return toppingPrice; }
     public void setToppingPrice(BigDecimal toppingPrice) { this.toppingPrice = toppingPrice; }
     public Map<Integer, Integer> getToppingQuantities() {
         return toppingQuantities;

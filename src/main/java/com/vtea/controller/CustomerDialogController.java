@@ -70,8 +70,6 @@ public class CustomerDialogController {
         btnSubmit.setOnAction(event -> handleSubmit());
         btnCancel.setOnAction(event -> closeDialog());
         btnClose.setOnAction(event -> closeDialog());
-
-        // Công việc tuần này chỉ làm tích điểm, chưa xử lý dùng điểm.
         if (radioEarn != null) {
             radioEarn.setSelected(true);
             radioEarn.selectedProperty().addListener((obs, oldValue, selected) -> updatePointActionPreview());
@@ -95,7 +93,7 @@ public class CustomerDialogController {
 
 
     /*
-    Neu khach ko tich diem thi bo qua
+    Neu khach ko tich diem thi bo qua -> Khách vãng lai
      */
     private void handleWalkIn() {
         boolean confirmed = DialogHelper.showConfirm(
