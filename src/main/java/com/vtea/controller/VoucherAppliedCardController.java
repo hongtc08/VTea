@@ -3,6 +3,8 @@ package com.vtea.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import com.vtea.model.Voucher;
+import com.vtea.utils.FormatUtils;
 
 /**
  * VoucherAppliedCardController – Controller của VoucherAppliedCard.fxml.
@@ -26,7 +28,7 @@ public class VoucherAppliedCardController {
     @FXML private Button btnRemove;           // Nút × để xóa voucher khỏi đơn
 
     // ── State ─────────────────────────────────────────────────────────────────
-    private Object currentVoucher;            // TODO: thay Object → VoucherDTO
+    private Voucher currentVoucher;
     private Runnable onRemoveCallback;        // Callback về CustomerDialogController khi xóa
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -41,24 +43,25 @@ public class VoucherAppliedCardController {
     /**
      * Điền dữ liệu voucher đã áp dụng vào card.
      *
-     * @param voucherDTO      TODO: thay Object → VoucherDTO
+     * @param voucher         Voucher model
      * @param appliedAmount   số tiền giảm thực tế đã tính (có thể khác discountValue nếu đơn < giảm)
      * @param onRemove        Runnable sẽ gọi khi người dùng bấm × để xóa card này
      */
-    public void setData(Object voucherDTO, java.math.BigDecimal appliedAmount, Runnable onRemove) {
-        this.currentVoucher = voucherDTO;
+    public void setData(Voucher voucher, java.math.BigDecimal appliedAmount, Runnable onRemove) {
+        this.currentVoucher = voucher;
         this.onRemoveCallback = onRemove;
 
-        // TODO: lblVoucherCode.setText(voucherDTO.getCode());
+        lblVoucherCode.setText(voucher.getCode());
 
-        // TODO: Tóm tắt giảm giá nhỏ (dưới tên voucher):
-        //   if ("FIXED".equals(voucherDTO.getDiscountType()))
-        //       lblDiscountSummary.setText("-" + FormatUtils.formatPrice(voucherDTO.getDiscountValue()));
-        //   else
-        //       lblDiscountSummary.setText("-" + voucherDTO.getDiscountValue().intValue() + "%");
+        // Tóm tắt giảm giá nhỏ (dưới tên voucher):
+        if ("FIXED".equals(voucher.getDiscountType())) {
+            lblDiscountSummary.setText("-" + FormatUtils.formatPrice(voucher.getDiscountValue()));
+        } else {
+            lblDiscountSummary.setText("-" + voucher.getDiscountValue().intValue() + "%");
+        }
 
-        // TODO: Số tiền giảm thực tế (lớn, bên phải):
-        //   lblDiscountAmount.setText("-" + FormatUtils.formatPrice(appliedAmount));
+        // Số tiền giảm thực tế (lớn, bên phải):
+        lblDiscountAmount.setText("-" + FormatUtils.formatPrice(appliedAmount));
     }
 
     // ── Handlers ──────────────────────────────────────────────────────────────

@@ -53,12 +53,12 @@ public class BillPreviewController {
         billTextFlow.getChildren().clear();
 
         Text header = new Text(receiptFormatter.formatHeader());
-        header.setStyle("-fx-font-weight: bold;");
+        header.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
 
         Text body = new Text(receiptFormatter.formatBodyOnly(bill));
 
         Text total = new Text(receiptFormatter.formatTotal(bill));
-        total.setStyle("-fx-font-weight: bold;");
+        total.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
 
         Text footer = new Text(receiptFormatter.formatFooter());
 

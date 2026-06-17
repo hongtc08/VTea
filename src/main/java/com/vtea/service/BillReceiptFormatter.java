@@ -121,8 +121,9 @@ public class BillReceiptFormatter {
         // --- Tính tiền ---
         BigDecimal tierDiscount = bill.getTierDiscountAmount();
         BigDecimal pointDiscount = bill.getPointDiscountAmount();
+        BigDecimal voucherDiscount = bill.getVoucherDiscountAmount();
 
-        BigDecimal discountTotal = tierDiscount.add(pointDiscount);
+        BigDecimal discountTotal = tierDiscount.add(pointDiscount).add(voucherDiscount);
         BigDecimal amountAfterDiscount = subtotal.subtract(discountTotal);
 
         if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
@@ -141,6 +142,10 @@ public class BillReceiptFormatter {
 
         if (pointDiscount.compareTo(BigDecimal.ZERO) > 0) {
             builder.append(moneyLine("Giảm điểm:", pointDiscount.negate())).append("\n");
+        }
+
+        if (voucherDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            builder.append(moneyLine("Giảm giá Voucher:", voucherDiscount.negate())).append("\n");
         }
 
         builder.append(moneyLine("VAT 10%:", vat)).append("\n");

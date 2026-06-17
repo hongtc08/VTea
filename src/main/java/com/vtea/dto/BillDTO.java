@@ -27,6 +27,12 @@ public class BillDTO {
     private BigDecimal tierDiscountAmount;
     private BigDecimal pointDiscountAmount;
 
+    // --- Bổ sung Voucher ---
+    private Integer voucherId;
+    private String voucherCode;
+    private BigDecimal voucherDiscountAmount;
+    // -----------------------
+
     private String tierName;
     private int discountPercent;
 
@@ -144,6 +150,33 @@ public class BillDTO {
 
     public void setPointDiscountAmount(BigDecimal pointDiscountAmount) {
         this.pointDiscountAmount = pointDiscountAmount;
+    }
+
+    public Integer getVoucherId() {
+        return voucherId;
+    }
+
+    public void setVoucherId(Integer voucherId) {
+        this.voucherId = voucherId;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public BigDecimal getVoucherDiscountAmount() {
+        if (voucherDiscountAmount == null) {
+            return BigDecimal.ZERO;
+        }
+        return voucherDiscountAmount;
+    }
+
+    public void setVoucherDiscountAmount(BigDecimal voucherDiscountAmount) {
+        this.voucherDiscountAmount = voucherDiscountAmount;
     }
 
 

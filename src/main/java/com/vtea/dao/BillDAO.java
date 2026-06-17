@@ -65,11 +65,15 @@ public class BillDAO {
                     o.status,
                     o.tier_discount_amount,
                     o.point_discount_amount,
+                    o.voucher_id,
+                    v.code AS voucher_code,
+                    o.voucher_discount_amount,
                     o.total_amount
                 FROM `order` o
                 LEFT JOIN user u ON o.user_id = u.user_id
                 LEFT JOIN customer c ON o.customer_id = c.customer_id
                 LEFT JOIN member_tier mt ON c.tier_id = mt.tier_id
+                LEFT JOIN voucher v ON o.voucher_id = v.voucher_id
                 WHERE o.order_id = ?
                 """;
 
@@ -109,6 +113,14 @@ public class BillDAO {
                     bill.setStatus(rs.getString("status"));
                     bill.setTierDiscountAmount(rs.getBigDecimal("tier_discount_amount"));
                     bill.setPointDiscountAmount(rs.getBigDecimal("point_discount_amount"));
+                    
+                    int voucherId = rs.getInt("voucher_id");
+                    if (!rs.wasNull()) {
+                        bill.setVoucherId(voucherId);
+                    }
+                    bill.setVoucherCode(rs.getString("voucher_code"));
+                    bill.setVoucherDiscountAmount(rs.getBigDecimal("voucher_discount_amount"));
+
                     bill.setTotalAmount(rs.getBigDecimal("total_amount"));
 
                     return bill;
