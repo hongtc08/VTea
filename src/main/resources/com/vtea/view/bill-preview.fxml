@@ -2,7 +2,8 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -18,24 +19,11 @@
         <Insets top="18" right="18" bottom="18" left="18"/>
     </padding>
 
-    <TextArea fx:id="billContentTextArea"
-              editable="false"
-              wrapText="false"
-              focusTraversable="false"
-              prefWidth="430"
-              prefHeight="585"
-              style="
-                  -fx-font-family: 'DejaVu Sans Mono';
-                  -fx-font-size: 14px;
-                  -fx-control-inner-background: white;
-                  -fx-background-color: white;
-                  -fx-border-color: #d0d0d0;
-                  -fx-border-radius: 4;
-                  -fx-background-radius: 4;
-                  -fx-padding: 16;
-                  -fx-focus-color: transparent;
-                  -fx-faint-focus-color: transparent;
-              "/>
+    <ScrollPane prefWidth="430" prefHeight="585" fitToWidth="true" style="-fx-background: white; -fx-background-color: white; -fx-border-color: #d0d0d0; -fx-border-radius: 4; -fx-background-radius: 4; -fx-padding: 20;">
+        <VBox alignment="TOP_CENTER" style="-fx-background-color: white;">
+            <TextFlow fx:id="billTextFlow" textAlignment="LEFT" maxWidth="-Infinity" style="-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 14px; -fx-background-color: white;"/>
+        </VBox>
+    </ScrollPane>
 
     <HBox spacing="12" alignment="CENTER_RIGHT">
         <Button text="Xuất PDF"

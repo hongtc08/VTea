@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<!--
+    VoucherRow.fxml
+    Template cho MỖI DÒNG voucher trong danh sách quản lý.
+    Controller: VoucherRowController.java
+-->
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.VoucherRowController"
+      alignment="CENTER_LEFT"
+      style="-fx-background-color: white; -fx-border-color: #f0ece8;
+             -fx-border-width: 0 0 1 0; -fx-padding: 16 20; -fx-cursor: default;">
+
+    <stylesheets>
+        <URL value="@../css/styles.css"/>
+    </stylesheets>
+
+    <!-- === Tên voucher (185px) === -->
+    <Label fx:id="lblName"
+           text="Tên voucher"
+           prefWidth="185"
+           wrapText="true"
+           style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1c1917;"/>
+
+    <!-- === Mã voucher badge (155px) === -->
+    <HBox prefWidth="155" alignment="CENTER_LEFT">
+        <Label fx:id="lblCode"
+               text="CODE"
+               style="-fx-background-color: #f0ece8; -fx-text-fill: #4a3728;
+                      -fx-font-family: 'Consolas'; -fx-font-weight: bold; -fx-font-size: 12px;
+                      -fx-background-radius: 6; -fx-padding: 4 10;
+                      -fx-border-color: #e7ddd6; -fx-border-radius: 6;"/>
+    </HBox>
+
+    <!-- === Giảm giá (125px) === -->
+    <HBox prefWidth="125" alignment="CENTER_LEFT" spacing="6">
+        <!-- Icon: fth-tag (tiền cố định) hoặc fth-percent (phần trăm) – set bởi controller -->
+        <FontIcon fx:id="iconDiscountType"
+                  iconLiteral="fth-tag"
+                  iconSize="15"
+                  iconColor="#F59E0B"/>
+        <Label fx:id="lblDiscount"
+               text="0"
+               style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #F59E0B;"/>
+    </HBox>
+
+    <!-- === Hạn dùng (130px) === -->
+    <HBox prefWidth="130" alignment="CENTER_LEFT" spacing="6">
+        <FontIcon fx:id="iconExpiry"
+                  iconLiteral="fth-calendar"
+                  iconSize="14"
+                  iconColor="#78716c"/>
+        <Label fx:id="lblExpiry"
+               text="--/--/----"
+               style="-fx-font-size: 13px; -fx-text-fill: #57534e;"/>
+    </HBox>
+
+    <!-- === Lượt dùng: progress bar + text (175px) === -->
+    <VBox prefWidth="175" alignment="CENTER_LEFT" spacing="5">
+        <ProgressBar fx:id="progressUsage"
+                     progress="0"
+                     prefWidth="120"
+                     prefHeight="6"
+                     style="-fx-accent: #4a3728;"/>
+        <Label fx:id="lblUsageCount"
+               text="0 / ∞"
+               style="-fx-font-size: 12px; -fx-text-fill: #78716c;"/>
+    </VBox>
+
+    <!-- === Trạng thái badge (110px) === -->
+    <HBox prefWidth="110" alignment="CENTER_LEFT">
+        <StackPane fx:id="badgeStatus"
+                   style="-fx-background-color: #d1fae5; -fx-background-radius: 20;
+                          -fx-padding: 4 12;">
+            <Label fx:id="lblStatus"
+                   text="Hoạt động"
+                   style="-fx-text-fill: #065f46; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+        </StackPane>
+    </HBox>
+
+    <!-- === Thao tác (grow) === -->
+    <HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT" spacing="6">
+
+        <!-- Toggle bật/tắt -->
+        <Button fx:id="btnToggle"
+                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 6;">
+            <graphic>
+                <FontIcon fx:id="iconToggle"
+                          iconLiteral="mdi2t-toggle-switch"
+                          iconSize="22"
+                          iconColor="#12b6a2"/>
+            </graphic>
+            <tooltip><Tooltip text="Bật / Tắt voucher"/></tooltip>
+        </Button>
+
+        <!-- Chỉnh sửa -->
+        <Button fx:id="btnEdit"
+                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 6;">
+            <graphic>
+                <FontIcon iconLiteral="fth-edit-2" iconSize="18" iconColor="#78716c"/>
+            </graphic>
+            <tooltip><Tooltip text="Chỉnh sửa"/></tooltip>
+        </Button>
+
+        <!-- Xóa -->
+        <Button fx:id="btnDelete"
+                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 6;">
+            <graphic>
+                <FontIcon iconLiteral="fth-trash-2" iconSize="18" iconColor="#ef4444"/>
+            </graphic>
+            <tooltip><Tooltip text="Xóa"/></tooltip>
+        </Button>
+    </HBox>
+</HBox>

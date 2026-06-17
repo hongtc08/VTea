@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<VBox spacing="0"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.VoucherController">
+
+    <stylesheets>
+        <URL value="@../css/styles.css"/>
+    </stylesheets>
+
+    <!-- ===== HEADER ===== -->
+    <HBox alignment="CENTER_LEFT" spacing="16">
+        <padding><Insets bottom="20"/></padding>
+
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label text="Quản lý Voucher" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1c1917;"/>
+            <Label text="Tạo và quản lý mã giảm giá cho khách hàng" style="-fx-text-fill: #78716c; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <Button fx:id="btnAddVoucher"
+                text="  Thêm voucher"
+                styleClass="btn-primary"
+                prefHeight="40">
+            <graphic>
+                <FontIcon iconLiteral="fth-plus" iconSize="16" iconColor="white"/>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <!-- ===== SEARCH BAR ===== -->
+    <HBox styleClass="search-bar-container" alignment="CENTER_LEFT" spacing="12">
+        <padding><Insets bottom="16"/></padding>
+        <HBox styleClass="search-bar" alignment="CENTER_LEFT" spacing="10"
+              HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-background-radius: 10;
+                     -fx-border-color: #e7e5e4; -fx-border-radius: 10;
+                     -fx-padding: 10 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0, 0, 2);">
+            <FontIcon iconLiteral="fth-search" iconSize="18" iconColor="#a8a29e"/>
+            <TextField fx:id="searchField"
+                       promptText="Tìm tên hoặc mã voucher..."
+                       style="-fx-background-color: transparent; -fx-border-color: transparent;
+                              -fx-font-size: 14px;"
+                       HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </HBox>
+
+    <!-- ===== TABLE ===== -->
+    <VBox style="-fx-background-color: white; -fx-background-radius: 14;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 16, 0, 0, 4);"
+          VBox.vgrow="ALWAYS">
+
+        <!-- Table header -->
+        <HBox alignment="CENTER_LEFT"
+              style="-fx-background-color: #faf9f7; -fx-background-radius: 14 14 0 0;
+                     -fx-border-color: #f0ece8; -fx-border-width: 0 0 1 0;
+                     -fx-padding: 12 20;">
+
+            <Label text="VOUCHER"   prefWidth="185"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="MÃ"        prefWidth="155"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="GIẢM GIÁ"  prefWidth="125"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="HẠN DÙNG"  prefWidth="130"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="LƯỢT DÙNG" prefWidth="175"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="TRẠNG THÁI" prefWidth="110"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            <Label text="THAO TÁC" HBox.hgrow="ALWAYS"
+                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+        </HBox>
+
+        <!-- Scrollable rows -->
+        <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                    hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                    style="-fx-background-color: transparent; -fx-background: transparent;
+                           -fx-border-color: transparent;">
+            <content>
+                <VBox fx:id="voucherListContainer" spacing="0"/>
+            </content>
+        </ScrollPane>
+
+        <!-- Empty state (shown when list is empty) -->
+        <VBox fx:id="emptyState" alignment="CENTER" spacing="16"
+              visible="false" managed="false"
+              style="-fx-padding: 80 0;">
+            <FontIcon iconLiteral="fth-tag" iconSize="48" iconColor="#d6d3d1"/>
+            <Label text="Chưa có voucher nào" style="-fx-font-size: 16px; -fx-text-fill: #a8a29e; -fx-font-weight: bold;"/>
+            <Label text="Bấm &quot;Thêm voucher&quot; để tạo mã giảm giá đầu tiên"
+                   style="-fx-font-size: 13px; -fx-text-fill: #d6d3d1;"/>
+        </VBox>
+    </VBox>
+</VBox>

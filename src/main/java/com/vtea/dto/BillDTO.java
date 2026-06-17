@@ -52,10 +52,6 @@ public class BillDTO {
         this.createdAt = createdAt;
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
-
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
@@ -66,10 +62,6 @@ public class BillDTO {
 
     public void setStaffName(String staffName) {
         this.staffName = staffName;
-    }
-
-    public Integer getCustomerId() {
-        return customerId;
     }
 
     public void setCustomerId(Integer customerId) {
@@ -130,10 +122,6 @@ public class BillDTO {
 
     public List<BillItemDTO> getItems() {
         return items;
-    }
-
-    public void setItems(List<BillItemDTO> items) {
-        this.items = items;
     }
 
     public BigDecimal getTierDiscountAmount() {
