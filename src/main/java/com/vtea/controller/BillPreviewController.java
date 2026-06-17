@@ -8,7 +8,8 @@ import com.vtea.service.BillReceiptFormatter;
 import com.vtea.utils.DialogHelper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import java.io.File;
 import java.math.BigDecimal;
@@ -16,14 +17,14 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Controller hiển thị bill preview dạng hóa đơn in.
- * Chỉ dùng một TextArea để render bill giống hóa đơn cửa hàng.
+ * Sử dụng TextFlow để giữ đúng định dạng cũ nhưng in đậm một số phần.
  */
 public class BillPreviewController {
 
     private static final int BILL_WIDTH = 42;
 
     @FXML
-    private TextArea billContentTextArea;
+    private TextFlow billTextFlow;
 
     private BillDTO bill;
 
@@ -42,17 +43,27 @@ public class BillPreviewController {
     }
 
     /**
-     * Render toàn bộ nội dung bill lên TextArea.
+     * Render toàn bộ nội dung bill lên TextFlow.
      */
     private void renderBill() {
         if (bill == null) {
             return;
         }
+        
+        billTextFlow.getChildren().clear();
 
-        billContentTextArea.setText(receiptFormatter.format(bill));
-        billContentTextArea.positionCaret(0);
+        Text header = new Text(receiptFormatter.formatHeader());
+        header.setStyle("-fx-font-weight: bold;");
+
+        Text body = new Text(receiptFormatter.formatBodyOnly(bill));
+
+        Text total = new Text(receiptFormatter.formatTotal(bill));
+        total.setStyle("-fx-font-weight: bold;");
+
+        Text footer = new Text(receiptFormatter.formatFooter());
+
+        billTextFlow.getChildren().addAll(header, body, total, footer);
     }
-
 
     @FXML
     private void handleExportPdf() {
@@ -68,7 +79,7 @@ public class BillPreviewController {
                 new FileChooser.ExtensionFilter("PDF files", "*.pdf")
         );
 
-        File file = fileChooser.showSaveDialog(billContentTextArea.getScene().getWindow());
+        File file = fileChooser.showSaveDialog(billTextFlow.getScene().getWindow());
 
         if (file == null) {
             return;
@@ -76,19 +87,19 @@ public class BillPreviewController {
 
         try {
             billPdfService.exportBillToPdf(bill, file);
-            DialogHelper.showInfo("Thành công", "Xuất PDF hóa đơn thành công.");
+            DialogHelper.showInfo("Thành công", "Đã xuất hóa đơn ra file PDF: " + file.getName());
         } catch (Exception e) {
             e.printStackTrace();
-            DialogHelper.showInfo("Lỗi", "Không thể xuất PDF: " + e.getMessage());
+            DialogHelper.showInfo("Lỗi xuất file", "Có lỗi xảy ra: " + e.getMessage());
         }
     }
 
     /**
-     * Đóng cửa sổ bill preview.
+     * Đóng màn hình preview.
      */
     @FXML
     private void handleClose() {
-        billContentTextArea.getScene().getWindow().hide();
+        billTextFlow.getScene().getWindow().hide();
     }
 
     private void showInfo(String message) {

@@ -28,16 +28,37 @@ public class BillReceiptFormatter {
      * Lấy nội dung từ DTO
      */
     public String format(BillDTO bill) {
-        if (bill == null) {
-            return "";
-        }
-
+        if (bill == null) return "";
         StringBuilder builder = new StringBuilder();
 
-        // --- Tiêu đề
-        builder.append(center("VTEA COFFEE")).append("\n");
-        builder.append(center("HÓA ĐƠN THANH TOÁN")).append("\n");
-        builder.append(line()).append("\n");
+        builder.append(formatHeader());
+        builder.append(formatBodyOnly(bill));
+        builder.append(formatTotal(bill));
+        builder.append(formatFooter());
+
+        return builder.toString();
+    }
+
+    public String formatHeader() {
+        return lineDouble() + "\n" +
+               center("VTEA COFFEE") + "\n" +
+               center("HÓA ĐƠN THANH TOÁN") + "\n" +
+               lineDouble() + "\n";
+    }
+
+    public String formatTotal(BillDTO bill) {
+        return lineDouble() + "\n" +
+               leftRight("TỔNG CỘNG:", formatMoneyFull(bill.getTotalAmount())) + "\n" +
+               lineDouble() + "\n";
+    }
+
+    public String formatFooter() {
+        return center("Cảm ơn quý khách!") + "\n" +
+               center("Hẹn gặp lại") + "\n";
+    }
+
+    public String formatBodyOnly(BillDTO bill) {
+        StringBuilder builder = new StringBuilder();
 
         // --- Thông tin hóa đơn, nhân viên, khách hàng
         builder.append(leftRight("Mã HĐ: #" + bill.getOrderId(), formatDateTime(bill))).append("\n");
@@ -123,13 +144,7 @@ public class BillReceiptFormatter {
         }
 
         builder.append(moneyLine("VAT 10%:", vat)).append("\n");
-        builder.append(moneyLine("Tổng cộng:", total)).append("\n");
-        builder.append(line()).append("\n");
-
-        // --- Kết ---
-        builder.append(center("Cảm ơn quý khách!")).append("\n");
-        builder.append(center("Hẹn gặp lại")).append("\n");
-
+        
         return builder.toString();
     }
 
@@ -210,6 +225,13 @@ public class BillReceiptFormatter {
         return "-".repeat(BILL_WIDTH);
     }
 
+    /**
+     * Vẽ một đường gạch đôi nhấn mạnh (===)
+     */
+    private String lineDouble() {
+        return "=".repeat(BILL_WIDTH);
+    }
+
     // ==================== FORMAT DỮ LIỆU ====================
 
     /**
@@ -246,6 +268,11 @@ public class BillReceiptFormatter {
     private String formatDateTime(BillDTO bill) {
         if (bill.getCreatedAt() == null) return "";
         return bill.getCreatedAt().format(DATE_TIME_FORMATTER);
+    }
+
+    private String formatMoneyFull(BigDecimal amount) {
+        if (amount == null) return "0 VND";
+        return String.format("%,.0f VND", amount);
     }
 
     private String formatMoney(BigDecimal amount) {
