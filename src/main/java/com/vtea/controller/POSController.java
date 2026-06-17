@@ -247,6 +247,17 @@ public class POSController {
         } else {
             orderService.setCustomer(0);
         }
+
+        String voucherCode = dialog.getAppliedVoucherCode();
+        if (voucherCode != null) {
+            try {
+                orderService.applyVoucher(voucherCode);
+            } catch (Exception e) {
+                System.err.println("Lỗi khi áp dụng voucher vào OrderService: " + e.getMessage());
+            }
+        } else {
+            orderService.removeVoucher();
+        }
     }
 
     private void buildAndSaveOrder(String paymentMethod, CustomerDTO customer, int usedPoints) {

@@ -119,6 +119,17 @@ public class CustomerDialogController {
                 txtPhone.setText(phone);
             }
         });
+
+        // Tự động áp dụng Welcome Voucher khi nhập xong tên khách mới (mất focus)
+        txtName.focusedProperty().addListener((obs, oldValue, newValue) -> {
+            if (!newValue && selectedCustomer == null) {
+                String name = txtName.getText() == null ? "" : txtName.getText().trim();
+                String phone = txtPhone.getText() == null ? "" : txtPhone.getText().trim();
+                if (!name.isEmpty() && isValidPhone(phone)) {
+                    autoApplyWelcomeVoucher(phone);
+                }
+            }
+        });
     }
 
 
@@ -335,6 +346,13 @@ public class CustomerDialogController {
         return tierDiscountAmount;
     }
 
+    public String getAppliedVoucherCode() {
+        if (appliedVouchers != null && !appliedVouchers.isEmpty()) {
+            return appliedVouchers.get(0).getCode();
+        }
+        return null;
+    }
+
     private void updatePointActionPreview() {
         calculateTierDiscount();
         
@@ -486,6 +504,26 @@ public class CustomerDialogController {
     // ══════════════════════════════════════════════════════════════════════════
     // VOUCHER
     // ══════════════════════════════════════════════════════════════════════════
+
+    private void autoApplyWelcomeVoucher(String phone) {
+        try {
+            String expectedCode = "NEW_" + phone;
+            boolean alreadyApplied = appliedVouchers.stream()
+                .anyMatch(v -> v.getCode().equalsIgnoreCase(expectedCode));
+            if (alreadyApplied) return;
+
+            // Gọi service tạo mã (backend đã tự handle việc kiểm tra xem sđt này đã từng tạo chưa)
+            String code = voucherService.createWelcomeVoucher(phone);
+            
+            // Tự điền vào ô nhập và gọi hàm áp dụng
+            txtVoucherCode.setText(code);
+            handleApplyVoucher();
+            
+            DialogHelper.showInfo("Tặng Voucher", "Hệ thống đã tự động tặng và áp dụng voucher chào mừng cho khách hàng mới!");
+        } catch (Exception e) {
+            System.err.println("Không thể tạo welcome voucher: " + e.getMessage());
+        }
+    }
 
     /**
      * Mở/đóng section nhập voucher.
