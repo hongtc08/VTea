@@ -321,7 +321,7 @@ public class OrderService {
 
         BigDecimal amountAfterPointDiscount = amountAfterTierDiscount.subtract(requestedPointDiscount).max(BigDecimal.ZERO);
 
-        // Gọi VoucherService để kiểm tra điều kiện (ném Exception nếu không hợp lệ)
+        // Gọi VoucherService để kiểm tra điều kiện
         voucherService.calculateDiscount(code.trim(), amountAfterPointDiscount);
 
         // Nếu hợp lệ, gán và tính lại tổng tiền
@@ -521,7 +521,7 @@ public class OrderService {
             try {
                 voucherDiscount = voucherService.calculateDiscount(this.appliedVoucher.getCode(), amountAfterDiscount);
             } catch (Exception e) {
-                // Voucher không còn hợp lệ (vd: xóa bớt món không đủ min_order_value) -> Tự động gỡ bỏ
+
                 this.appliedVoucher = null;
             }
         }
