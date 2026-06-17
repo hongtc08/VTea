@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<!--
+    VoucherAppliedCard.fxml
+    Hiển thị THÔNG TIN CHI TIẾT của 1 voucher đã được áp dụng vào đơn hàng.
+    Được load động vào appliedVouchersContainer trong CustomerDialog.
+    Controller: VoucherAppliedCardController.java
+    Usage: loader.load() → controller.setData(voucherDTO) → add vào VBox container
+-->
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.VoucherAppliedCardController"
+      alignment="CENTER_LEFT" spacing="12"
+      style="-fx-background-color: #fffbeb;
+             -fx-border-color: #fde68a;
+             -fx-border-radius: 10;
+             -fx-background-radius: 10;
+             -fx-padding: 12 14;">
+
+    <stylesheets>
+        <URL value="@../css/styles.css"/>
+    </stylesheets>
+
+    <!-- Icon tag -->
+    <StackPane style="-fx-background-color: #fef3c7; -fx-background-radius: 8;
+                      -fx-min-width: 34; -fx-min-height: 34; -fx-max-width: 34; -fx-max-height: 34;">
+        <FontIcon iconLiteral="fth-tag" iconSize="16" iconColor="#d97706"/>
+    </StackPane>
+
+    <!-- Tên + mã voucher -->
+    <VBox spacing="2" HBox.hgrow="ALWAYS">
+        <Label fx:id="lblVoucherName"
+               text="Tên voucher"
+               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #1c1917;"/>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label fx:id="lblVoucherCode"
+                   text="CODE"
+                   style="-fx-font-family: 'Consolas'; -fx-font-size: 11px;
+                          -fx-text-fill: #78716c;"/>
+            <Label fx:id="lblDiscountSummary"
+                   text="-0đ"
+                   style="-fx-font-size: 12px; -fx-text-fill: #d97706;
+                          -fx-font-weight: bold;"/>
+        </HBox>
+    </VBox>
+
+    <!-- Số tiền được giảm -->
+    <Label fx:id="lblDiscountAmount"
+           text="-0đ"
+           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #12b6a2;"/>
+
+    <!-- Nút xóa -->
+    <Button fx:id="btnRemove"
+            style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
+        <graphic>
+            <FontIcon iconLiteral="fth-x" iconSize="16" iconColor="#a8a29e"/>
+        </graphic>
+        <tooltip><Tooltip text="Xóa voucher"/></tooltip>
+    </Button>
+
+</HBox>

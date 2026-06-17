@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.net.URL?>
+
+<!--
+    VoucherForm.fxml
+    Form dialog để THÊM MỚI hoặc CHỈNH SỬA voucher.
+    Controller: VoucherFormController.java
+    - Thêm mới: controller.setVoucher(null, parentController)
+    - Chỉnh sửa: controller.setVoucher(voucherDTO, parentController)
+-->
+<VBox spacing="20"
+      styleClass="dialog-box"
+      prefWidth="480"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.vtea.controller.VoucherFormController">
+
+    <padding><Insets top="28" right="28" bottom="24" left="28"/></padding>
+
+    <stylesheets>
+        <URL value="@../css/styles.css"/>
+    </stylesheets>
+
+    <!-- ===== TIÊU ĐỀ ===== -->
+    <HBox alignment="CENTER_LEFT">
+        <HBox alignment="CENTER" spacing="10" HBox.hgrow="ALWAYS">
+            <StackPane style="-fx-background-color: #fef3c7; -fx-background-radius: 10;
+                              -fx-min-width: 40; -fx-min-height: 40;">
+                <FontIcon iconLiteral="fth-tag" iconSize="20" iconColor="#d97706"/>
+            </StackPane>
+            <Label fx:id="lblFormTitle"
+                   text="Thêm voucher mới"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1c1917;"/>
+        </HBox>
+        <Button fx:id="btnClose"
+                style="-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 4;">
+            <graphic><FontIcon iconLiteral="fth-x" iconSize="22" iconColor="#a8a29e"/></graphic>
+        </Button>
+    </HBox>
+
+    <Separator style="-fx-opacity: 0.5;"/>
+
+    <!-- ===== FORM FIELDS ===== -->
+    <VBox spacing="16">
+
+        <!-- ToggleGroup phải khai báo TRƯỚC các RadioButton tham chiếu đến nó -->
+        <fx:define>
+            <ToggleGroup fx:id="discountTypeGroup"/>
+        </fx:define>
+
+        <!-- Tên voucher -->
+        <VBox spacing="6">
+            <Label text="Tên voucher" styleClass="form-label"/>
+            <TextField fx:id="txtVoucherName"
+                       promptText="Ví dụ: Chào mừng thành viên..."
+                       styleClass="form-input-field"/>
+        </VBox>
+
+        <!-- Mã voucher -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT" spacing="6">
+                <Label text="Mã voucher" styleClass="form-label"/>
+                <Label text="(Chữ hoa, không dấu, không khoảng trắng)"
+                       style="-fx-text-fill: #a8a29e; -fx-font-size: 11px;"/>
+            </HBox>
+            <TextField fx:id="txtVoucherCode"
+                       promptText="Ví dụ: WELCOME50K"
+                       styleClass="form-input-field"
+                       style="-fx-font-family: 'Consolas'; -fx-font-weight: bold;"/>
+        </VBox>
+
+        <!-- Loại giảm giá -->
+        <VBox spacing="8">
+            <Label text="Loại giảm giá" styleClass="form-label"/>
+            <HBox spacing="12">
+                <!-- Giảm theo tiền -->
+                <HBox fx:id="optionFixed"
+                      alignment="CENTER_LEFT" spacing="10"
+                      HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #faf9f7; -fx-background-radius: 10;
+                             -fx-border-color: #4a3728; -fx-border-radius: 10;
+                             -fx-padding: 12 16; -fx-cursor: hand;">
+                    <RadioButton fx:id="radioFixed">
+                        <toggleGroup><fx:reference source="discountTypeGroup"/></toggleGroup>
+                    </RadioButton>
+                    <VBox spacing="2">
+                        <Label text="Số tiền cố định"
+                               style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <Label text="Giảm 50.000đ, 100.000đ..."
+                               style="-fx-text-fill: #78716c; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <FontIcon iconLiteral="fth-tag" iconSize="18" iconColor="#d97706"/>
+                </HBox>
+                <!-- Giảm theo % -->
+                <HBox fx:id="optionPercent"
+                      alignment="CENTER_LEFT" spacing="10"
+                      HBox.hgrow="ALWAYS"
+                      style="-fx-background-color: #faf9f7; -fx-background-radius: 10;
+                             -fx-border-color: #e7e5e4; -fx-border-radius: 10;
+                             -fx-padding: 12 16; -fx-cursor: hand;">
+                    <RadioButton fx:id="radioPercent">
+                        <toggleGroup><fx:reference source="discountTypeGroup"/></toggleGroup>
+                    </RadioButton>
+                    <VBox spacing="2">
+                        <Label text="Phần trăm (%)"
+                               style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
+                        <Label text="Giảm 10%, 20%..."
+                               style="-fx-text-fill: #78716c; -fx-font-size: 11px;"/>
+                    </VBox>
+                    <FontIcon iconLiteral="mdi2p-percent" iconSize="18" iconColor="#12b6a2"/>
+                </HBox>
+            </HBox>
+        </VBox>
+
+        <!-- Giá trị giảm + Hạn dùng (2 cột) -->
+        <HBox spacing="16">
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label fx:id="lblDiscountValueTitle" text="Giá trị giảm (đ)" styleClass="form-label"/>
+                <TextField fx:id="txtDiscountValue"
+                           promptText="0"
+                           styleClass="form-input-field"/>
+            </VBox>
+            <VBox spacing="6" HBox.hgrow="ALWAYS">
+                <Label text="Ngày hết hạn" styleClass="form-label"/>
+                <DatePicker fx:id="dpExpiry"
+                            promptText="dd/MM/yyyy"
+                            styleClass="form-input-field"
+                            maxWidth="Infinity"/>
+            </VBox>
+        </HBox>
+
+        <!-- Số lượng tối đa -->
+        <VBox spacing="6">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Số lượt sử dụng tối đa" styleClass="form-label"/>
+                <Label text="(để trống = không giới hạn)"
+                       style="-fx-text-fill: #a8a29e; -fx-font-size: 11px;"/>
+            </HBox>
+            <TextField fx:id="txtMaxUses"
+                       promptText="Để trống nếu không giới hạn"
+                       styleClass="form-input-field"/>
+        </VBox>
+    </VBox>
+
+    <!-- ===== BUTTONS ===== -->
+    <HBox spacing="12" alignment="CENTER_RIGHT">
+        <VBox.margin><Insets top="8"/></VBox.margin>
+        <Button fx:id="btnCancel"
+                text="Hủy"
+                styleClass="btn-dialog-cancel"
+                prefWidth="110"
+                prefHeight="42"/>
+        <Button fx:id="btnSubmit"
+                text="Lưu voucher"
+                styleClass="btn-primary"
+                prefWidth="150"
+                prefHeight="42"/>
+    </HBox>
+</VBox>

@@ -32,6 +32,7 @@ public class MainLayoutController {
     @FXML private javafx.scene.control.Button btnEmployee;
     @FXML private javafx.scene.control.Button btnCustomer;
     @FXML private javafx.scene.control.Button btnInvoice;
+    @FXML private javafx.scene.control.Button btnVoucher;
     @FXML private javafx.scene.control.Button btnReport;
 
     private void applyRoleBasedAccessControl() {
@@ -53,6 +54,11 @@ public class MainLayoutController {
                 btnCustomer.setVisible(false);
                 btnCustomer.setManaged(false);
             }
+            // Voucher cũng là chức năng quản lý – chỉ Admin mới thấy
+            if (btnVoucher != null) {
+                btnVoucher.setVisible(false);
+                btnVoucher.setManaged(false);
+            }
             if (adminCrownIcon != null) {
                 adminCrownIcon.setVisible(false);
             }
@@ -64,7 +70,7 @@ public class MainLayoutController {
     }
 
     private void setActiveNav(javafx.scene.control.Button activeBtn) {
-        javafx.scene.control.Button[] allBtns = {btnDashboard, btnPOS, btnMenu, btnInventory, btnEmployee, btnCustomer, btnInvoice, btnReport};
+        javafx.scene.control.Button[] allBtns = {btnDashboard, btnPOS, btnMenu, btnInventory, btnEmployee, btnCustomer, btnInvoice, btnVoucher, btnReport};
         for (javafx.scene.control.Button b : allBtns) {
             if (b != null) b.getStyleClass().remove("nav-btn-active");
         }
@@ -151,6 +157,12 @@ public class MainLayoutController {
     private void handleLogout(ActionEvent event) {
         // Trở về màn hình đăng nhập
         MainApp.setRoot("login");
+    }
+
+    @FXML
+    public void handleVoucher(ActionEvent event) {
+        loadView("voucher");
+        setActiveNav(btnVoucher);
     }
 
     @FXML
