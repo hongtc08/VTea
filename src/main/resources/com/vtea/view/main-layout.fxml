@@ -149,6 +149,16 @@
                 </graphic>
             </Button>
 
+            <Button fx:id="btnVoucher"
+                    text="Voucher"
+                    styleClass="nav-btn"
+                    maxWidth="Infinity"
+                    onAction="#handleVoucher">
+                <graphic>
+                    <FontIcon iconLiteral="fth-tag" styleClass="sidebar-icon" iconSize="18"/>
+                </graphic>
+            </Button>
+
             <Button fx:id="btnReport"
                     text="Thống kê"
                     styleClass="nav-btn"

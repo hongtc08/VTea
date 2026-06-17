@@ -94,6 +94,59 @@
                     </VBox>
                 </VBox>
 
+                <!-- ===== VOUCHER SECTION (collapsible) ===== -->
+                <VBox style="-fx-background-color: white; -fx-background-radius: 10;
+                             -fx-border-color: #e7e5e4; -fx-border-radius: 10;">
+
+                    <!-- Header bấm để mở/đóng -->
+                    <HBox fx:id="voucherToggleHeader"
+                          alignment="CENTER_LEFT" spacing="10"
+                          style="-fx-padding: 12 14; -fx-cursor: hand;">
+                        <FontIcon iconLiteral="fth-tag" iconSize="16" iconColor="#78716c"/>
+                        <Label text="Nhập voucher"
+                               style="-fx-font-size: 13px; -fx-text-fill: #57534e;"/>
+                        <!-- Badge đếm số voucher đã áp dụng -->
+                        <StackPane fx:id="voucherBadgePane"
+                                   visible="false" managed="false"
+                                   style="-fx-background-color: #4a3728; -fx-background-radius: 20;
+                                          -fx-min-width: 20; -fx-min-height: 20;
+                                          -fx-max-width: 20; -fx-max-height: 20;">
+                            <Label fx:id="lblAppliedCount" text="0"
+                                   style="-fx-text-fill: white; -fx-font-size: 10px;
+                                          -fx-font-weight: bold;"/>
+                        </StackPane>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <FontIcon fx:id="iconVoucherArrow"
+                                  iconLiteral="fth-chevron-down" iconSize="16"
+                                  iconColor="#a8a29e"/>
+                    </HBox>
+
+                    <!-- Nội dung mở rộng: ô nhập mã + danh sách card voucher -->
+                    <VBox fx:id="voucherExpandBox"
+                          spacing="10"
+                          visible="false" managed="false"
+                          style="-fx-padding: 0 14 14 14;">
+
+                        <!-- Ô nhập mã + nút áp dụng -->
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <TextField fx:id="txtVoucherCode"
+                                       promptText="Nhập mã voucher..."
+                                       styleClass="form-input-field"
+                                       HBox.hgrow="ALWAYS"
+                                       style="-fx-font-family: 'Consolas'; -fx-font-weight: bold;"/>
+                            <Button fx:id="btnApplyVoucher"
+                                    text="Áp dụng"
+                                    styleClass="btn-primary"
+                                    prefHeight="44"
+                                    prefWidth="100"/>
+                        </HBox>
+
+                        <!-- Container chứa các VoucherAppliedCard.fxml được load động -->
+                        <VBox fx:id="appliedVouchersContainer" spacing="8"/>
+                    </VBox>
+                </VBox>
+
+                <!-- ===== TỔNG KẾT ===== -->
                 <VBox spacing="10" styleClass="summary-box">
                     <HBox>
                         <Label text="Tạm tính:" style="-fx-text-fill: #666666;"/>
@@ -104,6 +157,19 @@
                         <Label text="Giảm giá hạng:" style="-fx-text-fill: #666666;"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="lblTierDiscount" text="-0đ" style="-fx-text-fill: #16A34A;"/>
+                    </HBox>
+                    <!-- Dòng voucher (hiện khi có voucher được áp dụng) -->
+                    <HBox fx:id="voucherDiscountBox" managed="false" visible="false">
+                        <HBox alignment="CENTER_LEFT" spacing="6">
+                            <FontIcon iconLiteral="fth-tag" iconSize="13" iconColor="#d97706"/>
+                            <Label fx:id="lblVoucherDiscountTitle"
+                                   text="Voucher (1):"
+                                   style="-fx-text-fill: #d97706; -fx-font-weight: bold;"/>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="lblVoucherDiscount"
+                               text="-0đ"
+                               style="-fx-text-fill: #d97706; -fx-font-weight: bold;"/>
                     </HBox>
                     <HBox>
                         <Label text="VAT (10%):" style="-fx-text-fill: #666666;"/>
@@ -117,6 +183,7 @@
                         <Label fx:id="lblTotal" text="60.500đ" style="-fx-font-weight: bold; -fx-font-size: 18px; -fx-text-fill: #78350F;"/>
                     </HBox>
                 </VBox>
+
             </VBox>
         </content>
     </ScrollPane>
