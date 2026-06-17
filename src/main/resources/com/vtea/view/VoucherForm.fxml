@@ -47,6 +47,11 @@
     <!-- ===== FORM FIELDS ===== -->
     <VBox spacing="16">
 
+        <!-- ToggleGroup phải khai báo TRƯỚC các RadioButton tham chiếu đến nó -->
+        <fx:define>
+            <ToggleGroup fx:id="discountTypeGroup"/>
+        </fx:define>
+
         <!-- Tên voucher -->
         <VBox spacing="6">
             <Label text="Tên voucher" styleClass="form-label"/>
@@ -110,11 +115,6 @@
                 </HBox>
             </HBox>
         </VBox>
-
-        <!-- ToggleGroup definition (invisible) -->
-        <fx:define>
-            <ToggleGroup fx:id="discountTypeGroup"/>
-        </fx:define>
 
         <!-- Giá trị giảm + Hạn dùng (2 cột) -->
         <HBox spacing="16">

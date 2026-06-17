@@ -93,7 +93,7 @@
               style="-fx-padding: 80 0;">
             <FontIcon iconLiteral="fth-tag" iconSize="48" iconColor="#d6d3d1"/>
             <Label text="Chưa có voucher nào" style="-fx-font-size: 16px; -fx-text-fill: #a8a29e; -fx-font-weight: bold;"/>
-            <Label text="Bấm \"Thêm voucher\" để tạo mã giảm giá đầu tiên"
+            <Label text="Bấm &quot;Thêm voucher&quot; để tạo mã giảm giá đầu tiên"
                    style="-fx-font-size: 13px; -fx-text-fill: #d6d3d1;"/>
         </VBox>
     </VBox>
