@@ -1,22 +1,21 @@
 package com.vtea.model;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 public class Voucher {
     private int voucherId;
     private String code;
-    private String discountType; // "PERCENTAGE" hoặc "FIXED"
+    private String discountType;
     private BigDecimal discountValue;
     private BigDecimal minOrderValue;
     private BigDecimal maxDiscountAmount;
     private int usageLimit;
     private int usedCount;
-    private Timestamp startDate;
-    private Timestamp endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private boolean isActive;
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     public int getVoucherId() {
         return voucherId;
@@ -82,19 +81,19 @@ public class Voucher {
         this.usedCount = usedCount;
     }
 
-    public Timestamp getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Timestamp startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
 
-    public Timestamp getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Timestamp endDate) {
+    public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
 
@@ -106,11 +105,11 @@ public class Voucher {
         isActive = active;
     }
 
-    public Timestamp getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }
