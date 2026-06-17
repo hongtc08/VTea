@@ -15,6 +15,8 @@ public class Order {
     private String paymentMethod;
     private BigDecimal tierDiscountAmount;
     private BigDecimal pointDiscountAmount;
+    private Integer voucherId;
+    private BigDecimal voucherDiscountAmount;
 
     // Danh sách các món trong giỏ
     private List<OrderDetail> details = new ArrayList<>();
@@ -62,5 +64,21 @@ public class Order {
 
     public void setPointDiscountAmount(BigDecimal pointDiscountAmount) {
         this.pointDiscountAmount = pointDiscountAmount;
+    }
+
+    public Integer getVoucherId() {
+        return voucherId;
+    }
+
+    public void setVoucherId(Integer voucherId) {
+        this.voucherId = voucherId;
+    }
+
+    public BigDecimal getVoucherDiscountAmount() {
+        return voucherDiscountAmount;
+    }
+
+    public void setVoucherDiscountAmount(BigDecimal voucherDiscountAmount) {
+        this.voucherDiscountAmount = voucherDiscountAmount;
     }
 }
