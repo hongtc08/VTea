@@ -138,7 +138,8 @@
                                     text="Áp dụng"
                                     styleClass="btn-primary"
                                     prefHeight="44"
-                                    prefWidth="100"/>
+                                    minWidth="110"
+                                    prefWidth="110"/>
                         </HBox>
 
                         <!-- Container chứa các VoucherAppliedCard.fxml được load động -->

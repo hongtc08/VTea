@@ -12,6 +12,14 @@ import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
+
+import com.vtea.model.Voucher;
+import com.vtea.service.VoucherService;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.HBox;
 
 public class CustomerDialogController {
 
@@ -69,8 +77,12 @@ public class CustomerDialogController {
     private BigDecimal orderSubtotal = BigDecimal.ZERO;
     private BigDecimal orderTotal = BigDecimal.ZERO;
     private BigDecimal tierDiscountAmount = BigDecimal.ZERO;
+    private BigDecimal totalVoucherDiscount = BigDecimal.ZERO;
     private int earnPoints = 0;
     private int pointsToUse = 0;
+
+    private final VoucherService voucherService = new VoucherService();
+    private List<Voucher> appliedVouchers = new ArrayList<>();
 
     private static final BigDecimal POINT_CONVERSION_RATE = BigDecimal.valueOf(1000);
     private static final BigDecimal VAT_RATE = BigDecimal.valueOf(0.10);
@@ -96,14 +108,9 @@ public class CustomerDialogController {
         }
 
         // ── Voucher section setup ───────────────────────────────────────────
-        // TODO: Setup toggle collapse/expand cho section voucher
-        // voucherToggleHeader.setOnMouseClicked(e -> toggleVoucherSection());
-        //
-        // TODO: Gán sự kiện nút "Áp dụng"
-        // btnApplyVoucher.setOnAction(e -> handleApplyVoucher());
-        //
-        // TODO: Cho phép bấm Enter trong ô nhập mã để áp dụng
-        // txtVoucherCode.setOnAction(e -> handleApplyVoucher());
+        voucherToggleHeader.setOnMouseClicked(e -> toggleVoucherSection());
+        btnApplyVoucher.setOnAction(e -> handleApplyVoucher());
+        txtVoucherCode.setOnAction(e -> handleApplyVoucher());
 
         txtPhone.textProperty().addListener((obs, oldValue, newValue) -> {
             String phone = normalizePhone(newValue);
@@ -374,7 +381,7 @@ public class CustomerDialogController {
     private void updatePreviewForEarningOnly(boolean canUsePoints) {
         pointsToUse = 0;
         
-        BigDecimal amountAfterTierDiscount = orderSubtotal.subtract(tierDiscountAmount);
+        BigDecimal amountAfterTierDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(totalVoucherDiscount);
         if (amountAfterTierDiscount.compareTo(BigDecimal.ZERO) < 0) amountAfterTierDiscount = BigDecimal.ZERO;
         
         BigDecimal vatAfterDiscount = amountAfterTierDiscount.multiply(VAT_RATE);
@@ -389,7 +396,7 @@ public class CustomerDialogController {
     private void updatePreviewForUsingPoints() {
         pointsToUse = calculateMaxUsablePoints(selectedCustomer);
         BigDecimal discount = POINT_CONVERSION_RATE.multiply(BigDecimal.valueOf(pointsToUse));
-        BigDecimal amountAfterDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(discount);
+        BigDecimal amountAfterDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(totalVoucherDiscount).subtract(discount);
 
         if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
             amountAfterDiscount = BigDecimal.ZERO;
@@ -427,7 +434,7 @@ public class CustomerDialogController {
             return 0;
         }
 
-        BigDecimal subtotalAfterTier = orderSubtotal.subtract(tierDiscountAmount);
+        BigDecimal subtotalAfterTier = orderSubtotal.subtract(tierDiscountAmount).subtract(totalVoucherDiscount);
         if (subtotalAfterTier.compareTo(BigDecimal.ZERO) <= 0) return 0;
 
         BigDecimal maxAllowedPointDiscount = subtotalAfterTier.multiply(new BigDecimal("0.50"));
@@ -477,7 +484,7 @@ public class CustomerDialogController {
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // VOUCHER – TODO (implement khi có VoucherService + VoucherDTO)
+    // VOUCHER
     // ══════════════════════════════════════════════════════════════════════════
 
     /**
@@ -485,114 +492,107 @@ public class CustomerDialogController {
      * Đổi icon mũi tên (chevron-down ↔ chevron-up) và toggle voucherExpandBox.
      */
     private void toggleVoucherSection() {
-        // TODO:
-        //  boolean isOpen = voucherExpandBox.isVisible();
-        //  voucherExpandBox.setVisible(!isOpen);
-        //  voucherExpandBox.setManaged(!isOpen);
-        //  iconVoucherArrow.setIconLiteral(isOpen ? "fth-chevron-down" : "fth-chevron-up");
+        boolean isOpen = voucherExpandBox.isVisible();
+        voucherExpandBox.setVisible(!isOpen);
+        voucherExpandBox.setManaged(!isOpen);
+        iconVoucherArrow.setIconLiteral(isOpen ? "fth-chevron-up" : "fth-chevron-down");
     }
 
     /**
      * Gọi khi nhấn "Áp dụng":
-     *  1. Lấy mã từ txtVoucherCode
-     *  2. Gọi VoucherService.validateAndGetVoucher(code)
-     *  3. Nếu hợp lệ: load VoucherAppliedCard.fxml + cập nhật tổng tiền
-     *  4. Nếu không: hiện snackbar lỗi
      */
     private void handleApplyVoucher() {
-        // TODO:
-        //  String code = txtVoucherCode.getText().trim().toUpperCase();
-        //  if (code.isEmpty()) { showAlert("Lỗi", "Vui lòng nhập mã voucher."); return; }
-        //
-        //  VoucherDTO voucher = voucherService.validateAndGetVoucher(code, orderSubtotal);
-        //  if (voucher == null) { showAlert("Không hợp lệ", "Mã voucher không tồn tại hoặc đã hết hạn."); return; }
-        //
-        //  // Tính số tiền giảm thực tế
-        //  BigDecimal appliedAmount = calculateVoucherDiscount(voucher);
-        //
-        //  // Load VoucherAppliedCard.fxml
-        //  FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherAppliedCard.fxml"));
-        //  HBox card = loader.load();
-        //  VoucherAppliedCardController ctrl = loader.getController();
-        //  ctrl.setData(voucher, appliedAmount, () -> removeAppliedVoucher(voucher, card));
-        //  appliedVouchersContainer.getChildren().add(card);
-        //
-        //  appliedVouchers.add(voucher);      // Lưu vào danh sách local
-        //  txtVoucherCode.clear();
-        //  updateVoucherBadge();
-        //  recalculateTotals();               // Tính lại tổng tiền
+        String code = txtVoucherCode.getText().trim().toUpperCase();
+        if (code.isEmpty()) { 
+            showAlert("Lỗi", "Vui lòng nhập mã voucher."); 
+            return; 
+        }
+
+        // Kiem tra xem voucher da duoc ap dung chua
+        boolean alreadyApplied = appliedVouchers.stream()
+            .anyMatch(v -> v.getCode().equalsIgnoreCase(code));
+        if (alreadyApplied) {
+            showAlert("Lỗi", "Mã voucher này đã được áp dụng cho đơn hàng!");
+            return;
+        }
+
+        try {
+            BigDecimal appliedAmount = voucherService.calculateDiscount(code, orderSubtotal);
+            com.vtea.dao.VoucherDAO dao = new com.vtea.dao.VoucherDAO();
+            Voucher voucher = dao.getVoucherByCode(code);
+            
+            if (voucher == null) {
+                showAlert("Lỗi", "Mã voucher không tồn tại.");
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherAppliedCard.fxml"));
+            HBox card = loader.load();
+            VoucherAppliedCardController ctrl = loader.getController();
+            ctrl.setData(voucher, appliedAmount, () -> removeAppliedVoucher(voucher, card));
+            appliedVouchersContainer.getChildren().add(card);
+
+            appliedVouchers.add(voucher);
+            txtVoucherCode.clear();
+            updateVoucherBadge();
+            recalculateTotals();
+        } catch (Exception ex) {
+            showAlert("Không hợp lệ", ex.getMessage());
+        }
     }
 
     /**
      * Xóa 1 voucher khỏi đơn khi người dùng bấm × trên VoucherAppliedCard.
      */
-    private void removeAppliedVoucher(Object voucher, javafx.scene.Node card) {
-        // TODO:
-        //  appliedVouchers.remove(voucher);
-        //  appliedVouchersContainer.getChildren().remove(card);
-        //  updateVoucherBadge();
-        //  recalculateTotals();
+    private void removeAppliedVoucher(Voucher voucher, javafx.scene.Node card) {
+        appliedVouchers.remove(voucher);
+        appliedVouchersContainer.getChildren().remove(card);
+        updateVoucherBadge();
+        recalculateTotals();
     }
 
     /**
      * Cập nhật badge số lượng voucher đang áp dụng.
      */
     private void updateVoucherBadge() {
-        // TODO:
-        //  int count = appliedVouchers.size();
-        //  if (count > 0) {
-        //      lblAppliedCount.setText(String.valueOf(count));
-        //      voucherBadgePane.setVisible(true);
-        //      voucherBadgePane.setManaged(true);
-        //  } else {
-        //      voucherBadgePane.setVisible(false);
-        //      voucherBadgePane.setManaged(false);
-        //  }
+        int count = appliedVouchers.size();
+        if (count > 0) {
+            lblAppliedCount.setText(String.valueOf(count));
+            voucherBadgePane.setVisible(true);
+            voucherBadgePane.setManaged(true);
+        } else {
+            voucherBadgePane.setVisible(false);
+            voucherBadgePane.setManaged(false);
+        }
     }
 
-    /**
-     * Tính số tiền được giảm của 1 voucher (xét cả trường hợp giảm vượt quá tổng đơn).
-     * @param voucher TODO: thay Object → VoucherDTO
-     * @return BigDecimal số tiền thực tế được giảm
-     */
-    private java.math.BigDecimal calculateVoucherDiscount(Object voucher) {
-        // TODO:
-        //  if ("FIXED".equals(voucher.getDiscountType())) {
-        //      // Giảm cố định – không được vượt quá subtotal
-        //      return voucher.getDiscountValue().min(orderSubtotal);
-        //  } else {
-        //      // Giảm phần trăm: subtotal * discountValue / 100
-        //      return orderSubtotal.multiply(voucher.getDiscountValue())
-        //                         .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-        //  }
-        return java.math.BigDecimal.ZERO;
+    private BigDecimal calculateVoucherDiscount(Voucher voucher) {
+        try {
+            return voucherService.calculateDiscount(voucher.getCode(), orderSubtotal);
+        } catch (Exception ex) {
+            return BigDecimal.ZERO;
+        }
     }
 
     /**
      * Tính lại VAT và tổng tiền sau khi thêm/xóa voucher, cập nhật các Label trong summary.
      */
     private void recalculateTotals() {
-        // TODO:
-        //  BigDecimal totalVoucherDiscount = appliedVouchers.stream()
-        //      .map(v -> calculateVoucherDiscount(v))
-        //      .reduce(BigDecimal.ZERO, BigDecimal::add);
-        //
-        //  // Hiện/ẩn dòng Voucher trong summary
-        //  if (totalVoucherDiscount.compareTo(BigDecimal.ZERO) > 0) {
-        //      lblVoucherDiscountTitle.setText("Voucher (" + appliedVouchers.size() + "):");
-        //      lblVoucherDiscount.setText("-" + FormatUtils.formatPrice(totalVoucherDiscount));
-        //      voucherDiscountBox.setVisible(true);
-        //      voucherDiscountBox.setManaged(true);
-        //  } else {
-        //      voucherDiscountBox.setVisible(false);
-        //      voucherDiscountBox.setManaged(false);
-        //  }
-        //
-        //  // Tính lại tổng: subtotal - tierDiscount - voucherDiscount + VAT
-        //  BigDecimal afterDiscount = orderSubtotal.subtract(tierDiscountAmount).subtract(totalVoucherDiscount);
-        //  if (afterDiscount.compareTo(BigDecimal.ZERO) < 0) afterDiscount = BigDecimal.ZERO;
-        //  BigDecimal newVat = afterDiscount.multiply(VAT_RATE);
-        //  BigDecimal newTotal = afterDiscount.add(newVat);
-        //  updateLabels(newVat, newTotal, ..., ...);
+        totalVoucherDiscount = appliedVouchers.stream()
+            .map(v -> calculateVoucherDiscount(v))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (totalVoucherDiscount.compareTo(BigDecimal.ZERO) > 0) {
+            lblVoucherDiscountTitle.setText("Voucher (" + appliedVouchers.size() + "):");
+            lblVoucherDiscount.setText("-" + FormatUtils.formatPrice(totalVoucherDiscount));
+            voucherDiscountBox.setVisible(true);
+            voucherDiscountBox.setManaged(true);
+        } else {
+            voucherDiscountBox.setVisible(false);
+            voucherDiscountBox.setManaged(false);
+        }
+
+        updatePointActionPreview();
     }
+
 }
