@@ -31,21 +31,16 @@
         <FontIcon iconLiteral="fth-tag" iconSize="16" iconColor="#d97706"/>
     </StackPane>
 
-    <!-- Tên + mã voucher -->
+    <!-- Mã voucher + tóm tắt giảm giá -->
     <VBox spacing="2" HBox.hgrow="ALWAYS">
-        <Label fx:id="lblVoucherName"
-               text="Tên voucher"
-               style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #1c1917;"/>
-        <HBox spacing="8" alignment="CENTER_LEFT">
-            <Label fx:id="lblVoucherCode"
-                   text="CODE"
-                   style="-fx-font-family: 'Consolas'; -fx-font-size: 11px;
-                          -fx-text-fill: #78716c;"/>
-            <Label fx:id="lblDiscountSummary"
-                   text="-0đ"
-                   style="-fx-font-size: 12px; -fx-text-fill: #d97706;
-                          -fx-font-weight: bold;"/>
-        </HBox>
+        <Label fx:id="lblVoucherCode"
+               text="CODE"
+               style="-fx-font-family: 'Consolas'; -fx-font-weight: bold;
+                      -fx-font-size: 13px; -fx-text-fill: #4a3728;"/>
+        <Label fx:id="lblDiscountSummary"
+               text="-0đ"
+               style="-fx-font-size: 12px; -fx-text-fill: #d97706;
+                      -fx-font-weight: bold;"/>
     </VBox>
 
     <!-- Số tiền được giảm -->

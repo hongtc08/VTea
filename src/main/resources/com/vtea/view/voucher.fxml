@@ -61,8 +61,6 @@
                      -fx-border-color: #f0ece8; -fx-border-width: 0 0 1 0;
                      -fx-padding: 12 20;">
 
-            <Label text="VOUCHER"   prefWidth="185"
-                   style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
             <Label text="MÃ"        prefWidth="155"
                    style="-fx-text-fill: #78716c; -fx-font-size: 11px; -fx-font-weight: bold;"/>
             <Label text="GIẢM GIÁ"  prefWidth="125"

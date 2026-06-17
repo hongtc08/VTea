@@ -20,7 +20,6 @@ import javafx.scene.control.Label;
 public class VoucherAppliedCardController {
 
     // ── FXML bindings ─────────────────────────────────────────────────────────
-    @FXML private Label lblVoucherName;       // Tên voucher (VD: "Chào mừng thành viên")
     @FXML private Label lblVoucherCode;       // Mã voucher  (VD: "WELCOME50K")
     @FXML private Label lblDiscountSummary;   // Tóm tắt dưới tên (VD: "-50.000đ" nhỏ màu cam)
     @FXML private Label lblDiscountAmount;    // Số tiền giảm lớn bên phải (VD: "-50.000đ" màu teal)
@@ -50,7 +49,6 @@ public class VoucherAppliedCardController {
         this.currentVoucher = voucherDTO;
         this.onRemoveCallback = onRemove;
 
-        // TODO: lblVoucherName.setText(voucherDTO.getName());
         // TODO: lblVoucherCode.setText(voucherDTO.getCode());
 
         // TODO: Tóm tắt giảm giá nhỏ (dưới tên voucher):

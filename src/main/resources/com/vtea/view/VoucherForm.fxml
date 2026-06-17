@@ -52,14 +52,6 @@
             <ToggleGroup fx:id="discountTypeGroup"/>
         </fx:define>
 
-        <!-- Tên voucher -->
-        <VBox spacing="6">
-            <Label text="Tên voucher" styleClass="form-label"/>
-            <TextField fx:id="txtVoucherName"
-                       promptText="Ví dụ: Chào mừng thành viên..."
-                       styleClass="form-input-field"/>
-        </VBox>
-
         <!-- Mã voucher -->
         <VBox spacing="6">
             <HBox alignment="CENTER_LEFT" spacing="6">
