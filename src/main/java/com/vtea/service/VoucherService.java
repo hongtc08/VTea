@@ -80,6 +80,48 @@ public class VoucherService {
         return discountAmount;
     }
 
+    /**
+     * Tạo mã giảm giá chào mừng 20% cho khách hàng mới đăng ký.
+     * Mã được lưu trực tiếp vào Database và có hiệu lực trong vòng 24 giờ.
+     */
+    public String createWelcomeVoucher(String phoneNumber) throws Exception {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            throw new Exception("Số điện thoại không hợp lệ.");
+        }
+
+        String code = "NEW_" + phoneNumber.trim();
+
+        // Kiểm tra xem mã này đã từng được tạo chưa
+        Voucher existing = voucherDAO.getVoucherByCode(code);
+        if (existing != null) {
+            return code;
+        }
+
+        Voucher welcomeVoucher = new Voucher();
+        welcomeVoucher.setCode(code);
+        welcomeVoucher.setDiscountType("PERCENTAGE");
+        welcomeVoucher.setDiscountValue(new BigDecimal("20"));
+        welcomeVoucher.setMinOrderValue(BigDecimal.ZERO);
+        // Giới hạn giảm tối đa 50k để tránh rủi ro
+        welcomeVoucher.setMaxDiscountAmount(new BigDecimal("50000"));
+        
+        LocalDateTime now = LocalDateTime.now();
+        welcomeVoucher.setStartDate(now);
+        // Tồn tại trong vòng 24 giờ
+        welcomeVoucher.setEndDate(now.plusHours(24));
+        
+        welcomeVoucher.setUsageLimit(1);
+        welcomeVoucher.setUsedCount(0);
+        welcomeVoucher.setActive(true);
+
+        boolean success = voucherDAO.insertVoucher(welcomeVoucher);
+        if (!success) {
+            throw new Exception("Không thể tạo voucher chào mừng.");
+        }
+
+        return code;
+    }
+
     // DANH CHO QUAN LY
 
     /**
