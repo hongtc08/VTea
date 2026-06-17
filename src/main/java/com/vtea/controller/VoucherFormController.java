@@ -25,7 +25,6 @@ public class VoucherFormController {
     @FXML private Button btnCancel;
     @FXML private Button btnSubmit;          // "Lưu voucher"
 
-    @FXML private TextField txtVoucherName;
     @FXML private TextField txtVoucherCode;
 
     @FXML private HBox optionFixed;          // Card chọn loại giảm tiền
@@ -93,7 +92,6 @@ public class VoucherFormController {
             // TODO: Chế độ chỉnh sửa – điền dữ liệu cũ vào form
             // lblFormTitle.setText("Chỉnh sửa voucher");
             // btnSubmit.setText("Lưu thay đổi");
-            // txtVoucherName.setText(voucherDTO.getName());
             // txtVoucherCode.setText(voucherDTO.getCode());
             // if ("FIXED".equals(voucherDTO.getDiscountType())) radioFixed.setSelected(true);
             // else radioPercent.setSelected(true);
@@ -110,7 +108,6 @@ public class VoucherFormController {
      */
     private void handleSubmit() {
         // TODO: 1. Validate các trường
-        //   - txtVoucherName không rỗng
         //   - txtVoucherCode không rỗng và chưa tồn tại trong DB (khi thêm mới)
         //   - txtDiscountValue là số hợp lệ và > 0
         //   - Nếu radioPercent: discountValue <= 100
@@ -119,7 +116,6 @@ public class VoucherFormController {
         //
         // TODO: 2. Tạo đối tượng VoucherDTO từ form
         //   VoucherDTO dto = new VoucherDTO();
-        //   dto.setName(txtVoucherName.getText().trim());
         //   dto.setCode(txtVoucherCode.getText().trim());
         //   dto.setDiscountType(radioFixed.isSelected() ? "FIXED" : "PERCENT");
         //   dto.setDiscountValue(new BigDecimal(txtDiscountValue.getText().trim()));

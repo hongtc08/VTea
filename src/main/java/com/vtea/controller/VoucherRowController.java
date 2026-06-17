@@ -27,7 +27,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 public class VoucherRowController {
 
     // ── FXML bindings ─────────────────────────────────────────────────────────
-    @FXML private Label lblName;
     @FXML private Label lblCode;
     @FXML private FontIcon iconDiscountType;   // fth-tag hoặc mdi2p-percent
     @FXML private Label lblDiscount;
@@ -57,7 +56,6 @@ public class VoucherRowController {
         this.currentVoucher = voucherDTO;
         this.parentController = parent;
 
-        // TODO: lblName.setText(voucherDTO.getName());
         // TODO: lblCode.setText(voucherDTO.getCode());
 
         // TODO: Nếu discountType == "FIXED":

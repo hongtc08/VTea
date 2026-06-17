@@ -20,13 +20,6 @@
         <URL value="@../css/styles.css"/>
     </stylesheets>
 
-    <!-- === Tên voucher (185px) === -->
-    <Label fx:id="lblName"
-           text="Tên voucher"
-           prefWidth="185"
-           wrapText="true"
-           style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #1c1917;"/>
-
     <!-- === Mã voucher badge (155px) === -->
     <HBox prefWidth="155" alignment="CENTER_LEFT">
         <Label fx:id="lblCode"
