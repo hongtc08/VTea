@@ -20,8 +20,8 @@ public class OrderDAO {
      */
     public int checkoutOrder(Connection conn, Order order, List<OrderDetail> details) throws SQLException {
     String insertOrderSQL = "INSERT INTO `order` " +
-            "(user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "(user_id, customer_id, total_amount, tier_discount_amount, point_discount_amount, created_at, status, payment_method, voucher_id, voucher_discount_amount) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
       String insertDetailSQL = "INSERT INTO order_detail (order_id, product_id, quantity, unit_price) VALUES (?, ?, ?, ?)";
         String insertToppingSQL = "INSERT INTO order_detail_topping (detail_id, topping_id, unit_price, quantity) VALUES (?, ?, (SELECT price FROM topping WHERE topping_id = ?), ?)";
 
@@ -45,6 +45,14 @@ public class OrderDAO {
             psOrder.setObject(6, java.time.LocalDateTime.now());
             psOrder.setString(7, order.getStatus());
             psOrder.setString(8, order.getPaymentMethod());
+
+            if(order.getVoucherId() != null){
+                psOrder.setInt(9, order.getVoucherId());
+            } else {
+                psOrder.setNull(9, java.sql.Types.INTEGER);
+            }
+
+            psOrder.setBigDecimal(10, order.getVoucherDiscountAmount() != null ? order.getVoucherDiscountAmount() : BigDecimal.ZERO);
 
             psOrder.executeUpdate();
 
@@ -99,6 +107,11 @@ public class OrderDAO {
                     psTopping.executeBatch();
                 }
             }
+        }
+
+        if(order.getVoucherId() != null && order.getVoucherId() > 0){
+            VoucherDAO voucherDAO = new VoucherDAO();
+            voucherDAO.increaseUsedCount(order.getVoucherId(), conn);
         }
 
         return generatedOrderId;
