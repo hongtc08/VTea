@@ -77,7 +77,6 @@ public class POSController {
     // Client gọi payment-backend để tạo link QR payOS và kiểm tra trạng thái thanh toán.
     private final PayOSPaymentClient payOSPaymentClient = new PayOSPaymentClient();
 
-    private int currentUserId;
 
     // Trạng thái thêm topping cho một món trong giỏ.
     private boolean toppingMode = false;
@@ -114,14 +113,7 @@ public class POSController {
      */
     @FXML
     public void initialize() {
-        // Lấy ID của user đang đăng nhập từ SessionManager
-        UserSessionDTO currentUser = SessionManager.getCurrentUser();
-        if (currentUser != null) {
-            this.currentUserId = currentUser.getId();
-        } else {
-            // Nếu không có user đăng nhập, dùng ID mặc định
-            this.currentUserId = 1;
-        }
+
 
         setupPaymentMethods();
         updateCartDisplay();
@@ -259,7 +251,8 @@ public class POSController {
 
     private void buildAndSaveOrder(String paymentMethod, CustomerDTO customer, int usedPoints) {
         Order order = orderService.getCurrentOrder();
-        order.setUserId(currentUserId);
+        int userId = com.vtea.utils.SessionManager.getCurrentUser() != null ? com.vtea.utils.SessionManager.getCurrentUser().getId() : 1;
+        order.setUserId(userId);
         order.setStatus("PAID");
         order.setPaymentMethod(resolvePaymentMethodForDatabase(paymentMethod));
 
