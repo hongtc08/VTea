@@ -1,114 +1,159 @@
 package com.vtea.controller;
 
+import com.vtea.model.Voucher;
+import com.vtea.service.VoucherService;
+import com.vtea.utils.DialogHelper;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * VoucherController – Màn hình quản lý Voucher (chỉ Admin).
  * Được load bởi MainLayoutController.loadView("voucher").
- *
- * Chức năng:
- *  1. Hiển thị danh sách voucher với đầy đủ thông tin
- *  2. Tìm kiếm theo tên / mã voucher
- *  3. Mở form Thêm/Sửa voucher (VoucherForm.fxml)
- *  4. Xóa voucher (delegate xuống VoucherRowController)
- *  5. loadData() được gọi lại sau mỗi thao tác CRUD
  */
 public class VoucherController {
 
-    // ── FXML bindings ─────────────────────────────────────────────────────────
     @FXML private TextField searchField;
     @FXML private VBox voucherListContainer;
     @FXML private VBox emptyState;
     @FXML private Button btnAddVoucher;
 
+    private final VoucherService voucherService = new VoucherService();
+    private List<Voucher> allVouchers;
+
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @FXML
     public void initialize() {
-        // TODO: gán sự kiện tìm kiếm
-        // searchField.textProperty().addListener((obs, old, newVal) -> filterVouchers(newVal));
+        // Tìm kiếm real-time khi người dùng gõ
+        searchField.textProperty().addListener((obs, old, keyword) -> filterAndRender(keyword));
 
-        // TODO: gán sự kiện nút Thêm voucher
-        // btnAddVoucher.setOnAction(e -> handleAddVoucher());
+        // Nút thêm voucher mới
+        btnAddVoucher.setOnAction(e -> handleAddVoucher());
 
-        // TODO: load danh sách voucher lần đầu
-        // loadData();
+        // Load dữ liệu ban đầu
+        loadData();
     }
 
-    // ── Public API (gọi từ VoucherRowController sau mỗi CRUD) ─────────────────
+    // ── Public API (VoucherRowController gọi sau CRUD) ────────────────────────
 
     /**
-     * Tải lại toàn bộ danh sách voucher từ DB và render lại.
-     * VoucherRowController gọi hàm này sau khi toggle/edit/delete.
+     * Tải lại toàn bộ danh sách từ DB và render lại màn hình.
      */
     public void loadData() {
-        // TODO: gọi VoucherService.getAllVouchers()
-        // TODO: filterVouchers(searchField.getText())
+        // Load trên background thread để không đứng hình UI
+        Thread thread = new Thread(() -> {
+            List<Voucher> list = voucherService.getAllVouchers();
+            Platform.runLater(() -> {
+                allVouchers = list;
+                filterAndRender(searchField.getText());
+            });
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
     /**
-     * Lọc danh sách voucher theo từ khóa và render lại VoucherRow.
-     * @param keyword chuỗi tìm kiếm (tên hoặc mã voucher)
+     * Lọc danh sách theo từ khóa (mã voucher) và render lại từng VoucherRow.
      */
-    private void filterVouchers(String keyword) {
-        // TODO: xóa voucherListContainer.getChildren()
-        // TODO: filter danh sách theo keyword (tên/code chứa keyword)
-        // TODO: nếu rỗng → emptyState.setVisible(true)
-        // TODO: forEach → renderRow(voucherDTO)
+    private void filterAndRender(String keyword) {
+        voucherListContainer.getChildren().clear();
+
+        if (allVouchers == null || allVouchers.isEmpty()) {
+            showEmptyState(true);
+            return;
+        }
+
+        List<Voucher> filtered = allVouchers;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim().toLowerCase();
+            filtered = allVouchers.stream()
+                    .filter(v -> v.getCode().toLowerCase().contains(kw))
+                    .collect(Collectors.toList());
+        }
+
+        if (filtered.isEmpty()) {
+            showEmptyState(true);
+        } else {
+            showEmptyState(false);
+            for (Voucher v : filtered) {
+                renderRow(v);
+            }
+        }
     }
 
     /**
      * Load 1 VoucherRow.fxml, gán data, thêm vào danh sách.
      */
-    private void renderRow(Object voucherDTO) {
-        // TODO:
-        //  FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherRow.fxml"));
-        //  Parent row = loader.load();
-        //  VoucherRowController ctrl = loader.getController();
-        //  ctrl.setData(voucherDTO, this);
-        //  voucherListContainer.getChildren().add(row);
+    private void renderRow(Voucher voucher) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherRow.fxml"));
+            Parent row = loader.load();
+            VoucherRowController ctrl = loader.getController();
+            ctrl.setData(voucher, this);
+            voucherListContainer.getChildren().add(row);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
-     * Mở form thêm voucher mới.
+     * Hiện/ẩn trạng thái "Không có voucher nào".
+     */
+    private void showEmptyState(boolean show) {
+        emptyState.setVisible(show);
+        emptyState.setManaged(show);
+    }
+
+    /**
+     * Mở VoucherForm để thêm voucher mới.
      */
     @FXML
     private void handleAddVoucher() {
-        // TODO:
-        //  FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherForm.fxml"));
-        //  Parent root = loader.load();
-        //  VoucherFormController ctrl = loader.getController();
-        //  ctrl.setVoucher(null, this);   ← null = thêm mới
-        //  openFormStage(root);
+        openFormStage(null);
     }
 
     /**
-     * Mở Stage modal chứa VoucherForm với hiệu ứng blur nền.
+     * Mở Stage modal chứa VoucherForm.
+     * @param voucher null = thêm mới, != null = chỉnh sửa
      */
-    private void openFormStage(Parent root) {
-        // TODO:
-        //  Stage stage = new Stage();
-        //  stage.initModality(Modality.APPLICATION_MODAL);
-        //  stage.initStyle(StageStyle.TRANSPARENT);
-        //  Scene scene = new Scene(root);
-        //  scene.setFill(Color.TRANSPARENT);
-        //  stage.setScene(scene);
-        //  DialogHelper.applyBlurBackground(true);
-        //  DialogHelper.animateDialog(root);
-        //  stage.showAndWait();
-        //  DialogHelper.applyBlurBackground(false);
+    public void openFormStage(Voucher voucher) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherForm.fxml"));
+            Parent root = loader.load();
+            VoucherFormController ctrl = loader.getController();
+            ctrl.setVoucher(voucher, this);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.TRANSPARENT);
+
+            Scene scene = new Scene(root);
+            scene.setFill(Color.TRANSPARENT);
+            stage.setScene(scene);
+
+            DialogHelper.applyBlurBackground(true);
+            DialogHelper.animateDialog(root);
+            stage.showAndWait();
+            DialogHelper.applyBlurBackground(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            DialogHelper.showInfo("Lỗi", "Không thể mở form voucher: " + e.getMessage());
+        }
     }
 }
