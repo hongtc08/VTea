@@ -3,11 +3,13 @@ package com.vtea.service;
 import com.vtea.dao.CustomerDAO;
 import com.vtea.dao.OrderDAO;
 import com.vtea.dao.ToppingDAO;
+import com.vtea.dao.VoucherDAO;
 import com.vtea.dto.CustomerDTO;
 import com.vtea.dto.OrderDetailDTO;
 import com.vtea.model.Order;
 import com.vtea.model.OrderDetail;
 import com.vtea.model.Topping;
+import com.vtea.model.Voucher;
 import com.vtea.utils.DBConnection;
 
 import java.math.BigDecimal;
@@ -30,6 +32,8 @@ public class OrderService {
     private final OrderDAO orderDAO;
     private final ToppingDAO toppingDAO;
     private final CustomerDAO customerDAO;
+    private final VoucherDAO voucherDAO;
+    private final VoucherService voucherService;
     private List<Topping> cachedActiveToppings;
 
     // Thông tin khách hàng và điểm thưởng
@@ -38,6 +42,8 @@ public class OrderService {
     private int pointsToUse = 0;
     private int lastEarnedPoints = 0; //Điểm cộng sau khi thanh toán
     private BigDecimal discountAmount = BigDecimal.ZERO;
+    
+    private Voucher appliedVoucher = null;
 
     public static final BigDecimal POINT_CONVERSION_RATE = new BigDecimal("1000"); //quy đổi điểm
 
@@ -47,6 +53,8 @@ public class OrderService {
         this.orderDAO = new OrderDAO();
         this.toppingDAO = new ToppingDAO();
         this.customerDAO = new CustomerDAO();
+        this.voucherDAO = new VoucherDAO();
+        this.voucherService = new VoucherService();
         this.cachedActiveToppings = toppingDAO.getAllActiveToppings();
         calculateTotal();
     }
@@ -135,6 +143,7 @@ public class OrderService {
         currentCustomerInfo = null;
         pointsToUse = 0;
         lastEarnedPoints = 0;
+        appliedVoucher = null;
         calculateTotal();
     }
 
@@ -279,6 +288,56 @@ public class OrderService {
         return lastEarnedPoints;
     }
 
+    // ==================== VOUCHER ====================
+    public void applyVoucher(String code) throws Exception {
+        if (code == null || code.trim().isEmpty()) {
+            this.appliedVoucher = null;
+            calculateTotal();
+            return;
+        }
+
+        Voucher voucher = voucherDAO.getVoucherByCode(code.trim());
+        if (voucher == null) {
+            throw new Exception("Mã giảm giá không tồn tại!");
+        }
+
+        // Tạm tính giá trị trước khi áp dụng voucher để validate
+        BigDecimal subtotal = BigDecimal.ZERO;
+        for (OrderDetailDTO item: cartItems) subtotal = subtotal.add(item.getSubTotal());
+
+        BigDecimal tierDiscountAmount = BigDecimal.ZERO;
+        if (currentCustomerInfo != null) {
+            BigDecimal discountPercent = BigDecimal.valueOf(currentCustomerInfo.getDiscountPercent());
+            tierDiscountAmount = subtotal.multiply(discountPercent).divide(new BigDecimal("100"), RoundingMode.DOWN);
+        }
+
+        BigDecimal amountAfterTierDiscount = subtotal.subtract(tierDiscountAmount).max(BigDecimal.ZERO);
+
+        BigDecimal maxAllowedPointDiscount = amountAfterTierDiscount.multiply(new BigDecimal("0.50"));
+        BigDecimal requestedPointDiscount = new BigDecimal(this.pointsToUse).multiply(POINT_CONVERSION_RATE);
+        if (requestedPointDiscount.compareTo(maxAllowedPointDiscount) > 0) {
+            requestedPointDiscount = maxAllowedPointDiscount;
+        }
+
+        BigDecimal amountAfterPointDiscount = amountAfterTierDiscount.subtract(requestedPointDiscount).max(BigDecimal.ZERO);
+
+        // Gọi VoucherService để kiểm tra điều kiện (ném Exception nếu không hợp lệ)
+        voucherService.calculateDiscount(code.trim(), amountAfterPointDiscount);
+
+        // Nếu hợp lệ, gán và tính lại tổng tiền
+        this.appliedVoucher = voucher;
+        calculateTotal();
+    }
+
+    public void removeVoucher() {
+        this.appliedVoucher = null;
+        calculateTotal();
+    }
+
+    public Voucher getAppliedVoucher() {
+        return appliedVoucher;
+    }
+
     // ==================== THANH TOÁN ====================
 
     /**
@@ -363,6 +422,7 @@ public class OrderService {
             currentCustomerId = 0;
             currentCustomerInfo = null;
             pointsToUse = 0;
+            appliedVoucher = null;
 
             return true;
 
@@ -455,11 +515,31 @@ public class OrderService {
             amountAfterDiscount = BigDecimal.ZERO;
         }
 
+        // --- APPLY VOUCHER ---
+        BigDecimal voucherDiscount = BigDecimal.ZERO;
+        if (this.appliedVoucher != null) {
+            try {
+                voucherDiscount = voucherService.calculateDiscount(this.appliedVoucher.getCode(), amountAfterDiscount);
+            } catch (Exception e) {
+                // Voucher không còn hợp lệ (vd: xóa bớt món không đủ min_order_value) -> Tự động gỡ bỏ
+                this.appliedVoucher = null;
+            }
+        }
+        
+        amountAfterDiscount = amountAfterDiscount.subtract(voucherDiscount);
+        if (amountAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
+            amountAfterDiscount = BigDecimal.ZERO;
+        }
+
+        currentOrder.setVoucherId(this.appliedVoucher != null ? this.appliedVoucher.getVoucherId() : null);
+        currentOrder.setVoucherDiscountAmount(voucherDiscount);
+        // -----------------------
+
         // 3. Ap dung thue VAT len so tien cuoi cung
         BigDecimal vat = amountAfterDiscount.multiply(new BigDecimal("0.10"));
         BigDecimal finalTotal = amountAfterDiscount.add(vat);
 
-        this.discountAmount = tierDiscountAmount.add(requestedPointDiscount);
+        this.discountAmount = tierDiscountAmount.add(requestedPointDiscount).add(voucherDiscount);
 
         currentOrder.setTierDiscountAmount(tierDiscountAmount);
         currentOrder.setPointDiscountAmount(requestedPointDiscount);
