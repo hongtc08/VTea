@@ -1,34 +1,29 @@
 package com.vtea.controller;
 
-import javafx.event.ActionEvent;
+import com.vtea.model.Voucher;
+import com.vtea.service.VoucherService;
+import com.vtea.utils.DialogHelper;
+import com.vtea.utils.FormatUtils;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * VoucherRowController – Controller cho MỖI DÒNG trong danh sách voucher.
  * Được VoucherController khởi tạo động qua FXMLLoader.
- *
- * Chức năng:
- *  1. setData(voucherDTO, parent) – điền dữ liệu vào UI của row
- *  2. handleToggle()   – bật/tắt voucher (is_active)
- *  3. handleEdit()     – mở VoucherForm.fxml để chỉnh sửa
- *  4. handleDelete()   – xác nhận và xóa voucher
  */
 public class VoucherRowController {
 
-    // ── FXML bindings ─────────────────────────────────────────────────────────
     @FXML private Label lblCode;
-    @FXML private FontIcon iconDiscountType;   // fth-tag hoặc mdi2p-percent
+    @FXML private FontIcon iconDiscountType;
     @FXML private Label lblDiscount;
     @FXML private FontIcon iconExpiry;
     @FXML private Label lblExpiry;
@@ -41,111 +36,156 @@ public class VoucherRowController {
     @FXML private Button btnEdit;
     @FXML private Button btnDelete;
 
-    // ── State ─────────────────────────────────────────────────────────────────
-    private Object currentVoucher;         // TODO: thay Object → VoucherDTO
+    private Voucher currentVoucher;
     private VoucherController parentController;
+    private final VoucherService voucherService = new VoucherService();
+
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    /**
-     * Điền dữ liệu vào từng ô của row và gán sự kiện cho 3 nút.
-     * @param voucherDTO TODO: thay Object bằng VoucherDTO
-     * @param parent     tham chiếu về VoucherController để reload sau CRUD
-     */
-    public void setData(Object voucherDTO, VoucherController parent) {
-        this.currentVoucher = voucherDTO;
+    public void setData(Voucher voucher, VoucherController parent) {
+        this.currentVoucher = voucher;
         this.parentController = parent;
 
-        // TODO: lblCode.setText(voucherDTO.getCode());
+        // Mã voucher
+        lblCode.setText(voucher.getCode());
 
-        // TODO: Nếu discountType == "FIXED":
-        //   iconDiscountType.setIconLiteral("fth-tag");
-        //   iconDiscountType.setIconColor(Color.valueOf("#F59E0B"));
-        //   lblDiscount.setText(FormatUtils.formatPrice(voucherDTO.getDiscountValue()));
-        //   lblDiscount.setStyle("... -fx-text-fill: #F59E0B ...");
-        // TODO: Nếu discountType == "PERCENT":
-        //   iconDiscountType.setIconLiteral("mdi2p-percent");
-        //   iconDiscountType.setIconColor(Color.valueOf("#12b6a2"));
-        //   lblDiscount.setText(voucherDTO.getDiscountValue() + "%");
-        //   lblDiscount.setStyle("... -fx-text-fill: #12b6a2 ...");
+        // Loại & giá trị giảm
+        if ("FIXED".equalsIgnoreCase(voucher.getDiscountType())) {
+            iconDiscountType.setIconLiteral("fth-tag");
+            iconDiscountType.setIconColor(javafx.scene.paint.Color.valueOf("#F59E0B"));
+            lblDiscount.setText(FormatUtils.formatPrice(voucher.getDiscountValue()));
+            lblDiscount.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #F59E0B;");
+        } else {
+            // PERCENTAGE
+            iconDiscountType.setIconLiteral("mdi2p-percent");
+            iconDiscountType.setIconColor(javafx.scene.paint.Color.valueOf("#12b6a2"));
+            lblDiscount.setText(voucher.getDiscountValue().intValue() + "%");
+            lblDiscount.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #12b6a2;");
+        }
 
-        // TODO: lblExpiry.setText(voucherDTO.getExpiryDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        // TODO: Nếu expiryDate đã qua → iconExpiry.setIconColor(RED) + lblExpiry.setStyle("red")
+        // Ngày hết hạn
+        boolean isExpired = false;
+        if (voucher.getEndDate() != null) {
+            isExpired = LocalDateTime.now().isAfter(voucher.getEndDate());
+            lblExpiry.setText(voucher.getEndDate().format(DATE_FMT));
+            if (isExpired) {
+                lblExpiry.setStyle("-fx-font-size: 13px; -fx-text-fill: #ef4444;");
+                iconExpiry.setIconColor(javafx.scene.paint.Color.valueOf("#ef4444"));
+            } else {
+                lblExpiry.setStyle("-fx-font-size: 13px; -fx-text-fill: #57534e;");
+                iconExpiry.setIconColor(javafx.scene.paint.Color.valueOf("#78716c"));
+            }
+        } else {
+            lblExpiry.setText("Không giới hạn");
+        }
 
-        // TODO: usedCount / maxUses:
-        //   int used = voucherDTO.getUsedCount();
-        //   Integer max = voucherDTO.getMaxUses();  ← null = vô hạn
-        //   lblUsageCount.setText(max == null ? used + "/∞" : used + "/" + max);
-        //   progressUsage.setProgress(max == null ? 0 : (double) used / max);
+        // Lượt dùng + thanh tiến trình
+        int used  = voucher.getUsedCount();
+        int limit = voucher.getUsageLimit();
+        boolean unlimited = (limit >= 999999);
 
-        // TODO: Trạng thái badge:
-        //   boolean active = voucherDTO.isActive();
-        //   lblStatus.setText(active ? "Hoạt động" : "Tắt");
-        //   badgeStatus.setStyle(active ? "... green ..." : "... gray ...");
-        //   iconToggle.setIconLiteral(active ? "mdi2t-toggle-switch" : "mdi2t-toggle-switch-off");
-        //   iconToggle.setIconColor(active ? Color.valueOf("#12b6a2") : Color.valueOf("#a8a29e"));
+        if (unlimited) {
+            lblUsageCount.setText(used + " / ∞");
+            progressUsage.setProgress(0);
+        } else {
+            lblUsageCount.setText(used + " / " + limit);
+            double ratio = (double) used / limit;
+            progressUsage.setProgress(Math.min(ratio, 1.0));
+        }
 
-        // Gán sự kiện
+        // Trạng thái badge
+        boolean active = voucher.isActive() && !isExpired && (unlimited || used < limit);
+        updateStatusBadge(active);
+        updateToggleIcon(voucher.isActive());
+
+        // Gán sự kiện 3 nút
         btnToggle.setOnAction(e -> handleToggle());
-        btnEdit.setOnAction(this::handleEdit);
-        btnDelete.setOnAction(this::handleDelete);
+        btnEdit.setOnAction(e -> handleEdit());
+        btnDelete.setOnAction(e -> handleDelete());
     }
 
     // ── Handlers ──────────────────────────────────────────────────────────────
 
     /**
-     * Bật / tắt voucher (đảo trạng thái is_active).
+     * Bật/tắt voucher (đảo is_active).
+     * Service chỉ có deactivate nên dùng updateVoucherInfo để bật lại.
      */
     private void handleToggle() {
-        // TODO:
-        //  boolean newState = !currentVoucher.isActive();
-        //  boolean success = voucherService.setActive(currentVoucher.getVoucherId(), newState);
-        //  if (success) parentController.loadData();
-        //  else DialogHelper.showInfo("Lỗi", "Không thể cập nhật trạng thái voucher.");
+        boolean newState = !currentVoucher.isActive();
+        String action = newState ? "bật" : "tắt";
+
+        boolean confirmed = DialogHelper.showConfirm(
+                "Xác nhận",
+                "Bạn có chắc muốn " + action + " voucher \"" + currentVoucher.getCode() + "\" không?"
+        );
+        if (!confirmed) return;
+
+        try {
+            currentVoucher.setActive(newState);
+            boolean ok = voucherService.updateVoucherInfo(currentVoucher);
+            if (ok) {
+                DialogHelper.showInfo("Thành công", "Đã " + action + " voucher " + currentVoucher.getCode() + ".");
+                parentController.loadData();
+            } else {
+                currentVoucher.setActive(!newState); // rollback
+                DialogHelper.showInfo("Lỗi", "Không thể cập nhật trạng thái voucher.");
+            }
+        } catch (Exception e) {
+            currentVoucher.setActive(!newState);
+            DialogHelper.showInfo("Lỗi", e.getMessage());
+        }
     }
 
     /**
      * Mở VoucherForm.fxml để chỉnh sửa voucher hiện tại.
      */
-    private void handleEdit(ActionEvent e) {
-        // TODO:
-        //  FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/vtea/view/VoucherForm.fxml"));
-        //  Parent root = loader.load();
-        //  VoucherFormController ctrl = loader.getController();
-        //  ctrl.setVoucher(currentVoucher, parentController);   ← truyền data cũ vào form
-        //  openFormStage(root);
+    private void handleEdit() {
+        parentController.openFormStage(currentVoucher);
     }
 
     /**
-     * Xác nhận và xóa voucher.
+     * Xác nhận và xóa mềm voucher (deactivate).
      */
-    private void handleDelete(ActionEvent e) {
-        // TODO:
-        //  boolean confirm = DialogHelper.showConfirm(
-        //      "Xóa voucher",
-        //      "Bạn có chắc muốn xóa voucher \"" + currentVoucher.getName() + "\" không?\n" +
-        //      "Hành động này không thể hoàn tác."
-        //  );
-        //  if (!confirm) return;
-        //  boolean success = voucherService.deleteVoucher(currentVoucher.getVoucherId());
-        //  if (success) { DialogHelper.showInfo("Thành công", "Đã xóa voucher."); parentController.loadData(); }
-        //  else DialogHelper.showInfo("Lỗi", "Không thể xóa voucher.");
+    private void handleDelete() {
+        boolean confirm = DialogHelper.showConfirm(
+                "Xóa voucher",
+                "Bạn có chắc muốn xóa voucher \"" + currentVoucher.getCode() + "\" không?\nHành động này sẽ vô hiệu hóa mã giảm giá."
+        );
+        if (!confirm) return;
+
+        try {
+            boolean ok = voucherService.disableVoucher(currentVoucher.getVoucherId());
+            if (ok) {
+                DialogHelper.showInfo("Thành công", "Đã xóa voucher " + currentVoucher.getCode() + ".");
+                parentController.loadData();
+            } else {
+                DialogHelper.showInfo("Lỗi", "Không thể xóa voucher.");
+            }
+        } catch (Exception e) {
+            DialogHelper.showInfo("Lỗi", e.getMessage());
+        }
     }
 
-    /**
-     * Mở Stage modal chứa form với hiệu ứng blur nền.
-     */
-    private void openFormStage(Parent root) {
-        // TODO:
-        //  Stage stage = new Stage();
-        //  stage.initModality(Modality.APPLICATION_MODAL);
-        //  stage.initStyle(StageStyle.TRANSPARENT);
-        //  Scene scene = new Scene(root);
-        //  scene.setFill(Color.TRANSPARENT);
-        //  stage.setScene(scene);
-        //  DialogHelper.applyBlurBackground(true);
-        //  DialogHelper.animateDialog(root);
-        //  stage.showAndWait();
-        //  DialogHelper.applyBlurBackground(false);
+    // ── UI helpers ─────────────────────────────────────────────────────────────
+
+    private void updateStatusBadge(boolean active) {
+        lblStatus.setText(active ? "Hoạt động" : "Tắt");
+        if (active) {
+            badgeStatus.setStyle("-fx-background-color: #d1fae5; -fx-background-radius: 20; -fx-padding: 4 12;");
+            lblStatus.setStyle("-fx-text-fill: #065f46; -fx-font-size: 12px; -fx-font-weight: bold;");
+        } else {
+            badgeStatus.setStyle("-fx-background-color: #f3f4f6; -fx-background-radius: 20; -fx-padding: 4 12;");
+            lblStatus.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 12px; -fx-font-weight: bold;");
+        }
+    }
+
+    private void updateToggleIcon(boolean active) {
+        iconToggle.setIconLiteral(active ? "mdi2t-toggle-switch" : "mdi2t-toggle-switch-off");
+        iconToggle.setIconColor(
+                active ? javafx.scene.paint.Color.valueOf("#12b6a2")
+                       : javafx.scene.paint.Color.valueOf("#a8a29e")
+        );
     }
 }
